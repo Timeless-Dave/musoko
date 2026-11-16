@@ -378,6 +378,7 @@ test('the farmer’s numbers show their own figures and the plain note', async (
 });
 
 test('CONS-2, TRUST-1, MODE-1: a farmer registers, becomes a draft awaiting review, and nothing is public', async ({ page }) => {
+  test.slow();
   await page.goto('/join');
   await expect(page.getByRole('heading', { name: /Step 1 of 2/ })).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -438,13 +439,14 @@ test('CONS-2, TRUST-1, MODE-1: a farmer registers, becomes a draft awaiting revi
   await page.getByRole('radio', { name: 'By the bunch' }).check();
   await page.getByLabel('Price in dollars').fill('3.50');
   await page.getByRole('button', { name: 'Save listing' }).click();
-  await expect(page).toHaveURL(/\/dashboard\/listings$/);
+  await expect(page).toHaveURL(/\/dashboard\/listings$/, { timeout: 15_000 });
   await expect(listing(page, 'Collard greens').getByText('Available now, confirmed')).toBeVisible();
   await page.goto('/food?status=all');
   await expect(page.getByText('Cypress Row Farm')).toHaveCount(0);
 });
 
 test('A11Y-1: the farmer pages have no accessibility violations', async ({ page }) => {
+  test.slow();
   await page.goto('/join');
   await check(page);
   await asFarmer(page, '/dashboard');

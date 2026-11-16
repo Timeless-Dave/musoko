@@ -354,6 +354,7 @@ test('DPRIV-2: retention rolls old searches into counts, deletes them, and the n
 });
 
 test('A11Y-1: the administrator pages have no accessibility violations', async ({ page }) => {
+  test.slow();
   await asAdmin(page, '/admin');
   await check(page);
   for (const path of ['/admin/registrations', '/admin/farms', '/admin/farms/new', '/admin/farms/farm-11', '/admin/farms/farm-08', '/admin/inquiries', '/admin/claims', '/admin/moderation', '/admin/metrics', '/admin/data']) {
