@@ -144,6 +144,74 @@ export function buildRegisteredFarm(input: {
   };
 }
 
+// ---------------------------------------------------------------- started by an administrator
+
+/**
+ * CONS-1: a profile an administrator starts for a farmer. It is a draft with no
+ * consent on record, no account, and every privacy choice off, so nothing about
+ * it is public until consent is recorded and Musoko lists it. The administrator
+ * is the one who created it.
+ */
+export function buildAdminDraftFarm(input: {
+  values: z.output<typeof farmProfileSchema>;
+  community: Community;
+  adminUserId: UserId;
+  profileId: FarmerProfileId;
+  takenSlugs: Iterable<string>;
+  now: Date;
+  isDemo: boolean;
+  exactPoint: Coordinates | null;
+}): Omit<RegisteredFarm, 'user' | 'role'> {
+  const { values, community, profileId, now } = input;
+  const stamp = now.toISOString();
+  const phone = orNull(values.phone) === null ? null : (formatPhone(values.phone!) ?? values.phone!.trim());
+  const email = orNull(values.email);
+  const street = orNull(values.streetAddress);
+
+  return {
+    profile: {
+      id: profileId,
+      userId: null,
+      slug: uniqueSlug(values.farmName, input.takenSlugs),
+      farmName: values.farmName,
+      farmerName: values.farmerName,
+      intro: values.intro,
+      story: values.story,
+      photos: [],
+      regionId: community.regionId,
+      communityId: community.id,
+      createdBy: input.adminUserId,
+      createdByRole: 'administrator',
+      registrationStatus: 'pending_review',
+      publicationStatus: 'draft',
+      consentMethod: null,
+      consentDate: null,
+      consentRecordedBy: null,
+      farmerReviewedLatestChanges: false,
+      reviewMethod: null,
+      reviewDate: null,
+      reviewRecordedBy: null,
+      openToWholesale: values.openToWholesale,
+      showExactLocation: false,
+      showPhone: false,
+      showEmail: false,
+      isDemo: input.isDemo,
+      createdAt: stamp,
+      updatedAt: stamp,
+    },
+    publicLocation: {
+      farmerProfileId: profileId,
+      communityId: community.id,
+      town: community.name,
+      county: community.county,
+      coarsePoint: community.centre,
+    },
+    privateLocation:
+      street !== null && input.exactPoint !== null ? { farmerProfileId: profileId, streetAddress: street, exactPoint: input.exactPoint } : null,
+    contact: { farmerProfileId: profileId, phone, email },
+  };
+}
+
 // ---------------------------------------------------------------- profile edit
 
 /** The farmer's own edit. It does not touch consent, review, or what is public beyond the words they changed. */

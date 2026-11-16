@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { asId, type FarmerProfile, type FarmerProfileId, type UserId, type CommunityId, type RegionId } from '../types';
 import {
+  approveRegistration,
+  declineRegistration,
+  isAwaitingFarmerReview,
+  recordAdminConsent,
+  recordAdminReview,
   canPublish,
   hasRecordedConsent,
   markAwaitingFarmerReview,
@@ -102,5 +107,61 @@ describe('profileState', () => {
     expect(profileState(profile({ registrationStatus: 'pending_review', publicationStatus: 'draft' }))).toBe('pending_review');
     expect(profileState(profile({ registrationStatus: 'rejected' }))).toBe('rejected');
     expect(profileState(profile())).toBe('listed');
+  });
+});
+
+describe('administrator consent and review (CONS-1 to CONS-3)', () => {
+  const record = { method: 'in_person' as const, date: '2026-11-10', recordedBy: admin };
+
+  it('CONS-1: a draft an administrator started has no consent and cannot publish', () => {
+    expect(hasRecordedConsent(draftByAdmin())).toBe(false);
+    expect(canPublish(draftByAdmin())).toBe(false);
+    expect(approveRegistration(draftByAdmin(), now)).toBeNull();
+    expect(profileState(draftByAdmin())).toBe('needs_consent');
+  });
+
+  it('CONS-2: logging consent records the method, the day and who wrote it down, and nothing else goes public', () => {
+    const after = recordAdminConsent(draftByAdmin(), record, now)!;
+    expect(after).toMatchObject({
+      consentMethod: 'in_person', consentDate: '2026-11-10', consentRecordedBy: admin,
+      publicationStatus: 'draft', registrationStatus: 'pending_review',
+    });
+    expect(hasRecordedConsent(after)).toBe(true);
+    expect(profileState(after)).toBe('pending_review');
+    expect(canPublish(after)).toBe(false);
+  });
+
+  it('CONS-2: consent already on record is not overwritten', () => {
+    expect(recordAdminConsent(profile(), record, now)).toBeNull();
+  });
+
+  it('TRUST-1: approving needs consent, lists the profile, and is the only way to Listed', () => {
+    const consented = recordAdminConsent(draftByAdmin(), record, now)!;
+    const listed = approveRegistration(consented, now)!;
+    expect(listed).toMatchObject({ registrationStatus: 'approved', publicationStatus: 'published' });
+    expect(profileState(listed)).toBe('listed');
+    expect(approveRegistration(listed, now)).toBeNull();
+  });
+
+  it('declining takes a listed profile off the site and keeps the record; approving again lists it', () => {
+    const off = declineRegistration(profile(), now)!;
+    expect(off).toMatchObject({ registrationStatus: 'rejected', publicationStatus: 'unpublished', consentMethod: 'farmer_signed_in' });
+    expect(profileState(off)).toBe('rejected');
+    expect(declineRegistration(off, now)).toBeNull();
+    expect(approveRegistration(off, now)).toMatchObject({ registrationStatus: 'approved', publicationStatus: 'published' });
+  });
+
+  it('CONS-3: the farmer’s review is logged the same way, and only when there is something to review', () => {
+    const changed = markAwaitingFarmerReview(profile({ createdByRole: 'administrator' }), now);
+    expect(isAwaitingFarmerReview(changed)).toBe(true);
+    expect(profileState(changed)).toBe('listed_awaiting_review');
+    const reviewed = recordAdminReview(changed, { method: 'by_phone', date: '2026-11-12', recordedBy: admin }, now)!;
+    expect(reviewed).toMatchObject({
+      farmerReviewedLatestChanges: true, reviewMethod: 'by_phone', reviewDate: '2026-11-12', reviewRecordedBy: admin,
+    });
+    expect(profileState(reviewed)).toBe('listed');
+    expect(recordAdminReview(reviewed, record, now)).toBeNull();
+    // A draft with no consent is not "awaiting review": it needs consent first.
+    expect(isAwaitingFarmerReview(draftByAdmin())).toBe(false);
   });
 });

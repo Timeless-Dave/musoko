@@ -29,6 +29,8 @@ import { normalizedUnitPrice } from '../units';
 
 export function isPubliclyVisible(profile: FarmerProfile): boolean {
   return (
+    // "Listed" is Musoko's review (TRUST-1): declining a profile takes it off the site whatever else is set.
+    profile.registrationStatus === 'approved' &&
     profile.publicationStatus === 'published' &&
     profile.consentMethod !== null &&
     profile.consentDate !== null &&

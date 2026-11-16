@@ -27,7 +27,6 @@ import {
   type Claim,
   type ClaimId,
   type Community,
-  type Coordinates,
   type Database,
   type EventId,
   type FarmerPickupOption,
@@ -43,23 +42,13 @@ import type { Actor } from '../../ports/auth';
 import { GatewayError } from '../../ports/errors';
 import type { FarmerGateway } from '../../ports/farmer';
 import { invalid, requireOwnFarm } from './access';
+import { demoExactPoint, writeProfileEdit } from './profiles';
 import type { DemoRuntime } from './store';
 
 /**
  * Everything the farmer does to their own farm. This file reads the private
  * contact and address tables, so the public gateway never imports it.
  */
-
-/** Demo only: there is no geocoder, so an exact point is invented from the address, within a few kilometres of the town. */
-function demoExactPoint(centre: Coordinates, address: string): Coordinates {
-  let hash = 2166136261;
-  for (const ch of address) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619) >>> 0;
-  const north = ((hash % 1000) / 1000) * 12 - 6;
-  const east = (((hash >>> 10) % 1000) / 1000) * 12 - 6;
-  const lat = centre.lat + north / 111;
-  const lng = centre.lng + east / (111.32 * Math.cos((centre.lat * Math.PI) / 180));
-  return { lat: Math.round(lat * 10000) / 10000, lng: Math.round(lng * 10000) / 10000 };
-}
 
 const copyOf = <T>(value: T): T => structuredClone(value);
 
@@ -163,37 +152,7 @@ export function createDemoFarmer(runtime: DemoRuntime): FarmerGateway {
       const values = must(parseProfile(input), 'The profile is not complete.');
       const db = await change(actor, (db, farm, now) => {
         const community = communityOf(db, values.communityId);
-        const edit = applyProfileEdit(farm, values, community, now);
-        const previous = db.farm_private_locations.find((l) => l.farmerProfileId === farm.id);
-        const privateLocation =
-          edit.streetAddress === null
-            ? null
-            : {
-                farmerProfileId: farm.id,
-                streetAddress: edit.streetAddress,
-                // Keep the point unless the address changed.
-                exactPoint:
-                  previous && previous.streetAddress === edit.streetAddress
-                    ? previous.exactPoint
-                    : demoExactPoint(community.centre, edit.streetAddress),
-              };
-        return {
-          ...db,
-          farmer_profiles: db.farmer_profiles.map((f) => (f.id === farm.id ? edit.profile : f)),
-          farm_public_locations: db.farm_public_locations.map((l) =>
-            l.farmerProfileId === farm.id
-              ? { ...l, communityId: community.id, town: community.name, county: community.county, coarsePoint: community.centre }
-              : l,
-          ),
-          farm_private_locations: [
-            ...db.farm_private_locations.filter((l) => l.farmerProfileId !== farm.id),
-            ...(privateLocation ? [privateLocation] : []),
-          ],
-          farmer_private_contacts: [
-            ...db.farmer_private_contacts.filter((c) => c.farmerProfileId !== farm.id),
-            { farmerProfileId: farm.id, ...edit.contact },
-          ],
-        };
+        return writeProfileEdit(db, farm.id, applyProfileEdit(farm, values, community, now), community);
       });
       return view(db, actor.farmerProfileId!);
     },

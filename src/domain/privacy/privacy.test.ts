@@ -168,6 +168,9 @@ describe('isPubliclyVisible', () => {
   it('requires published and all three consent fields', () => {
     expect(isPubliclyVisible(profile('1'))).toBe(true);
     expect(isPubliclyVisible(profile('1', { publicationStatus: 'draft' }))).toBe(false);
+    // Musoko declining a profile takes it off the site whatever else is set.
+    expect(isPubliclyVisible(profile('1', { registrationStatus: 'rejected' }))).toBe(false);
+    expect(isPubliclyVisible(profile('1', { registrationStatus: 'pending_review' }))).toBe(false);
     expect(isPubliclyVisible(profile('1', { publicationStatus: 'unpublished' }))).toBe(false);
     expect(isPubliclyVisible(profile('1', { consentMethod: null }))).toBe(false);
     expect(isPubliclyVisible(profile('1', { consentDate: null }))).toBe(false);

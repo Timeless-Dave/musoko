@@ -1,4 +1,4 @@
-import type { FarmerProfile, UserId } from '../types';
+import type { ConsentMethod, FarmerProfile, IsoDate, UserId } from '../types';
 
 /**
  * Consent to publish, and the review that follows an administrator's edit.
@@ -81,6 +81,85 @@ export function markAwaitingFarmerReview(profile: FarmerProfile, now: Date): Far
     reviewMethod: null,
     reviewDate: null,
     reviewRecordedBy: null,
+    updatedAt: now.toISOString(),
+  };
+}
+
+// ---------------------------------------------------------------- administrator side
+
+/** The ways an administrator can log consent or a review. "Farmer signed in" is the farmer's own, so it is not here. */
+export const ADMIN_CONSENT_METHODS = ['in_person', 'by_phone', 'signed_form'] as const satisfies readonly ConsentMethod[];
+export type AdminConsentMethod = (typeof ADMIN_CONSENT_METHODS)[number];
+
+export interface ConsentRecord {
+  method: AdminConsentMethod;
+  /** The day the farmer gave consent or reviewed the change, as the administrator logs it. */
+  date: IsoDate;
+  recordedBy: UserId;
+}
+
+/** CONS-3: public information was changed on the farmer's behalf and they have not yet said it is right. */
+export function isAwaitingFarmerReview(
+  profile: Pick<FarmerProfile, 'consentMethod' | 'consentDate' | 'consentRecordedBy' | 'farmerReviewedLatestChanges'>,
+): boolean {
+  return hasRecordedConsent(profile) && !profile.farmerReviewedLatestChanges;
+}
+
+/**
+ * CONS-2: an administrator logs how the farmer agreed to publication (in person,
+ * by phone, signed form), the day, and who wrote it down. Null when consent is
+ * already on record: it is not overwritten. The consent covers the profile as it
+ * stands, so the review is recorded in the same breath.
+ */
+export function recordAdminConsent(profile: FarmerProfile, record: ConsentRecord, now: Date): FarmerProfile | null {
+  if (hasRecordedConsent(profile)) return null;
+  return {
+    ...profile,
+    consentMethod: record.method,
+    consentDate: record.date,
+    consentRecordedBy: record.recordedBy,
+    farmerReviewedLatestChanges: true,
+    reviewMethod: record.method,
+    reviewDate: record.date,
+    reviewRecordedBy: record.recordedBy,
+    updatedAt: now.toISOString(),
+  };
+}
+
+/**
+ * CONS-3: the farmer's review of an administrator's changes, logged by an
+ * administrator the same way as consent. Null when there is nothing to review.
+ */
+export function recordAdminReview(profile: FarmerProfile, record: ConsentRecord, now: Date): FarmerProfile | null {
+  if (!isAwaitingFarmerReview(profile)) return null;
+  return {
+    ...profile,
+    farmerReviewedLatestChanges: true,
+    reviewMethod: record.method,
+    reviewDate: record.date,
+    reviewRecordedBy: record.recordedBy,
+    updatedAt: now.toISOString(),
+  };
+}
+
+/**
+ * TRUST-1: Musoko reviewed the profile for publication, and it goes public. This is
+ * the only route to "Listed". It needs consent on record, and it never produces a
+ * "Verified" label. Null when it cannot apply: no consent, or already approved.
+ */
+export function approveRegistration(profile: FarmerProfile, now: Date): FarmerProfile | null {
+  if (profile.registrationStatus === 'approved') return null;
+  if (!hasRecordedConsent(profile)) return null;
+  return { ...profile, registrationStatus: 'approved', publicationStatus: 'published', updatedAt: now.toISOString() };
+}
+
+/** Musoko does not list this profile, or takes a listed one off the site. Nothing is deleted. Null when already declined. */
+export function declineRegistration(profile: FarmerProfile, now: Date): FarmerProfile | null {
+  if (profile.registrationStatus === 'rejected') return null;
+  return {
+    ...profile,
+    registrationStatus: 'rejected',
+    publicationStatus: profile.publicationStatus === 'published' ? 'unpublished' : profile.publicationStatus,
     updatedAt: now.toISOString(),
   };
 }

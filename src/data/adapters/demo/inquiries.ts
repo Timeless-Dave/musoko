@@ -246,6 +246,7 @@ export function createDemoInquiries(
 
       // Notices use the rows as they were before the run, because a long-closed inquiry loses its contact row in the same run.
       for (const event of events) {
+        if (event.kind === 'search_events_rolled_up') continue;
         const inquiry = snapshot.inquiries.find((i) => i.id === event.inquiryId);
         if (!inquiry) continue;
         if (event.kind === 'reminder') {

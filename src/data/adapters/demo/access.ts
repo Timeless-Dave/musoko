@@ -19,3 +19,15 @@ export function requireOwnFarm(db: Database, actor: Actor): FarmerProfile {
 export function invalid(message: string, fields: Record<string, string>): GatewayError {
   return new GatewayError('invalid', message, { fields });
 }
+
+/**
+ * The administrator behind an actor: the role the caller claims must also be on
+ * record for that user. Every privileged administrator method starts here, on the
+ * latest state, so a farmer or buyer cannot reach private data by naming a role.
+ */
+export function requireAdmin(db: Database, actor: Actor): void {
+  const recorded = db.user_roles.some((r) => r.userId === actor.userId && r.role === 'administrator');
+  if (actor.role !== 'administrator' || !recorded) {
+    throw new GatewayError('forbidden', 'Only an administrator can do this.');
+  }
+}

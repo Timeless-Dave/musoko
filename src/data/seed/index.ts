@@ -21,7 +21,7 @@
  *           No conversion: prod-001 collards bunch, prod-041 peaches basket, prod-032 watermelon each.
  *  SEED-4   claims.ts: 20 claims, 3 verified (claim-18 to 20: licence, certification, licence on farm-02, 09, 10), none SNAP/EBT.
  *  SEED-5   events.ts: 40 search events over 30 days (7 or more with resultCount 0, three in Clarendon),
- *           12 preview events, 6 aggregate counts older than searchEventRetentionDays.
+ *           12 preview events, 7 aggregate counts older than searchEventRetentionDays (their searches are long deleted).
  *  SEED-6   products.ts: 15 quantity rows. prod-008 is fresh available_now with about 3 dozen.
  *  SEED-7   farms.ts: farm-11 is an administrator-created draft with no consent. farm-08 is published with
  *           farmerReviewedLatestChanges false. Consent methods: farmer_signed_in (farm-01), in_person, by_phone, signed_form.

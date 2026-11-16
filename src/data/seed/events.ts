@@ -114,5 +114,7 @@ export function buildAggregateCounts(now: Date, retentionDays: number): Aggregat
     row(4, 'inquiries', 12, { productTypeId: productTypeId('sweet-potatoes'), communityId: communityId('helena-west-helena') }),
     row(5, 'preview_opens', 22, { marketId: marketId(1) }),
     row(6, 'preview_opens', 9, { pickupLocationId: pickupLocationId(1) }),
+    // The older searches in Clarendon behind row 3, so no-result searches never outnumber the searches.
+    row(7, 'searches', 14, { communityId: communityId('clarendon') }),
   ];
 }

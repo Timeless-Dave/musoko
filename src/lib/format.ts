@@ -46,8 +46,19 @@ export function formatListingPrice(
   return `${price} a ${unit}`;
 }
 
-/** "3 Nov 2026": day, short month, year. No weekday, no ordinal. */
+const DAY_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * "3 Nov 2026": day, short month, year. No weekday, no ordinal. A day with no
+ * time ("2026-11-03", a consent day or a verification day) is a calendar day, so it
+ * reads as that day everywhere. Parsing it as midnight UTC would show the day before
+ * west of Greenwich. A full timestamp is an instant and shows in the reader's own day.
+ */
 export function formatDate(value: string | Date): string {
+  if (typeof value === 'string') {
+    const day = DAY_ONLY.exec(value);
+    if (day) return format(new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3])), 'd MMM yyyy');
+  }
   return format(typeof value === 'string' ? new Date(value) : value, 'd MMM yyyy');
 }
 

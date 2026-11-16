@@ -334,7 +334,7 @@ describe('lifecycle jobs through the app (STAT-3 to STAT-5, DPRIV-2)', () => {
     const id = state().db.inquiries.find((i) => i.statusToken === statusToken)!.id;
     const mine = () => state().db.inquiries.find((i) => i.id === id)!;
     // The seed has open inquiries of its own, so look only at this one.
-    const run = async () => (await services.demo!.runScheduledJobs()).filter((e) => e.inquiryId === id).map((e) => e.kind);
+    const run = async () => (await services.demo!.runScheduledJobs()).filter((e) => 'inquiryId' in e && e.inquiryId === id).map((e) => e.kind);
     const sent = (template: string) => state().outbox.filter((m) => m.template === template && m.relatedInquiryId === id);
 
     time.current = new Date(NOW.getTime() + 47 * HOUR);

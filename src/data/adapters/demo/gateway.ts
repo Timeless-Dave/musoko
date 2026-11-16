@@ -8,6 +8,7 @@ import type { Actor } from '../../ports/auth';
 import { GatewayError } from '../../ports/errors';
 import type { DataGateway } from '../../ports/gateway';
 import type { NotificationService } from '../../ports/notifications';
+import { createDemoAdmin } from './admin';
 import { createDemoFarmer } from './farmer';
 import { createDemoInquiries } from './inquiries';
 import type { DemoRuntime } from './store';
@@ -22,6 +23,7 @@ export function createDemoGateway(
 ): DataGateway & { runJobs(): Promise<JobEvent[]> } {
   const inquiries = createDemoInquiries(runtime, notifications);
   const farmer = createDemoFarmer(runtime);
+  const admin = createDemoAdmin(runtime, inquiries.runJobs);
   async function catalogue(): Promise<PublicCatalogue> {
     await runtime.ready();
     const { db } = runtime.read();
@@ -35,6 +37,7 @@ export function createDemoGateway(
   return {
     ...inquiries,
     ...farmer,
+    ...admin,
     async getSettings() {
       await runtime.ready();
       return copyOf(runtime.read().db.settings);
