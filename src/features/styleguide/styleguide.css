@@ -1,0 +1,385 @@
+/* Styleguide only. Colours come from tokens. */
+
+.sg-heading {
+  margin-bottom: var(--space-8);
+}
+.meta {
+  font-size: var(--text-meta);
+  line-height: var(--leading-meta);
+}
+.lead {
+  font-size: var(--text-lead);
+}
+.body-measure {
+  max-width: var(--measure);
+}
+.stack-6 {
+  display: grid;
+  gap: var(--space-6);
+}
+.row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ---- sticky index ---- */
+.sg-index {
+  position: sticky;
+  top: var(--header-h);
+  z-index: var(--z-sticky-nav);
+  background: var(--ground);
+  box-shadow: inset 0 calc(-1 * var(--rule-width)) 0 var(--rule);
+}
+.sg-index__row {
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sg-index__row::-webkit-scrollbar {
+  display: none;
+}
+.sg-index__link {
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--ink);
+  text-decoration: none;
+}
+.sg-index__link--current {
+  font-weight: var(--weight-strong);
+  box-shadow: inset 0 -3px 0 var(--ink);
+}
+
+/* ---- the open book ---- */
+.specimen + .specimen {
+  margin-top: var(--space-12);
+}
+.specimen__name {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-body);
+  font-weight: var(--weight-strong);
+}
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.spread__page {
+  min-width: 0;
+  padding: var(--space-6);
+  background: var(--ground);
+  color: var(--ink);
+}
+.spread__page:first-child {
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+.spread__page:last-child {
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+.spread__name {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+@media (min-width: 48rem) {
+  .spread__page {
+    padding: var(--space-8);
+  }
+}
+@media (min-width: 75rem) {
+  .spread:not(.spread--full) {
+    grid-template-columns: 1fr 1fr;
+  }
+  .spread:not(.spread--full) .spread__page:first-child {
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+  }
+  .spread:not(.spread--full) .spread__page:last-child {
+    border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  }
+}
+/* A page needs room to show a specimen honestly, so a full spread stays stacked. */
+
+/* ---- tokens ---- */
+.swatches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  box-shadow: inset 0 var(--rule-width) 0 var(--rule);
+}
+.swatch__chip {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-field);
+}
+.swatch__chip[data-edge] {
+  box-shadow: inset 0 0 0 1px var(--ink-muted);
+}
+.swatch__name {
+  display: block;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+.swatch__note {
+  display: block;
+  font-size: var(--text-meta);
+}
+.space-list,
+.radii {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.space-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-block: var(--space-1);
+}
+.space-list__bar {
+  display: block;
+  height: 8px;
+  background: var(--ink);
+}
+.radii {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.radii li {
+  display: grid;
+  gap: var(--space-2);
+}
+.radii__box {
+  display: block;
+  width: 96px;
+  height: 64px;
+  border: 1.5px solid var(--ink);
+}
+
+/* ---- type ---- */
+.type-list {
+  display: grid;
+  gap: var(--space-6);
+}
+.type-row__token {
+  margin-top: var(--space-1);
+}
+.prices__row {
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+.display-s {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- primitives ---- */
+.state-label {
+  width: 4.5rem;
+}
+/* Preview states: the same declarations as the real ones, forced on. */
+.btn--primary[data-state-preview='hover'] {
+  background: var(--ink-hover);
+}
+.btn--secondary[data-state-preview='hover'] {
+  background: var(--ground-raised);
+}
+.btn--link[data-state-preview='hover'],
+.btn--link[data-state-preview='pressed'] {
+  text-decoration-thickness: 2.5px;
+}
+.btn--secondary[data-state-preview='pressed'] {
+  background: var(--ground-sunk);
+}
+.btn--primary[data-state-preview='pressed'] .btn__label {
+  transform: translateY(1px);
+}
+.btn[data-state-preview='focus'] {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+.control[data-state-preview='focus'] {
+  border-color: var(--ink);
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+.section-stack {
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+.section-specimen {
+  display: flex;
+  align-items: center;
+  height: 160px;
+  padding-inline: var(--space-6);
+}
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+}
+.status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-strong);
+}
+.status-line--meta {
+  font-size: var(--text-meta);
+}
+
+/* ---- patterns ---- */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (min-width: 75rem) {
+  .photo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ---- theme ---- */
+.theme-bar {
+  position: relative;
+  height: var(--header-h);
+  background: var(--ground);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+.theme-note {
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+}
+.theme-note--strong {
+  font-weight: var(--weight-strong);
+}
+.fold-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fold-list__item {
+  display: grid;
+  gap: var(--space-2);
+}
+.fold-specimen {
+  position: relative;
+  display: block;
+  width: var(--header-h);
+  height: var(--header-h);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+/* ---- demo data ---- */
+.demo-data {
+  display: grid;
+  gap: var(--space-12);
+}
+.ledger {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ledger__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  box-shadow: inset 0 var(--rule-width) 0 var(--rule);
+}
+.ledger__count {
+  font: var(--weight-display) var(--text-display-s) / 1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 48rem) {
+  .ledger {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 75rem) {
+  .ledger {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.role-note {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+.listings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.listing {
+  display: grid;
+  gap: var(--space-4);
+  padding-block: var(--space-5);
+  box-shadow: inset 0 var(--rule-width) 0 var(--rule);
+}
+.listing__text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.listing__title {
+  font-weight: var(--weight-strong);
+}
+.listing__price {
+  font-variant-numeric: tabular-nums;
+}
+.listing__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+.listing__confirmed {
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+.listing__action {
+  justify-self: start;
+}
+.listing__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+.listing__error svg {
+  flex: none;
+}
+@media (min-width: 48rem) {
+  .listing {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .listing__error {
+    grid-column: 1 / -1;
+  }
+}

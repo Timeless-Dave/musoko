@@ -1,0 +1,88 @@
+import { confirmAvailability } from '@/domain/availability';
+import { buildPublicCatalogue } from '@/domain/privacy';
+import { asId, type EventId, type PublicCatalogue } from '@/domain/types';
+import { newId } from '@/lib/ids';
+import type { Actor } from '../../ports/auth';
+import { GatewayError } from '../../ports/errors';
+import type { DataGateway } from '../../ports/gateway';
+import type { DemoRuntime } from './store';
+
+// Public reads go only through buildPublicCatalogue. This file never reads the
+// private location, private contact or buyer contact collections (a test checks).
+const copyOf = <T>(value: T): T => structuredClone(value);
+
+export function createDemoGateway(runtime: DemoRuntime): DataGateway {
+  async function catalogue(): Promise<PublicCatalogue> {
+    await runtime.ready();
+    const { db } = runtime.read();
+    return copyOf(buildPublicCatalogue(db, runtime.clock.now(), db.settings));
+  }
+  async function table<K extends 'regions' | 'communities' | 'product_types'>(key: K) {
+    await runtime.ready();
+    return copyOf(runtime.read().db[key]);
+  }
+
+  return {
+    async getSettings() {
+      await runtime.ready();
+      return copyOf(runtime.read().db.settings);
+    },
+    listRegions: () => table('regions'),
+    listCommunities: () => table('communities'),
+    listProductTypes: () => table('product_types'),
+    async listPublicFarms() {
+      return (await catalogue()).farms;
+    },
+    async getPublicFarmBySlug(slug) {
+      return (await catalogue()).farms.find((f) => f.slug === slug) ?? null;
+    },
+    async listPublicProducts() {
+      return (await catalogue()).products;
+    },
+    async listPublicMarkets() {
+      return (await catalogue()).markets;
+    },
+    async listPublicPickupLocations() {
+      return (await catalogue()).pickupLocations;
+    },
+
+    async farmerConfirmAvailability(actor: Actor, productId) {
+      await runtime.ready();
+      if (actor.role !== 'farmer' || actor.farmerProfileId === null) {
+        throw new GatewayError('forbidden', 'Only a farmer can confirm availability.');
+      }
+      const before = runtime.read().db;
+      const product = before.products.find((p) => p.id === productId);
+      if (!product) throw new GatewayError('not_found', 'That listing does not exist.');
+      const farm = before.farmer_profiles.find((f) => f.id === product.farmerProfileId);
+      if (product.farmerProfileId !== actor.farmerProfileId || !farm || farm.userId !== actor.userId) {
+        throw new GatewayError('forbidden', 'You can only confirm your own listings.');
+      }
+      const current = before.product_availability.find((a) => a.productId === productId);
+      if (!current) throw new GatewayError('not_found', 'That listing has no availability record.');
+
+      const now = runtime.clock.now();
+      let saved = current;
+      await runtime.commit((state) => {
+        // Re-read inside the commit so two quick taps cannot overwrite each other.
+        const latest = state.db.product_availability.find((a) => a.productId === productId) ?? current;
+        const result = confirmAvailability(latest, now, state.db.settings);
+        saved = result.availability;
+        return {
+          ...state,
+          db: {
+            ...state.db,
+            product_availability: state.db.product_availability.map((a) => (a.productId === productId ? result.availability : a)),
+            product_availability_history: result.statusChanged
+              ? [
+                  ...state.db.product_availability_history,
+                  { id: asId<EventId>(newId('avail-hist')), productId, status: 'available_now', changedAt: now.toISOString(), changedBy: actor.userId },
+                ]
+              : state.db.product_availability_history,
+          },
+        };
+      });
+      return copyOf(saved);
+    },
+  };
+}

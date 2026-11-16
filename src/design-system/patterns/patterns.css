@@ -1,0 +1,155 @@
+/* Patterns. Colours come from tokens only. */
+
+/* ---- PageHeader ---- */
+.page-header {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+  box-shadow: 0 var(--rule-width) 0 var(--rule);
+}
+.page-header__back {
+  margin-bottom: var(--space-6);
+}
+.page-header__title {
+  max-width: 18ch;
+  font: var(--weight-display) var(--text-display-l) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-l);
+  text-wrap: balance;
+}
+.page-header__lead {
+  max-width: 40ch;
+  margin-top: var(--space-4);
+  font-size: var(--text-lead);
+  text-wrap: pretty;
+}
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+@media (min-width: 48rem) {
+  .page-header {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
+  }
+}
+
+/* ---- EmptyState ---- */
+.empty-state {
+  padding-block: var(--space-12);
+  box-shadow: inset 0 var(--rule-width) 0 var(--rule);
+}
+.empty-state__sentence {
+  max-width: 32ch;
+  font-size: var(--text-lead);
+  font-weight: var(--weight-strong);
+}
+.empty-state__action {
+  margin-top: var(--space-6);
+}
+
+/* ---- StatFigure and the ledger ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.stat-figure {
+  padding: var(--space-6) var(--space-6) var(--space-6) 0;
+  box-shadow: inset 0 var(--rule-width) 0 var(--rule);
+}
+.stat-figure__slot {
+  min-height: calc(var(--text-figure) * 1.05);
+}
+.stat-figure__figure {
+  font: var(--weight-display) var(--text-figure) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-l);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.stat-figure__insufficient {
+  max-width: 18ch;
+  font-size: var(--text-lead);
+  font-weight: var(--weight-strong);
+}
+.stat-figure__label {
+  max-width: 24ch;
+  margin-top: var(--space-2);
+}
+.stat-figure__note {
+  margin-top: var(--space-1);
+  font-size: var(--text-meta);
+}
+@media (min-width: 48rem) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-figure:nth-child(even) {
+    padding-left: var(--space-6);
+    box-shadow:
+      inset 0 var(--rule-width) 0 var(--rule),
+      inset var(--rule-width) 0 0 var(--rule);
+  }
+}
+@media (min-width: 75rem) {
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .stat-figure:not(:first-child) {
+    padding-left: var(--space-6);
+    box-shadow:
+      inset 0 var(--rule-width) 0 var(--rule),
+      inset var(--rule-width) 0 0 var(--rule);
+  }
+}
+
+/* ---- PhotoFrame ---- */
+.photo-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: var(--ground-sunk);
+}
+.photo-frame img {
+  animation: photo-in var(--dur-slow) var(--ease-out) both;
+}
+@keyframes photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.photo-frame__specimen {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-frame img {
+    animation: none;
+  }
+}
+
+/* ---- Skeleton ---- */
+.skeleton-bar {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-field);
+  background: var(--ground-sunk);
+  animation: skeleton-pulse 1200ms var(--ease-in-out) infinite alternate;
+}
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar {
+    animation: none;
+  }
+}

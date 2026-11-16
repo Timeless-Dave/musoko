@@ -1,26 +1,113 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import '../design-system/tokens/tokens.css';
+@import '../design-system/theme/peel.css';
+@import '../design-system/primitives/primitives.css';
+@import '../design-system/patterns/patterns.css';
+@import '../features/shell/shell.css';
+@import '../features/demo/demo.css';
+@import '../features/home/home.css';
+@import '../features/styleguide/styleguide.css';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Tailwind keeps its spacing scale and utilities; colours and breakpoints are Musoko's own. */
+@theme {
+  --color-*: initial;
+  --breakpoint-*: initial;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 75rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-ground-raised: var(--ground-raised);
+  --color-ground-sunk: var(--ground-sunk);
+  --color-leaf: var(--c-leaf);
+  --radius-panel: var(--radius-panel);
+  --radius-field: var(--radius-field);
+  --radius-pill: var(--radius-pill);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-padding-top: calc(var(--header-h) + 3.5rem);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  padding-bottom: var(--demo-strip-h, 0px);
+  background: var(--ground);
+  color: var(--ink);
+  font: var(--weight-text) var(--text-body) / var(--leading-text) var(--font-text);
+  font-feature-settings: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+.skip-link {
+  position: absolute;
+  z-index: calc(var(--z-header) + 1);
+  top: var(--space-2);
+  left: var(--gutter);
+  transform: translateY(-300%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
+
+/* Display type used directly by routes */
+.display-xl {
+  font: var(--weight-display) var(--text-display-xl) / 1 var(--font-display);
+  letter-spacing: var(--tracking-xl);
+}
+.display-l {
+  font: var(--weight-display) var(--text-display-l) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-l);
+}
+.display-m {
+  font: var(--weight-display) var(--text-display-m) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-m);
+}
+.display-s {
+  font: var(--weight-display) var(--text-display-s) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-s);
+}
+.not-found__action {
+  margin-top: var(--space-6);
+}
+.scroll-sentinel {
+  position: absolute;
+  top: 0;
+  height: 1px;
+  width: 1px;
+}
+main {
+  position: relative;
+}
+main:focus {
+  outline: none;
 }
