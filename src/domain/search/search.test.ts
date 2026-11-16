@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { defaultSettings } from '@/config/settings';
-import { buildSeed } from '@/data/seed';
+import { buildSeed } from '../../data/seed';
 import { matchProductType, scrubSearchTerms } from './index';
 
 const types = buildSeed(new Date('2026-11-15T15:00:00.000Z'), defaultSettings).product_types;

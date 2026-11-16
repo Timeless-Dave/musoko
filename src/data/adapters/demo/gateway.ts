@@ -75,6 +75,36 @@ export function createDemoGateway(runtime: DemoRuntime): DataGateway {
       });
     },
 
+    async recordPreviewOpen({ targetKind, targetId, surface }) {
+      await runtime.ready();
+      const { db } = runtime.read();
+      const exists =
+        targetKind === 'farmers_market'
+          ? db.farmers_markets.some((m) => m.id === targetId && m.moderationStatus === 'visible')
+          : db.pickup_locations.some((l) => l.id === targetId && l.moderationStatus === 'visible');
+      if (!exists) throw new GatewayError('not_found', 'That place is not listed.');
+
+      const day = runtime.clock.now().toISOString().slice(0, 10);
+      await runtime.commit((state) => {
+        // One row per place, surface and day. The row holds a count and nothing about who opened it.
+        const same = (e: { day: string; targetKind: string; targetId: string; surface: string }) =>
+          e.day === day && e.targetKind === targetKind && e.targetId === targetId && e.surface === surface;
+        const existing = state.db.preview_events.some(same);
+        return {
+          ...state,
+          db: {
+            ...state.db,
+            preview_events: existing
+              ? state.db.preview_events.map((e) => (same(e) ? { ...e, count: e.count + 1 } : e))
+              : [
+                  ...state.db.preview_events,
+                  { id: asId<EventId>(newId('preview')), day, targetKind, targetId, surface, count: 1 },
+                ],
+          },
+        };
+      });
+    },
+
     async farmerConfirmAvailability(actor: Actor, productId) {
       await runtime.ready();
       if (actor.role !== 'farmer' || actor.farmerProfileId === null) {

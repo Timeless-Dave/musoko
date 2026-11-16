@@ -8,11 +8,19 @@ import type {
   PublicMarket,
   PublicPickupLocation,
   PublicProduct,
+  PreviewEvent,
   Region,
   SearchFilters,
   Settings,
 } from '@/domain/types';
 import type { Actor } from './auth';
+
+export interface PreviewOpenInput {
+  targetKind: PreviewEvent['targetKind'];
+  /** The market or pickup location id. */
+  targetId: string;
+  surface: PreviewEvent['surface'];
+}
 
 /**
  * Public methods return projection types or reference rows only. Privileged
@@ -37,6 +45,13 @@ export interface DataGateway {
     communityId: CommunityId | null;
     resultCount: number;
   }): Promise<void>;
+  /**
+   * Counts one open of a market or pickup location preview, on the map or in a
+   * list. Anonymous: the event carries the place, the surface and the day, and
+   * nothing about the visitor. Repeat opens on one day add to one count.
+   */
+  recordPreviewOpen(input: PreviewOpenInput): Promise<void>;
+
   // ----- privileged -----
   /** Farmer only, and only for a product on the actor's own farm. */
   farmerConfirmAvailability(actor: Actor, productId: ProductId): Promise<ProductAvailability>;

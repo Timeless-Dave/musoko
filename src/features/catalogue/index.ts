@@ -3,6 +3,7 @@ export {
   usePublicFarms,
   usePublicFarm,
   usePublicMarkets,
+  usePublicPickupLocations,
   useCommunities,
   useProductTypes,
   useSelectedCommunity,

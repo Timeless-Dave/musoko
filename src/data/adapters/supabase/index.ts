@@ -25,6 +25,7 @@ export function createLiveServices(): Services {
       listPublicMarkets: reject,
       listPublicPickupLocations: reject,
       recordSearch: reject,
+      recordPreviewOpen: reject,
       farmerConfirmAvailability: reject,
     },
     auth: { getSession: reject, signOut: reject, subscribe: () => () => undefined },

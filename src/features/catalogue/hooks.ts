@@ -16,6 +16,8 @@ export const usePublicFarm = (slug: string) =>
   useQuery({ queryKey: ['public', 'farm', slug], queryFn: () => services.gateway.getPublicFarmBySlug(slug) });
 export const usePublicMarkets = () =>
   useQuery({ queryKey: ['public', 'markets'], queryFn: () => services.gateway.listPublicMarkets() });
+export const usePublicPickupLocations = () =>
+  useQuery({ queryKey: ['public', 'pickup-locations'], queryFn: () => services.gateway.listPublicPickupLocations() });
 export const useCommunities = () =>
   useQuery({ queryKey: ['public', 'communities'], queryFn: () => services.gateway.listCommunities() });
 export const useProductTypes = () =>
