@@ -1,5 +1,6 @@
 import type {
   Community,
+  CommunityId,
   ProductAvailability,
   ProductId,
   ProductType,
@@ -8,6 +9,7 @@ import type {
   PublicPickupLocation,
   PublicProduct,
   Region,
+  SearchFilters,
   Settings,
 } from '@/domain/types';
 import type { Actor } from './auth';
@@ -28,6 +30,13 @@ export interface DataGateway {
   listPublicProducts(): Promise<PublicProduct[]>;
   listPublicMarkets(): Promise<PublicMarket[]>;
   listPublicPickupLocations(): Promise<PublicPickupLocation[]>;
+  /** Anonymous: no session or device id. Terms are scrubbed before storage. */
+  recordSearch(input: {
+    rawTerms: string;
+    filters: SearchFilters;
+    communityId: CommunityId | null;
+    resultCount: number;
+  }): Promise<void>;
   // ----- privileged -----
   /** Farmer only, and only for a product on the actor's own farm. */
   farmerConfirmAvailability(actor: Actor, productId: ProductId): Promise<ProductAvailability>;

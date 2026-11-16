@@ -1,5 +1,6 @@
 import { confirmAvailability } from '@/domain/availability';
 import { buildPublicCatalogue } from '@/domain/privacy';
+import { matchProductType, scrubSearchTerms } from '@/domain/search';
 import { asId, type EventId, type PublicCatalogue } from '@/domain/types';
 import { newId } from '@/lib/ids';
 import type { Actor } from '../../ports/auth';
@@ -44,6 +45,34 @@ export function createDemoGateway(runtime: DemoRuntime): DataGateway {
     },
     async listPublicPickupLocations() {
       return (await catalogue()).pickupLocations;
+    },
+
+    async recordSearch({ rawTerms, filters, communityId, resultCount }) {
+      await runtime.ready();
+      const now = runtime.clock.now();
+      const day = now.toISOString().slice(0, 10);
+      await runtime.commit((state) => {
+        const terms = scrubSearchTerms(rawTerms, state.db.settings);
+        const matched = matchProductType(terms, state.db.product_types);
+        return {
+          ...state,
+          db: {
+            ...state.db,
+            search_events: [
+              ...state.db.search_events,
+              {
+                id: asId<EventId>(newId('search')),
+                day,
+                terms,
+                matchedProductTypeId: matched?.id ?? null,
+                filters,
+                communityId,
+                resultCount,
+              },
+            ],
+          },
+        };
+      });
     },
 
     async farmerConfirmAvailability(actor: Actor, productId) {

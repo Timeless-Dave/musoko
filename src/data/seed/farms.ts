@@ -13,6 +13,7 @@ import { communityBySlug, communityId } from './communities';
 import { REGION_ID } from './regions';
 import { daysAgo, dayOnly } from './time';
 import { DEMO_ADMIN_USER_ID, DEMO_FARMER_USER_ID } from './users';
+import { PHOTOS, type PhotoKey } from './photos';
 
 export const farmId = (n: number): FarmerProfileId => asId<FarmerProfileId>(`farm-${String(n).padStart(2, '0')}`);
 
@@ -111,6 +112,22 @@ export function offsetPoint(centre: Coordinates, northKm: number, eastKm: number
   return { lat: Math.round(lat * 10000) / 10000, lng: Math.round(lng * 10000) / 10000 };
 }
 
+/** One landscape photograph per farm: land, animals or produce, never a person's face. */
+const FARM_PHOTO: Record<number, PhotoKey> = {
+  1: 'farms/high-tunnel',
+  2: 'farms/hens-on-pasture',
+  3: 'farms/beehives',
+  4: 'farms/garden-beds',
+  5: 'farms/sorghum-heads',
+  6: 'farms/bedded-field',
+  7: 'farms/cattle-at-fence',
+  8: 'farms/kitchen-garden',
+  9: 'farms/delta-field-road',
+  10: 'farms/dairy-herd',
+  11: 'farms/ploughed-field',
+  12: 'farms/apple-orchard',
+};
+
 export function buildFarms(now: Date): {
   profiles: FarmerProfile[];
   publicLocations: FarmPublicLocation[];
@@ -140,7 +157,7 @@ export function buildFarms(now: Date): {
       farmerName: s.farmerName,
       intro: s.intro,
       story: s.story,
-      photos: [],
+      photos: FARM_PHOTO[s.n] ? [PHOTOS[FARM_PHOTO[s.n]]] : [],
       regionId: REGION_ID,
       communityId: communityId(s.town),
       createdBy,

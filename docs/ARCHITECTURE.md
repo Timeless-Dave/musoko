@@ -123,6 +123,8 @@ musoko/
     │   └── api/                                live mode only: webhooks, scheduled jobs
     ├── features/                   one folder per part of the product
     │   ├── home/
+    │   ├── catalogue/              shared browsing pieces: data hooks, product and farm cards, search bar, category rail, shelves
+    │   ├── credits/                photo credits page
     │   ├── marketplace/            search, filters, sort, product card, unit price display
     │   ├── farmers/                directory, profile, claims display
     │   ├── map/                    map view, list view, marker preview

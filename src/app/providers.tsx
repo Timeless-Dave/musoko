@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { services } from '@/data';
 import { copy } from '@/content/copy';
 import { ThemeProvider, WatermarkProvider } from '@/design-system/theme';
@@ -16,9 +17,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <WatermarkProvider text={services.mode === 'demo' ? copy.demo.watermark : null}>{children}</WatermarkProvider>
-      </ThemeProvider>
+      <NuqsAdapter>
+        <ThemeProvider>
+          <WatermarkProvider text={services.mode === 'demo' ? copy.demo.watermark : null}>{children}</WatermarkProvider>
+        </ThemeProvider>
+      </NuqsAdapter>
     </QueryClientProvider>
   );
 }

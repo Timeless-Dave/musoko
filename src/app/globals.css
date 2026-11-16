@@ -5,6 +5,7 @@
 @import '../design-system/patterns/patterns.css';
 @import '../features/shell/shell.css';
 @import '../features/demo/demo.css';
+@import '../features/catalogue/catalogue.css';
 @import '../features/home/home.css';
 @import '../features/styleguide/styleguide.css';
 

@@ -4,7 +4,7 @@ import { Button } from '@/design-system/primitives';
 import { themeScript } from '@/design-system/theme';
 import { copy } from '@/content/copy';
 import { DemoStrip } from '@/features/demo';
-import { SiteHeader } from '@/features/shell';
+import { SiteFooter, SiteHeader } from '@/features/shell';
 import { Providers } from './providers';
 import './globals.css';
 
@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="scroll-sentinel" data-scroll-sentinel aria-hidden="true" />
             {children}
           </main>
+          <SiteFooter />
           <DemoStrip />
         </Providers>
       </body>

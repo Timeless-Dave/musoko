@@ -12,9 +12,13 @@ import {
 } from '@/domain/types';
 import { normalizedUnitPrice } from '@/domain/units';
 import { farmId } from './farms';
+import { PHOTOS, type PhotoKey } from './photos';
 import { productTypeId } from './product-types';
 import { daysAgo, monthsAhead } from './time';
 import { DEMO_FARMER_USER_ID } from './users';
+
+/** Listings that would otherwise sit beside another with the same photograph. */
+const PHOTO_OVERRIDE: Record<number, PhotoKey> = { 9: 'produce/eggs-carton' };
 
 export const productId = (n: number): ProductId => asId<ProductId>(`prod-${String(n).padStart(3, '0')}`);
 
@@ -133,7 +137,7 @@ export function buildProducts(
       productTypeId: type.id,
       title: s.title,
       description: s.desc,
-      photo: null,
+      photo: PHOTOS[PHOTO_OVERRIDE[s.n] ?? (`produce/${s.type}` as PhotoKey)] ?? null,
       priceCents: s.cents,
       sellingUnit: s.unit,
       unitSize: s.size,

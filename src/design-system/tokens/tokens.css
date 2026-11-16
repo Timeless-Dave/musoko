@@ -151,6 +151,6 @@
   --rule: color-mix(in oklab, var(--ink) 18%, var(--ground));
   --ground-raised: color-mix(in oklab, var(--ink) 6%, var(--ground));
   --ground-sunk: color-mix(in oklab, var(--ink) 10%, var(--ground));
-  --watermark-ink: color-mix(in oklab, var(--ink) 6%, var(--ground));
+  --watermark-ink: color-mix(in oklab, var(--ink) 4%, var(--ground));
   --focus-color: var(--ink);
 }

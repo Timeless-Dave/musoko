@@ -221,6 +221,27 @@ describe('subscribe and notifications', () => {
   });
 });
 
+describe('search events (DATA-1)', () => {
+  it('scrubs terms and appends an anonymous row', async () => {
+    const storage = createMemoryStorage();
+    const s = open(storage);
+    await s.demo!.ready();
+    const before = stored(storage).state.db.search_events.length;
+    await s.gateway.recordSearch({
+      rawTerms: '  eggs buyer@x.com ',
+      filters: { availability: 'available_now' },
+      communityId: buildSeed(NOW, defaultSettings).communities[0]!.id,
+      resultCount: 3,
+    });
+    const events = stored(storage).state.db.search_events;
+    expect(events.length).toBe(before + 1);
+    const last = events.at(-1)!;
+    expect(last.terms).toBe('eggs');
+    expect(last.resultCount).toBe(3);
+    expect(JSON.stringify(last)).not.toMatch(/buyer@/);
+  });
+});
+
 describe('other controls', () => {
   it('counts every table but settings', async () => {
     const s = open(createMemoryStorage());
