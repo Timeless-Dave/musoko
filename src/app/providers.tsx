@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { services } from '@/data';
 import { copy } from '@/content/copy';
-import { ThemeProvider, WatermarkProvider } from '@/design-system/theme';
+import { FaviconSync, ThemeProvider, WatermarkProvider } from '@/design-system/theme';
 import { useScheduledJobs } from '@/features/demo';
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -23,6 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <NuqsAdapter>
         <ThemeProvider>
+          <FaviconSync />
           <WatermarkProvider text={services.mode === 'demo' ? copy.demo.watermark : null}>{children}</WatermarkProvider>
         </ThemeProvider>
       </NuqsAdapter>

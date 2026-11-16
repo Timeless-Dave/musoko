@@ -1,0 +1,1 @@
+export { AssistantFab } from './AssistantFab';

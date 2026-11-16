@@ -8,6 +8,8 @@ const TRANSACTION_STATEMENT = 'Payment and pickup are arranged directly with the
 export const copy = {
   brand: {
     name: 'Musoko',
+    /** Shown beside the M mark; together they read as the full name. */
+    wordmarkSuffix: 'usoko',
     tagline: 'Connecting Local Farmers and Communities.',
     initiative: 'An initiative of ReMix Ideas',
   },
@@ -47,8 +49,48 @@ export const copy = {
   theme: {
     toGreen: 'Switch to the green theme',
     toYellow: 'Switch to the yellow theme',
+    switchTo: (name: 'yellow' | 'green') => (name === 'green' ? 'Green theme' : 'Yellow theme'),
   },
-  nav: { food: 'Find food', farmers: 'Farmers', markets: 'Markets', map: 'Map', credits: 'Photo credits', label: 'Main' },
+  nav: {
+    food: 'Find food',
+    farmers: 'Farmers',
+    markets: 'Markets',
+    map: 'Map',
+    compare: 'Compare',
+    credits: 'Photo credits',
+    label: 'Main',
+  },
+  assistant: {
+    label: 'Ask Musoko',
+    title: 'Ask Musoko',
+    body: 'Answers come from the Musoko brief. This is a guide for using the site, not a shopping assistant and not live farm advice.',
+    welcome:
+      'Ask how to find food, send an inquiry, join as a farmer, or what Demo and Listed mean. I only use the Musoko brief — nothing is sent to another service.',
+    ask: 'Your question',
+    send: 'Ask',
+    close: 'Close',
+  },
+  compare: {
+    title: 'Compare listings',
+    intro: 'Pick up to four listings on Find food, then compare price, availability and pickup side by side.',
+    empty: 'No listings selected yet.',
+    emptyAction: 'Browse food',
+    add: 'Compare',
+    added: 'In compare',
+    remove: 'Remove',
+    clear: 'Clear all',
+    full: 'You can compare four listings at most.',
+    row: {
+      photo: 'Photo',
+      listing: 'Listing',
+      farm: 'Farm',
+      price: 'Price',
+      unit: 'Unit price',
+      status: 'Availability',
+      pickup: 'Pickup',
+      away: 'Distance',
+    },
+  },
   search: {
     label: 'What local food are you looking for?',
     placeholder: 'Tomatoes, eggs, honey',

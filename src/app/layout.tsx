@@ -3,6 +3,7 @@ import { Hanken_Grotesk } from 'next/font/google';
 import { Button } from '@/design-system/primitives';
 import { themeScript } from '@/design-system/theme';
 import { copy } from '@/content/copy';
+import { AssistantFab } from '@/features/assistant';
 import { DemoStrip } from '@/features/demo';
 import { SiteFooter, SiteHeader } from '@/features/shell';
 import { Providers } from './providers';
@@ -24,8 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={hanken.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <link rel="icon" href="/brand/favicon-yellow.svg" type="image/svg+xml" data-musoko-icon="" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           <Button href="#main" className="skip-link">
             {copy.common.skip}
@@ -37,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </main>
           <SiteFooter />
           <DemoStrip />
+          <AssistantFab />
         </Providers>
       </body>
     </html>

@@ -1,23 +1,27 @@
 'use client';
 
+import { Leaf, Sun } from '@phosphor-icons/react';
+import { copy } from '@/content/copy';
 import { useTheme } from './ThemeProvider';
 
-/**
- * The page's own top-right corner, folded down. Under the fold the other
- * theme shows through. Pressing it lifts the corner and peels the page.
- * The labels come from the caller because the design system holds no wording.
- */
-export function ThemeToggle({ labels }: { labels: { toGreen: string; toYellow: string } }) {
+/** Sliding pill like VerifAI: sun = yellow theme, leaf = green; peel runs on change. */
+export function ThemeToggle() {
   const { theme, toggle } = useTheme();
+  const green = theme === 'green';
+
   return (
     <button
       type="button"
       className="theme-toggle"
-      aria-label={theme === 'yellow' ? labels.toGreen : labels.toYellow}
+      role="switch"
+      aria-checked={green}
+      aria-label={green ? copy.theme.toYellow : copy.theme.toGreen}
+      title={green ? copy.theme.toYellow : copy.theme.toGreen}
       onClick={toggle}
     >
-      <span className="theme-toggle__under" aria-hidden="true" />
-      <span className="theme-toggle__flap" aria-hidden="true" />
+      <Sun size={16} weight="bold" className="theme-toggle__icon theme-toggle__sun" aria-hidden="true" />
+      <Leaf size={16} weight="fill" className="theme-toggle__icon theme-toggle__leaf" aria-hidden="true" />
+      <span className="theme-toggle__knob" aria-hidden="true" />
     </button>
   );
 }

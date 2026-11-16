@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, type ReactNode } from 'react';
+import { runPeelTransition } from './peelTransition';
 import { THEME_STORAGE_KEY, type ThemeName } from './theme-script';
 
 interface ThemeApi {
@@ -15,7 +16,6 @@ function readTheme(): ThemeName {
   return document.documentElement.dataset.theme === 'green' ? 'green' : 'yellow';
 }
 
-/** The attribute on <html> is the source of truth; the inline script set it before first paint. */
 function subscribe(notify: () => void) {
   const observer = new MutationObserver(notify);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -28,7 +28,7 @@ function applyTheme(next: ThemeName) {
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, next);
   } catch {
-    // Storage may be blocked. The choice then lasts for this visit only.
+    // Storage may be blocked.
   }
   const ground = getComputedStyle(root).getPropertyValue('--theme-ground').trim();
   if (ground) {
@@ -42,23 +42,7 @@ function applyTheme(next: ThemeName) {
   }
 }
 
-function removeCurl() {
-  document.querySelectorAll('.peel-curl').forEach((el) => el.remove());
-}
-
-function appendCurl() {
-  removeCurl();
-  const curl = document.createElement('div');
-  curl.className = 'peel-curl';
-  curl.setAttribute('aria-hidden', 'true');
-  curl.innerHTML = '<div class="peel-curl__light"></div><div class="peel-curl__shade"></div>';
-  document.body.appendChild(curl);
-}
-
-let running: ViewTransition | null = null;
-
 function changeTheme(next: ThemeName) {
-  const root = document.documentElement;
   if (readTheme() === next) return;
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -67,19 +51,8 @@ function changeTheme(next: ThemeName) {
     return;
   }
 
-  running?.skipTransition();
-  // Forward: yellow to green, the corner lifts. Back: green to yellow, the sheet is laid back.
-  root.dataset.peel = next === 'green' ? 'forward' : 'back';
-  const transition = document.startViewTransition(() => {
+  runPeelTransition(() => {
     applyTheme(next);
-    appendCurl();
-  });
-  running = transition;
-  transition.finished.finally(() => {
-    if (running !== transition) return;
-    running = null;
-    delete root.dataset.peel;
-    removeCurl();
   });
 }
 

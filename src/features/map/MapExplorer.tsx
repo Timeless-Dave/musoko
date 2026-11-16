@@ -24,9 +24,9 @@ import { buildPlaces, filterPlaces, groupPins, sortPlaces, type Place } from './
 const VIEWS = ['list', 'map'] as const;
 const KINDS = ['farm', 'market', 'pickup'] as const;
 
-// The list is the default view. The map is only fetched once someone asks for it.
+// Map is the default; the canvas still mounts only while this tab is selected.
 const params = {
-  view: parseAsStringLiteral(VIEWS).withDefault('list'),
+  view: parseAsStringLiteral(VIEWS).withDefault('map'),
   show: parseAsStringLiteral(KINDS),
   town: parseAsString,
   food: parseAsStringLiteral(CATEGORY_ORDER),

@@ -1,16 +1,4 @@
-/* The page peel. DESIGN.md section 4. Colour values come from tokens only. */
-
-@property --peel-t {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
-@property --fold {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 30px;
-}
+/* Page peel (VerifAI-style): JS sets --peel-d while the new theme shows in the corner. */
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -18,82 +6,49 @@
   mix-blend-mode: normal;
 }
 
-/* Forward, yellow to green: the new page on top, a triangle grows from the top-right corner. */
-:root[data-peel='forward']::view-transition-old(root) {
-  z-index: 1;
+:root.peeling::view-transition-group(root) {
+  animation: peel-hold var(--dur-peel) linear;
 }
-:root[data-peel='forward']::view-transition-new(root) {
-  z-index: 2;
-  animation: peel-in var(--dur-peel) var(--ease-peel) both;
-}
-
-/* Back, green to yellow: the old page on top, the same triangle shrinks into the corner. */
-:root[data-peel='back']::view-transition-new(root) {
-  z-index: 1;
-}
-:root[data-peel='back']::view-transition-old(root) {
-  z-index: 2;
-  animation: peel-in var(--dur-peel) var(--ease-peel) both reverse;
-}
-
-@keyframes peel-in {
+@keyframes peel-hold {
   from {
-    clip-path: polygon(100% 0, 100% 0, 100% 0);
+    opacity: 1;
   }
   to {
-    clip-path: polygon(-100% 0, 100% 0, 100% 200%);
+    opacity: 1;
   }
 }
 
-/* The curl: a narrow band that travels along the moving edge. */
-.peel-curl {
+:root.peeling::view-transition-new(root) {
+  clip-path: polygon(calc(100vw - var(--peel-d, 0px)) 0, 100vw 0, 100vw var(--peel-d, 0px));
+}
+
+::view-transition-group(peel),
+::view-transition-new(peel),
+::view-transition-old(peel) {
+  animation: none;
+}
+
+.peel {
   position: fixed;
   inset: 0;
+  z-index: 2147483646;
   pointer-events: none;
-  view-transition-name: peel-curl;
-  animation: peel-curl var(--dur-peel) var(--ease-peel) both;
-}
-:root[data-peel='back'] .peel-curl {
-  animation-direction: reverse;
-}
-@keyframes peel-curl {
-  from {
-    --peel-t: 0;
-  }
-  to {
-    --peel-t: 1;
-  }
+  view-transition-name: peel;
+  filter: drop-shadow(-4px 6px 9px color-mix(in oklab, var(--c-shade) 30%, transparent));
 }
 
-::view-transition-group(peel-curl) {
-  z-index: 3;
-  animation: none;
-}
-::view-transition-new(peel-curl) {
-  animation: none;
-}
-::view-transition-old(peel-curl) {
-  display: none;
-}
-
-/* Leading side: a 10px highlight, hard-edged. */
-.peel-curl__light {
+.peel-flap {
   position: absolute;
-  inset: 0;
-  background: var(--peel-light);
-  --x: calc(100% - var(--peel-t) * 200%);
-  --y: calc(var(--peel-t) * 200%);
-  clip-path: polygon(var(--x) 0, 100% var(--y), calc(100% - 10px) var(--y), calc(var(--x) - 10px) 0);
-}
-/* Trailing side: a soft shade over the turned page. Flat fill, one blur, no gradient. */
-.peel-curl__shade {
-  position: absolute;
-  inset: 0;
-  background: var(--peel-shade);
-  filter: blur(8px);
-  --x: calc(100% - var(--peel-t) * 200%);
-  --y: calc(var(--peel-t) * 200%);
-  clip-path: polygon(var(--x) 0, calc(var(--x) + 28px) 0, calc(100% + 28px) var(--y), 100% var(--y));
+  transform-origin: 50% 0;
+  transform: rotate(45deg);
+  background: linear-gradient(
+    to bottom,
+    var(--flap-edge) 0,
+    var(--flap-back) 10%,
+    var(--flap-light) 38%,
+    var(--flap-back) 70%,
+    var(--flap-under) 100%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -104,71 +59,64 @@
   }
 }
 
-/* ---- the toggle: a page corner with a dog-ear ---- */
+/* VerifAI-style switch: yellow (sun) left, green (leaf) right, sliding knob. */
 .theme-toggle {
-  --fold: 30px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: var(--header-h);
-  height: var(--header-h);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  overflow: hidden;
+  --knob: 1.4rem;
+  --pad: 3px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  flex: none;
+  width: 4.1rem;
+  height: calc(var(--knob) + var(--pad) * 2 + 2px);
+  padding: var(--pad);
+  border-radius: var(--radius-pill);
+  background: var(--ground-sunk);
+  border: var(--border-control) solid var(--rule);
+  color: var(--ink-muted);
   cursor: pointer;
-  color: inherit;
-  transition: --fold var(--dur-base) var(--ease-out);
+  overflow: hidden;
 }
-.theme-toggle__under,
-.theme-toggle__flap {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-/* The other theme showing through under the fold. */
-.theme-toggle__under {
-  background: var(--ink);
-  clip-path: polygon(calc(100% - var(--fold)) 0, 100% 0, 100% var(--fold));
-}
-/* The back of the folded page: the corner reflected across the fold line. */
-.theme-toggle__flap {
-  background: var(--ink-faint);
-  clip-path: polygon(calc(100% - var(--fold)) 0, 100% var(--fold), calc(100% - var(--fold)) var(--fold));
-}
-@media (hover: hover) {
-  .theme-toggle:hover {
-    --fold: 40px;
-  }
+.theme-toggle:hover {
+  border-color: var(--ink);
 }
 .theme-toggle:focus-visible {
-  --fold: 40px;
   outline: var(--focus-width) solid var(--focus-color);
-  outline-offset: calc(-1 * var(--space-1));
+  outline-offset: var(--focus-offset);
 }
-.theme-toggle:active,
-:root[data-peel] .theme-toggle {
-  --fold: 48px;
+.theme-toggle__icon {
+  position: relative;
+  z-index: 1;
+  width: 0.9rem;
+  height: 0.9rem;
+  pointer-events: none;
 }
-@media (min-width: 48rem) {
-  .theme-toggle {
-    --fold: 34px;
-  }
-  @media (hover: hover) {
-    .theme-toggle:hover {
-      --fold: 44px;
-    }
-  }
-  .theme-toggle:focus-visible {
-    --fold: 44px;
-  }
-  .theme-toggle:active,
-  :root[data-peel] .theme-toggle {
-    --fold: 54px;
-  }
+.theme-toggle__knob {
+  position: absolute;
+  z-index: 0;
+  top: var(--pad);
+  left: var(--pad);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
-@media (prefers-reduced-motion: reduce) {
-  .theme-toggle {
-    transition: none;
-  }
+:root[data-theme='green'] .theme-toggle__knob {
+  transform: translateX(calc(4.1rem - var(--knob) - var(--pad) * 2 - 3px));
+  background: var(--c-yellow);
+}
+:root[data-theme='yellow'] .theme-toggle__sun {
+  color: var(--ground);
+}
+:root[data-theme='yellow'] .theme-toggle__leaf {
+  color: var(--ink);
+}
+:root[data-theme='green'] .theme-toggle__sun {
+  color: var(--ink-muted);
+}
+:root[data-theme='green'] .theme-toggle__leaf {
+  color: var(--c-green);
 }

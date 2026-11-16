@@ -39,14 +39,16 @@
 
 .watermark {
   position: fixed;
-  inset: -25vmax;
+  inset: -20vmax;
   z-index: var(--z-watermark);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0.3em;
+  display: grid;
+  place-items: center;
   transform: rotate(-8deg);
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+.watermark__word {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-watermark);
@@ -54,12 +56,7 @@
   letter-spacing: var(--tracking-m);
   white-space: nowrap;
   color: var(--watermark-ink);
-  pointer-events: none;
-  user-select: none;
-  overflow: hidden;
-}
-.watermark > span:nth-child(even) {
-  transform: translateX(-2.75em);
+  text-transform: uppercase;
 }
 
 /* ---- Button ---- */

@@ -61,7 +61,7 @@ export function SearchBar({
             onChange={(event) => setCommunitySlug(event.target.value)}
           >
             {communities.map((c) => (
-              <option key={c.id} value={c.slug}>
+              <option key={c.id} value={c.slug} title={c.name}>
                 {c.name}
               </option>
             ))}

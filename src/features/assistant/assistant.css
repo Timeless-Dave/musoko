@@ -1,0 +1,84 @@
+.assistant-fab {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(var(--demo-strip-h, 3.25rem) + var(--space-4));
+  z-index: calc(var(--z-strip) - 1);
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  border: var(--border-control) solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--ground);
+  cursor: pointer;
+}
+.assistant-fab svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+.assistant-fab:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+.assistant-panel {
+  display: grid;
+  gap: var(--space-4);
+  min-height: 0;
+}
+.assistant-panel__note {
+  font-size: var(--text-meta);
+  color: var(--ink-muted);
+}
+.assistant-thread {
+  display: grid;
+  gap: var(--space-3);
+  max-height: min(50dvh, 22rem);
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+.assistant-bubble {
+  margin: 0;
+  max-width: 38rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  white-space: pre-wrap;
+  font-size: var(--text-meta);
+  line-height: 1.45;
+}
+.assistant-bubble--guide {
+  background: var(--ground-sunk);
+  justify-self: start;
+}
+.assistant-bubble--user {
+  background: var(--ink);
+  color: var(--ground);
+  justify-self: end;
+}
+.assistant-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.assistant-starter {
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: var(--rule-width) solid var(--rule);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  font: var(--weight-strong) 0.8125rem / 1.2 var(--font-text);
+  cursor: pointer;
+}
+.assistant-compose {
+  display: grid;
+  gap: var(--space-3);
+}
+@media (min-width: 48rem) {
+  .assistant-compose {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}

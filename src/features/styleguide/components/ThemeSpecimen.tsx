@@ -1,6 +1,5 @@
 'use client';
 
-import { copy } from '@/content/copy';
 import { ThemeToggle, useTheme } from '@/design-system/theme';
 import { Specimen } from './Spread';
 
@@ -17,7 +16,7 @@ export function ThemeSpecimen() {
       <div className="specimen">
         <h3 className="specimen__name">The corner</h3>
         <div className="theme-bar" data-tone="ground">
-          <ThemeToggle labels={copy.theme} />
+          <ThemeToggle />
         </div>
         <p className="theme-note">Switch the page theme with the corner at the top right. The page turns from that corner.</p>
         <p className="theme-note theme-note--strong" role="status">

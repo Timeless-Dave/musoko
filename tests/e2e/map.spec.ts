@@ -23,19 +23,13 @@ const previewEvents = (page: Page) =>
 const total = (events: Awaited<ReturnType<typeof previewEvents>>, targetId: string, surface: string) =>
   events.filter((e) => e.targetId === targetId && e.surface === surface).reduce((n, e) => n + e.count, 0);
 
-test('A11Y-2: the list is the default and no map code or tiles load until the map is opened', async ({ page }) => {
-  const requested: string[] = [];
-  page.on('request', (request) => requested.push(request.url()));
+test('A11Y-2: the map is the default on /map and the list is one tap away', async ({ page }) => {
   await page.goto('/map');
+  await expect(page.getByRole('tab', { name: 'Map' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('.maplibregl-map')).toBeVisible();
+  await page.getByRole('tab', { name: 'List' }).click();
   await expect(page.getByRole('tab', { name: 'List' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('heading', { name: 'Farmers markets', level: 2 })).toBeVisible();
-  await expect(page.locator('.maplibregl-map')).toHaveCount(0);
-  await page.waitForTimeout(500);
-  expect(requested.filter((url) => /maplibre|openfreemap/i.test(url))).toEqual([]);
-
-  await page.getByRole('tab', { name: 'Map' }).click();
-  await expect(page).toHaveURL(/view=map/);
-  await expect(page.locator('.maplibregl-map')).toBeVisible();
 });
 
 test('the list is the whole map in words, with a Demo mark on every place', async ({ page }) => {

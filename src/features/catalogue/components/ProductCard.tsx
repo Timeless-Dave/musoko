@@ -7,6 +7,7 @@ import { blurFor } from '@/content/image-credits';
 import { PhotoFrame } from '@/design-system/patterns';
 import { Button, MetaLine, StatusMark } from '@/design-system/primitives';
 import type { PublicProduct } from '@/domain/types';
+import { CompareToggle } from '@/features/compare';
 import { DemoMark } from '@/features/demo';
 import { formatDate, formatListingPrice, formatUnitPrice } from '@/lib/format';
 import { pickupSummary, quantityLine, statusDetail, STATUS_FILL } from '../format';
@@ -79,14 +80,17 @@ export function ProductCard({
         <span>{copy.product.updated(formatDate(product.availability.updatedAt))}</span>
         {product.isDemo ? <DemoMark /> : null}
       </MetaLine>
-      <Button
-        variant="link"
-        href={`/inquiry/new?product=${product.id}`}
-        className="product-card__contact"
-        aria-label={copy.inquiry.contactFarmerAbout(`${product.title}, ${product.farm.farmName}`)}
-      >
-        {copy.inquiry.contactFarmer}
-      </Button>
+      <div className="product-card__actions">
+        <CompareToggle productId={product.id} />
+        <Button
+          variant="link"
+          href={`/inquiry/new?product=${product.id}`}
+          className="product-card__contact"
+          aria-label={copy.inquiry.contactFarmerAbout(`${product.title}, ${product.farm.farmName}`)}
+        >
+          {copy.inquiry.contactFarmer}
+        </Button>
+      </div>
     </article>
   );
 }

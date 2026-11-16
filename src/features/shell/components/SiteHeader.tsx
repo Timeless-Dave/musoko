@@ -4,17 +4,27 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { copy } from '@/content/copy';
-import { Logo } from '@/design-system/brand/Logo';
+import { BrandWordmark } from '@/design-system/brand/BrandWordmark';
 import { ThemeToggle } from '@/design-system/theme';
+import { useCompareStore } from '@/features/compare';
+import { isNavActive } from '../nav-active';
 import { NAV } from '../nav';
+import { NavIcon } from '../NavIcon';
 
 function NavLinks({ pathname }: { pathname: string | null }) {
+  const compareCount = useCompareStore((s) => s.ids.length);
   return (
     <ul>
       {NAV.map((item) => (
         <li key={item.href}>
-          <Link href={item.href} aria-current={pathname?.startsWith(item.href) ? 'page' : undefined}>
+          <Link href={item.href} aria-current={isNavActive(pathname, item.href) ? 'page' : undefined}>
+            <NavIcon name={item.icon} />
             {item.label}
+            {item.href === '/compare' && compareCount > 0 ? (
+              <span className="site-nav__badge" aria-label={`${compareCount} listings in compare`}>
+                {compareCount}
+              </span>
+            ) : null}
           </Link>
         </li>
       ))}
@@ -22,7 +32,6 @@ function NavLinks({ pathname }: { pathname: string | null }) {
   );
 }
 
-/** Reads the path, so it renders inside Suspense and the rest of the header can be prerendered. */
 function CurrentNavLinks() {
   return <NavLinks pathname={usePathname()} />;
 }
@@ -30,7 +39,6 @@ function CurrentNavLinks() {
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
 
-  // A hairline appears under the header only once the page has scrolled.
   useEffect(() => {
     const sentinel = document.querySelector('[data-scroll-sentinel]');
     if (!sentinel) return;
@@ -40,19 +48,20 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className="site-header" data-tone="ground" data-scrolled={scrolled || undefined}>
+    <header className="site-header" data-tone="ground" data-scrolled={scrolled ? '' : undefined}>
       <div className="container site-header__bar">
         <Link href="/" className="site-header__brand" aria-label={`${copy.brand.name}, home`}>
-          <Logo size={32} className="site-header__mark" />
-          <span className="site-header__name">{copy.brand.name}</span>
+          <BrandWordmark logoSize={32} markClassName="site-header__mark" suffixClassName="site-header__name" />
         </Link>
         <nav className="site-nav" aria-label={copy.nav.label}>
           <Suspense fallback={<NavLinks pathname={null} />}>
             <CurrentNavLinks />
           </Suspense>
         </nav>
+        <div className="site-header__actions">
+          <ThemeToggle />
+        </div>
       </div>
-      <ThemeToggle labels={copy.theme} />
     </header>
   );
 }

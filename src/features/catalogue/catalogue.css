@@ -8,6 +8,7 @@
   background: var(--ground-raised);
   border: var(--border-control) solid var(--ink);
   border-radius: 1.25rem;
+  overflow: hidden;
 }
 .search-bar__field {
   display: grid;
@@ -76,15 +77,33 @@
 }
 @media (min-width: 48rem) {
   .search-bar {
-    grid-template-columns: minmax(0, 1.2fr) minmax(11.5rem, 1fr) auto;
-    align-items: center;
-    border-radius: var(--radius-pill);
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: stretch;
+    border-radius: var(--radius-panel);
+    padding: var(--space-2) var(--space-3);
   }
   .search-bar__field--near {
     border-top: 0;
     border-left: var(--rule-width) solid var(--rule);
     padding-left: var(--space-5);
+  }
+  .search-bar__submit {
+    grid-column: 1 / -1;
+    width: 100%;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 80rem) {
+  .search-bar {
+    grid-template-columns: minmax(0, 1.3fr) minmax(14rem, 0.9fr) auto;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  }
+  .search-bar__submit {
+    grid-column: auto;
+    width: auto;
+    align-self: center;
+    margin-inline: var(--space-1);
   }
 }
 
@@ -172,10 +191,15 @@
   gap: var(--space-4);
   margin-bottom: var(--space-5);
 }
+.shelf {
+  position: relative;
+}
 .shelf__title {
   font: var(--weight-display) var(--text-display-m) / var(--leading-display) var(--font-display);
   letter-spacing: var(--tracking-m);
   text-wrap: balance;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .shelf__more {
   flex: none;
@@ -184,15 +208,16 @@
 .shelf__row {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 72%;
+  grid-auto-columns: min(16.5rem, calc(100% - 2.5rem));
   gap: var(--space-4);
   margin: 0 calc(-1 * var(--gutter));
-  padding: 0 var(--gutter) var(--space-2);
+  padding: 0 var(--gutter) var(--space-3);
   list-style: none;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x proximity;
   scroll-padding-inline: var(--gutter);
-  scrollbar-width: none;
+  scrollbar-width: thin;
 }
 .shelf__row::-webkit-scrollbar {
   display: none;
@@ -200,25 +225,32 @@
 .shelf__row > li {
   scroll-snap-align: start;
   min-width: 0;
+  max-width: 16.5rem;
 }
 .shelf__row--3 {
   grid-auto-columns: 82%;
 }
 @media (min-width: 48rem) {
-  .shelf__row {
-    grid-auto-columns: calc((100% - 2 * var(--space-6)) / 3);
-    gap: var(--space-6);
-  }
+  .shelf__row,
   .shelf__row--3 {
-    grid-auto-columns: calc((100% - var(--space-6)) / 2);
+    grid-auto-flow: row;
+    grid-auto-columns: unset;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    max-width: none;
+  }
+  .shelf__row > li {
+    max-width: none;
   }
 }
 @media (min-width: 75rem) {
   .shelf__row {
-    grid-auto-columns: calc((100% - 3 * var(--space-6)) / 4);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .shelf__row--3 {
-    grid-auto-columns: calc((100% - 2 * var(--space-6)) / 3);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -266,6 +298,15 @@
 .product-card__title {
   font: var(--weight-display) 1.25rem / 1.2 var(--font-display);
   letter-spacing: var(--tracking-s);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.product-card:hover .product-card__title,
+.product-card:focus-within .product-card__title {
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }
 .product-card__title a,
 .farm-card__name a,
@@ -307,11 +348,16 @@
   border-top: var(--rule-width) solid var(--rule);
 }
 /* Above the whole-card link, so the card's own action stays a separate target. */
-.product-card__contact {
+.product-card__actions {
   position: relative;
   z-index: 1;
-  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
   margin-top: var(--space-1);
+}
+.product-card__compare,
+.product-card__contact {
   padding-block: var(--space-2);
   min-height: var(--tap);
 }

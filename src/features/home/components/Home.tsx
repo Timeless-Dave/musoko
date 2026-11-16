@@ -20,18 +20,22 @@ import {
   useSelectedCommunity,
 } from '@/features/catalogue';
 import { MarketRow } from '@/features/farmers-markets';
+import { useMounted } from '@/lib/useMounted';
 
 const HERO = '/images/farms/vegetable-rows.jpg';
 const HERO_INSET = '/images/farms/carrots-in-hands.jpg';
 
 export function Home() {
   const router = useRouter();
+  const mounted = useMounted();
   const { community } = useSelectedCommunity();
   const milesFrom = useMilesFrom(community);
   const { data: products } = usePublicProducts();
   const { data: farms } = usePublicFarms();
   const { data: markets } = usePublicMarkets();
   const town = community?.name ?? '';
+
+  const catalogueReady = mounted && products != null && farms != null && markets != null;
 
   const byDistance = useMemo(() => {
     const miles = (id: Parameters<typeof milesFrom>[0]) => milesFrom(id) ?? Number.MAX_SAFE_INTEGER;
@@ -101,7 +105,7 @@ export function Home() {
           title={copy.home.availableNear(town)}
           more={{ href: '/food', label: copy.home.seeAllFood }}
         >
-          {products
+          {catalogueReady
             ? byDistance.available.map((product, i) => (
                 <li key={product.id}>
                   <ProductCard product={product} miles={milesFrom(product.farm.communityId)} priority={i < 2} />
@@ -122,11 +126,17 @@ export function Home() {
           more={{ href: '/farmers', label: copy.home.seeAllFarmers }}
           columns={3}
         >
-          {byDistance.farms.map((farm) => (
-            <li key={farm.id}>
-              <FarmCard farm={farm} listings={listingCount(farm.id)} miles={milesFrom(farm.location.communityId)} />
-            </li>
-          ))}
+          {catalogueReady
+            ? byDistance.farms.map((farm) => (
+                <li key={farm.id}>
+                  <FarmCard farm={farm} listings={listingCount(farm.id)} miles={milesFrom(farm.location.communityId)} />
+                </li>
+              ))
+            : Array.from({ length: 3 }, (_, i) => (
+                <li key={i}>
+                  <ProductCardSkeleton />
+                </li>
+              ))}
         </Shelf>
       </Section>
 
@@ -158,15 +168,17 @@ export function Home() {
           </Button>
         </div>
         <ul className="market-list market-list--compact">
-          {byDistance.markets.map((market, i) => (
-            <li key={market.id}>
-              <MarketRow market={market} index={i} compact />
-            </li>
-          ))}
+          {catalogueReady
+            ? byDistance.markets.map((market, i) => (
+                <li key={market.id}>
+                  <MarketRow market={market} index={i} compact />
+                </li>
+              ))
+            : null}
         </ul>
       </Section>
 
-      {byDistance.coming.length ? (
+      {catalogueReady && byDistance.coming.length ? (
         <Section pad="tight" aria-labelledby="home-coming">
           <Shelf id="home-coming" title={copy.home.comingSoon}>
             {byDistance.coming.map((product) => (

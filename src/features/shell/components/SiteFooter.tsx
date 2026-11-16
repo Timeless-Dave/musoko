@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { copy } from '@/content/copy';
-import { Logo } from '@/design-system/brand/Logo';
+import { BrandWordmark } from '@/design-system/brand/BrandWordmark';
 import { Section } from '@/design-system/primitives';
 import { NAV } from '../nav';
 
@@ -10,8 +10,7 @@ export function SiteFooter() {
       <div className="site-footer__grid">
         <div>
           <p className="site-footer__brand">
-            <Logo size={36} />
-            <span>{copy.brand.name}</span>
+            <BrandWordmark logoSize={36} />
           </p>
           <p>{copy.brand.tagline}</p>
           <p>{copy.brand.initiative}</p>

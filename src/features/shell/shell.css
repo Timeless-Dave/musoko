@@ -18,26 +18,36 @@
 .site-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.05em;
   height: 100%;
   padding-inline-end: var(--space-2);
   color: inherit;
   text-decoration: none;
   border-radius: var(--radius-field);
 }
+.brand-wordmark__mark {
+  display: block;
+  flex: none;
+}
+.brand-wordmark__suffix {
+  font: var(--weight-display) 1.375rem / 1 var(--font-display);
+  letter-spacing: var(--tracking-m);
+  /* The sprout sits above the M cap; nudge the suffix to the mark’s visual centre. */
+  transform: translateY(0.14em);
+}
 .site-header__mark {
   width: 32px;
   height: 32px;
 }
 .site-header__name {
-  font: var(--weight-display) 1.375rem / 1 var(--font-display);
-  letter-spacing: var(--tracking-m);
+  font-size: inherit;
 }
 @media (min-width: 48rem) {
   .site-header__mark {
     width: 36px;
     height: 36px;
   }
+  .brand-wordmark__suffix,
   .site-header__name {
     font-size: 1.5rem;
   }
@@ -48,12 +58,26 @@
   height: auto;
 }
 .site-header__bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   height: var(--header-h);
-  gap: var(--space-6);
-  padding-right: calc(var(--header-h) + var(--space-2));
+  gap: var(--space-3);
+  align-items: center;
+}
+.site-header__actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-self: end;
+}
+.site-nav {
+  justify-self: center;
+  min-width: 0;
+  max-width: 100%;
 }
 .site-nav ul {
   display: flex;
+  justify-content: center;
   gap: var(--space-1);
   margin: 0;
   padding: 0;
@@ -62,7 +86,8 @@
 .site-nav a {
   display: inline-flex;
   align-items: center;
-  min-height: var(--tap);
+  gap: var(--space-2);
+  min-height: 2.5rem;
   padding-inline: var(--space-3);
   border-radius: var(--radius-pill);
   color: inherit;
@@ -75,15 +100,31 @@
   background: var(--ink);
   color: var(--ground);
 }
+.site-nav__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: var(--weight-display);
+  line-height: 1.4;
+  background: var(--ground);
+  color: var(--ink);
+}
+.site-nav a[aria-current='page'] .site-nav__badge {
+  background: var(--ground);
+  color: var(--ink);
+}
 @media (hover: hover) {
   .site-nav a:not([aria-current='page']):hover {
     background: var(--ground-sunk);
   }
 }
 /* Phones: the links sit on their own row under the brand and scroll sideways. */
-@media (max-width: 47.99rem) {
+@media (max-width: 64.99rem) {
   .site-header__bar {
-    flex-wrap: wrap;
+    grid-template-columns: auto auto;
     height: auto;
     min-height: var(--header-h);
     row-gap: 0;
@@ -91,10 +132,13 @@
   .site-header__brand {
     height: var(--header-h);
   }
+  .site-header__actions {
+    justify-self: end;
+  }
   .site-nav {
-    flex-basis: 100%;
+    grid-column: 1 / -1;
+    justify-self: stretch;
     margin-inline: calc(-1 * var(--gutter));
-    margin-right: calc(-1 * (var(--gutter) + var(--header-h) + var(--space-2)));
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -102,6 +146,9 @@
     display: none;
   }
   .site-nav ul {
+    justify-content: flex-start;
+    width: max-content;
+    min-width: 100%;
     padding: 0 var(--gutter) var(--space-2);
   }
   .site-nav a {
@@ -118,10 +165,11 @@
 .site-footer__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.05em;
   margin-bottom: var(--space-3);
-  font: var(--weight-display) 1.5rem / 1 var(--font-display);
-  letter-spacing: var(--tracking-m);
+}
+.site-footer__brand .brand-wordmark__suffix {
+  font-size: 1.5rem;
 }
 .site-footer__links {
   display: grid;
