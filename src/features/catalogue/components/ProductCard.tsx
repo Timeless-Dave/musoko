@@ -5,7 +5,7 @@ import { services } from '@/data';
 import { copy } from '@/content/copy';
 import { blurFor } from '@/content/image-credits';
 import { PhotoFrame } from '@/design-system/patterns';
-import { MetaLine, StatusMark } from '@/design-system/primitives';
+import { Button, MetaLine, StatusMark } from '@/design-system/primitives';
 import type { PublicProduct } from '@/domain/types';
 import { DemoMark } from '@/features/demo';
 import { formatDate, formatListingPrice, formatUnitPrice } from '@/lib/format';
@@ -79,6 +79,14 @@ export function ProductCard({
         <span>{copy.product.updated(formatDate(product.availability.updatedAt))}</span>
         {product.isDemo ? <DemoMark /> : null}
       </MetaLine>
+      <Button
+        variant="link"
+        href={`/inquiry/new?product=${product.id}`}
+        className="product-card__contact"
+        aria-label={copy.inquiry.contactFarmerAbout(`${product.title}, ${product.farm.farmName}`)}
+      >
+        {copy.inquiry.contactFarmer}
+      </Button>
     </article>
   );
 }

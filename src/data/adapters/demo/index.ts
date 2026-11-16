@@ -14,14 +14,16 @@ export { DEMO_SCHEMA_VERSION, DEMO_STORAGE_KEY } from './store';
 export function createDemoServices(options: { clock?: Clock; storage?: DemoStorage } = {}): Services {
   const clock: Clock = options.clock ?? { now: () => new Date() };
   const runtime = createDemoRuntime(clock, options.storage);
+  const notifications = createDemoNotifications(runtime);
+  const { runJobs, ...gateway } = createDemoGateway(runtime, notifications);
   return {
     mode: 'demo',
-    gateway: createDemoGateway(runtime),
+    gateway,
     auth: createDemoAuth(runtime),
-    notifications: createDemoNotifications(runtime),
+    notifications,
     map: createDemoMap(),
     images: createDemoImages(),
     clock,
-    demo: createDemoControls(runtime),
+    demo: createDemoControls(runtime, runJobs),
   };
 }

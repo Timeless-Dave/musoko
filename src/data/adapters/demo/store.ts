@@ -15,7 +15,16 @@ export const DEMO_STORAGE_KEY = 'musoko.demo.v1';
  * with a different version is replaced by a fresh seed and the visitor sees a
  * notice. Nothing is wiped silently.
  */
-export const DEMO_SCHEMA_VERSION = 3;
+export const DEMO_SCHEMA_VERSION = 4;
+
+/**
+ * One accepted inquiry from one browser tab, kept only to apply the hourly limit.
+ * The key is a random value the tab made up. It is never stored with an inquiry.
+ */
+export interface InquiryAttempt {
+  key: string;
+  at: IsoDateTime;
+}
 
 export interface DemoState {
   schemaVersion: number;
@@ -25,6 +34,8 @@ export interface DemoState {
   session: { role: UserRole };
   outbox: DemoOutboxMessage[];
   notice: DemoNotice | null;
+  /** Rate-limit bookkeeping for the inquiry form (INQ-6). */
+  inquiryAttempts: InquiryAttempt[];
 }
 
 export interface DemoStorage {
@@ -62,6 +73,7 @@ export function freshState(now: Date, role: UserRole = 'buyer', notice: DemoNoti
     session: { role },
     outbox: [],
     notice,
+    inquiryAttempts: [],
   };
 }
 
@@ -69,6 +81,7 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'obj
 
 function looksLikeDemoState(v: unknown): v is DemoState {
   if (!isRecord(v) || !isRecord(v.db) || !isRecord(v.session) || !Array.isArray(v.outbox)) return false;
+  if (!Array.isArray(v.inquiryAttempts)) return false;
   const roles = ['buyer', 'farmer', 'administrator'];
   if (typeof v.session.role !== 'string' || !roles.includes(v.session.role)) return false;
   for (const key of ['farmer_profiles', 'products', 'product_availability', 'communities', 'farm_private_locations']) {

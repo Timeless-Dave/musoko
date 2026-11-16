@@ -67,6 +67,9 @@ export function FarmProfile() {
               <span>{copy.farms.listings(listings.length)}</span>
               {farm.isDemo ? <DemoMark /> : null}
             </MetaLine>
+            <div className="farm-head__actions">
+              <Button href={`/inquiry/new?farm=${farm.slug}`}>{copy.inquiry.contactFarmer}</Button>
+            </div>
           </div>
           {photo ? (
             <PhotoFrame

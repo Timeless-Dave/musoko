@@ -1,0 +1,149 @@
+/* Inquiry form and the buyer's status page. Colours come from tokens only. */
+
+/* ---- Form ---- */
+.inquiry-form {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 36rem;
+  padding-block: var(--space-6) var(--space-12);
+}
+.inquiry-form__step {
+  display: grid;
+  gap: var(--space-1);
+  font: var(--weight-display) var(--text-display-s) / 1.15 var(--font-display);
+  letter-spacing: var(--tracking-s);
+}
+.inquiry-form__step:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-field);
+}
+.inquiry-form__count {
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+  letter-spacing: 0;
+}
+.inquiry-form__subject {
+  display: grid;
+  gap: var(--space-1);
+  padding-block: var(--space-3);
+  border-block: var(--rule-width) solid var(--rule);
+}
+.inquiry-form__subject strong {
+  font: var(--weight-display) 1.25rem / 1.2 var(--font-display);
+}
+.inquiry-form__fields {
+  display: grid;
+  gap: var(--space-6);
+}
+.inquiry-form__fields[hidden] {
+  display: none;
+}
+.inquiry-form__quantity {
+  display: grid;
+  gap: var(--space-2);
+}
+.inquiry-form__notice {
+  max-width: var(--measure);
+  font-weight: var(--weight-strong);
+}
+.inquiry-form__notice:empty {
+  display: none;
+}
+.inquiry-form__privacy,
+.inquiry-form__statement {
+  max-width: var(--measure);
+  font-size: var(--text-meta);
+}
+.inquiry-form__statement {
+  font-weight: var(--weight-strong);
+}
+.inquiry-form__error {
+  max-width: var(--measure);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-control) solid var(--ink);
+  border-radius: var(--radius-field);
+  font-weight: var(--weight-strong);
+}
+.inquiry-form__actions {
+  display: grid;
+  gap: var(--space-3);
+}
+/* Off-screen, not display: none, so a bot that fills every field still fills it. */
+.inquiry-form__trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (min-width: 32rem) {
+  .inquiry-form__actions {
+    grid-auto-flow: column;
+    justify-content: start;
+    grid-auto-columns: max-content;
+  }
+}
+
+/* ---- Status page ---- */
+.inquiry-status__head {
+  display: grid;
+  gap: var(--space-3);
+  padding-block: var(--space-4) var(--space-8);
+  justify-items: start;
+}
+.inquiry-status__title {
+  max-width: 20ch;
+  font: var(--weight-display) var(--text-display-l) / 1 var(--font-display);
+  letter-spacing: var(--tracking-l);
+  text-wrap: balance;
+}
+.inquiry-status__state {
+  font: var(--weight-display) var(--text-display-s) / 1.15 var(--font-display);
+}
+.inquiry-status__lead {
+  max-width: 38ch;
+  font-size: var(--text-lead);
+  line-height: 1.4;
+}
+.inquiry-status__grid {
+  display: grid;
+  gap: var(--space-10);
+}
+.inquiry-status__block {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.inquiry-status__block + .inquiry-status__block {
+  margin-top: var(--space-8);
+}
+.inquiry-status__block p {
+  max-width: var(--measure);
+}
+.inquiry-status__reply {
+  font-size: var(--text-lead);
+  font-weight: var(--weight-strong);
+}
+.inquiry-status__label {
+  font-weight: var(--weight-strong);
+}
+.inquiry-status__note {
+  font-size: var(--text-meta);
+}
+.inquiry-status__link {
+  display: grid;
+  gap: var(--space-3);
+}
+.inquiry-status__link .control {
+  font-size: var(--text-meta);
+}
+@media (min-width: 48rem) {
+  .inquiry-status__grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+  .inquiry-status__link {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

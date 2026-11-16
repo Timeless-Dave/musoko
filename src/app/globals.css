@@ -8,6 +8,7 @@
 @import '../features/catalogue/catalogue.css';
 @import '../features/map/map.css';
 @import '../features/home/home.css';
+@import '../features/inquiry/inquiry.css';
 @import '../features/styleguide/styleguide.css';
 
 /* Tailwind keeps its spacing scale and utilities; colours and breakpoints are Musoko's own. */

@@ -1,18 +1,25 @@
 import { confirmAvailability } from '@/domain/availability';
 import { buildPublicCatalogue } from '@/domain/privacy';
 import { matchProductType, scrubSearchTerms } from '@/domain/search';
+import type { JobEvent } from '@/domain/jobs';
 import { asId, type EventId, type PublicCatalogue } from '@/domain/types';
 import { newId } from '@/lib/ids';
 import type { Actor } from '../../ports/auth';
 import { GatewayError } from '../../ports/errors';
 import type { DataGateway } from '../../ports/gateway';
+import type { NotificationService } from '../../ports/notifications';
+import { createDemoInquiries } from './inquiries';
 import type { DemoRuntime } from './store';
 
 // Public reads go only through buildPublicCatalogue. This file never reads the
 // private location, private contact or buyer contact collections (a test checks).
 const copyOf = <T>(value: T): T => structuredClone(value);
 
-export function createDemoGateway(runtime: DemoRuntime): DataGateway {
+export function createDemoGateway(
+  runtime: DemoRuntime,
+  notifications: NotificationService,
+): DataGateway & { runJobs(): Promise<JobEvent[]> } {
+  const inquiries = createDemoInquiries(runtime, notifications);
   async function catalogue(): Promise<PublicCatalogue> {
     await runtime.ready();
     const { db } = runtime.read();
@@ -24,6 +31,7 @@ export function createDemoGateway(runtime: DemoRuntime): DataGateway {
   }
 
   return {
+    ...inquiries,
     async getSettings() {
       await runtime.ready();
       return copyOf(runtime.read().db.settings);

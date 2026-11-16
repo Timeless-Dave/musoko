@@ -14,6 +14,7 @@ import type {
   Settings,
 } from '@/domain/types';
 import type { Actor } from './auth';
+import type { InquiryGateway } from './inquiries';
 
 export interface PreviewOpenInput {
   targetKind: PreviewEvent['targetKind'];
@@ -26,7 +27,7 @@ export interface PreviewOpenInput {
  * Public methods return projection types or reference rows only. Privileged
  * methods take the acting user and check the role before returning anything.
  */
-export interface DataGateway {
+export interface DataGateway extends InquiryGateway {
   // ----- public -----
   getSettings(): Promise<Settings>;
   listRegions(): Promise<Region[]>;

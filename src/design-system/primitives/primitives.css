@@ -531,3 +531,100 @@
 .meta-line__dot {
   margin-inline: var(--space-2) var(--space-1);
 }
+
+/* ---- ChoiceGroup ---- */
+.choice-group {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.choice-group__legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-body);
+  font-weight: var(--weight-strong);
+}
+.choice-group__choices {
+  display: grid;
+}
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  padding: var(--space-3) var(--space-1);
+  border-top: var(--rule-width) solid var(--rule);
+  cursor: pointer;
+}
+.choice:last-child {
+  border-bottom: var(--rule-width) solid var(--rule);
+}
+.choice input {
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0.125rem 0 0;
+  accent-color: var(--ink);
+}
+.choice:has(input:checked) {
+  background: var(--ground-raised);
+}
+.choice:has(input:focus-visible) {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: -2px;
+  border-radius: var(--radius-field);
+}
+.choice__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.choice__label {
+  font-weight: var(--weight-strong);
+}
+.choice__detail {
+  font-size: var(--text-meta);
+  line-height: var(--leading-meta);
+}
+@media (hover: hover) {
+  .choice:hover {
+    background: var(--ground-raised);
+  }
+}
+/* chips: two or three plain words in a row, filled with ink when chosen */
+.choice-group--chips .choice-group__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.choice-group--chips .choice {
+  position: relative;
+  align-items: center;
+  padding-inline: var(--space-5);
+  border: var(--border-control) solid var(--ink-muted);
+  border-radius: var(--radius-field);
+}
+.choice-group--chips .choice:last-child {
+  border-bottom: var(--border-control) solid var(--ink-muted);
+}
+.choice-group--chips .choice input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.choice-group--chips .choice:has(input:checked) {
+  background: var(--ink);
+  color: var(--ground);
+  border-color: var(--ink);
+}
+@media (hover: hover) {
+  .choice-group--chips .choice:hover:not(:has(input:checked)) {
+    background: transparent;
+    border-color: var(--ink);
+  }
+}

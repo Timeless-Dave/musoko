@@ -83,6 +83,19 @@ const UNIT_PLURAL: Record<string, string> = {
   pack: 'packs',
 };
 
+/** The plural label for a count of this unit: "bunches", "lb", "" for each. */
+export function unitPlural(unit: string): string {
+  return UNIT_PLURAL[unit] ?? unit;
+}
+
+/** "about 20 lb" or "3 dozen". Null when the farmer entered no quantity. */
+export function statedAmount(product: PublicProduct): string | null {
+  const q = product.quantity;
+  if (!q) return null;
+  const amount = `${q.amount} ${unitPlural(q.unit)}`.trim();
+  return q.approximate ? `about ${amount}` : amount;
+}
+
 /** "About 20 lb available · confirmed 12 Nov". Null when the farmer entered no quantity. */
 export function quantityLine(product: PublicProduct): string | null {
   const q = product.quantity;

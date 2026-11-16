@@ -76,7 +76,7 @@ export function Button({
 
   if (href && !inactive) {
     return (
-      <Link href={href} ref={setRef} {...common}>
+      <Link href={href} ref={setRef} {...common} aria-label={rest['aria-label']}>
         {content}
       </Link>
     );

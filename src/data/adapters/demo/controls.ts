@@ -3,7 +3,7 @@ import type { DemoControls } from '../../ports/demo';
 import { sessionFor } from './auth';
 import type { DemoRuntime } from './store';
 
-export function createDemoControls(runtime: DemoRuntime): DemoControls {
+export function createDemoControls(runtime: DemoRuntime, runJobs: DemoControls['runScheduledJobs']): DemoControls {
   return {
     ready: () => runtime.ready(),
     reset: () => runtime.reset(),
@@ -33,6 +33,7 @@ export function createDemoControls(runtime: DemoRuntime): DemoControls {
       await runtime.ready();
       return runtime.read().outbox.map((m) => ({ ...m }));
     },
+    runScheduledJobs: runJobs,
     subscribe: (listener) => runtime.subscribe(listener),
   };
 }
