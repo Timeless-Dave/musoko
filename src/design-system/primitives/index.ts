@@ -2,6 +2,7 @@ export { Button, type ButtonProps } from './Button';
 export { Field, FieldFrame } from './Field';
 export { Select } from './Select';
 export { ChoiceGroup, type Choice } from './ChoiceGroup';
+export { Checkbox, CheckGroup } from './Checkbox';
 export { Dialog } from './Dialog';
 export { Sheet } from './Sheet';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';

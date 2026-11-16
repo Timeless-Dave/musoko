@@ -63,9 +63,14 @@ export function Home() {
             </h1>
             <p className="home-hero__lead">{copy.home.lead}</p>
             <SearchBar onSearch={(q) => router.push(q ? `/food?q=${encodeURIComponent(q)}` : '/food')} />
-            <Button variant="link" href="/farmers" className="home-hero__secondary">
-              {copy.home.exploreFarmers}
-            </Button>
+            <div className="home-hero__links">
+              <Button variant="link" href="/farmers" className="home-hero__secondary">
+                {copy.home.exploreFarmers}
+              </Button>
+              <Button variant="link" href="/join" className="home-hero__secondary">
+                {copy.home.joinAsFarmer}
+              </Button>
+            </div>
           </div>
           <div className="home-hero__photos" aria-hidden="true">
             <PhotoFrame

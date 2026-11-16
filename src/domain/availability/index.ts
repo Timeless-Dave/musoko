@@ -1,4 +1,4 @@
-import type { AvailabilityStatus, ProductAvailability, Settings } from '../types';
+import type { AvailabilityStatus, ProductAvailability, Settings, YearMonth } from '../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -63,5 +63,63 @@ export function confirmAvailability(
       updatedAt: stamp,
     },
     statusChanged: before !== 'available_now',
+  };
+}
+
+// ---------------------------------------------------------------- farmer changes (AVAIL-5)
+
+/**
+ * The months a farmer may choose for "Coming soon": this month and the next
+ * `horizon - 1`, as YYYY-MM strings in order.
+ */
+export function comingSoonMonths(now: Date, settings: Pick<Settings, 'comingSoonHorizonMonths'>): YearMonth[] {
+  const months: YearMonth[] = [];
+  for (let i = 0; i < settings.comingSoonHorizonMonths; i += 1) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + i, 1));
+    months.push(currentUtcMonth(d));
+  }
+  return months;
+}
+
+export function isValidComingSoonMonth(
+  month: string,
+  now: Date,
+  settings: Pick<Settings, 'comingSoonHorizonMonths'>,
+): boolean {
+  return comingSoonMonths(now, settings).includes(month);
+}
+
+/** The farmer says it will be ready in a month. Confirmation time is cleared: nothing is available yet. */
+export function markComingSoon(
+  availability: ProductAvailability,
+  expectedMonth: YearMonth,
+  now: Date,
+): { availability: ProductAvailability; statusChanged: boolean } {
+  return {
+    availability: {
+      ...availability,
+      status: 'coming_soon',
+      lastConfirmedAt: null,
+      expectedMonth,
+      updatedAt: now.toISOString(),
+    },
+    statusChanged: availability.status !== 'coming_soon',
+  };
+}
+
+/** The farmer has none right now. The listing stays, as "Availability unconfirmed". */
+export function markUnavailable(
+  availability: ProductAvailability,
+  now: Date,
+): { availability: ProductAvailability; statusChanged: boolean } {
+  return {
+    availability: {
+      ...availability,
+      status: 'unconfirmed',
+      lastConfirmedAt: null,
+      expectedMonth: null,
+      updatedAt: now.toISOString(),
+    },
+    statusChanged: availability.status !== 'unconfirmed',
   };
 }

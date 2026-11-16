@@ -1,4 +1,5 @@
-import type { BuyerInquiryView, InquiryRecord, InquiryRequestInput, InquirySignals } from '@/domain/inquiry';
+import type { BuyerInquiryView, InquiryRecord, InquiryRequestInput, InquirySignals, ReplyInput } from '@/domain/inquiry';
+import type { InquiryId, OutcomeKind } from '@/domain/types';
 import type { Actor } from './auth';
 
 export interface InquiryReceipt {
@@ -34,4 +35,23 @@ export interface InquiryGateway {
    * Newest first.
    */
   listInquiriesForActor(actor: Actor): Promise<InquiryRecord[]>;
+
+  /**
+   * INQ-3. The farmer's one-tap reply to an inquiry sent to their own farm, with an
+   * optional short note. Moves the inquiry to "responded" and tells the buyer by the
+   * channel they chose, through the notification port. "Contact me" releases the
+   * farmer's phone to that buyer's status page only when `confirmSharePhone` is true
+   * and the farmer has a phone on file (INQ-4); no other reply does.
+   *
+   * Rejects with GatewayError: `forbidden`, `not_found`, `invalid` (`message`,
+   * `confirmSharePhone`, or `form` when the inquiry is already closed).
+   */
+  replyToInquiry(actor: Actor, inquiryId: InquiryId, reply: ReplyInput): Promise<InquiryRecord>;
+
+  /**
+   * OUT-1, OUT-2. The farmer's answer to "Did this inquiry result in a sale or new
+   * customer relationship?". No amount, no payment detail. Closes a responded
+   * inquiry (STAT-5) unless the answer is "Still discussing".
+   */
+  recordInquiryOutcome(actor: Actor, inquiryId: InquiryId, outcome: OutcomeKind): Promise<InquiryRecord>;
 }

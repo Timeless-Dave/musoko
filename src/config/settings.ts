@@ -3,6 +3,8 @@ import type { Settings } from '@/domain/types';
 /** The only place these numbers are written. Everything else reads db.settings or gateway.getSettings(). */
 export const defaultSettings: Settings = {
   availabilityWindowDays: 14,
+  comingSoonHorizonMonths: 12,
+  farmerNumbersWindowDays: 30,
   inquiryReminderHours: 48,
   inquiryAutoCloseDays: 14,
   outcomePromptDays: 3,

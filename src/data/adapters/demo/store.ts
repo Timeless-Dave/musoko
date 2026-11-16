@@ -1,7 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
 import { defaultSettings } from '@/config/settings';
-import type { Database, IsoDateTime, UserRole } from '@/domain/types';
+import type { Database, IsoDateTime, UserId, UserRole } from '@/domain/types';
 import { buildSeed } from '../../seed';
 import { GatewayError } from '../../ports/errors';
 import type { Clock } from '../../ports/clock';
@@ -15,7 +15,7 @@ export const DEMO_STORAGE_KEY = 'musoko.demo.v1';
  * with a different version is replaced by a fresh seed and the visitor sees a
  * notice. Nothing is wiped silently.
  */
-export const DEMO_SCHEMA_VERSION = 4;
+export const DEMO_SCHEMA_VERSION = 5;
 
 /**
  * One accepted inquiry from one browser tab, kept only to apply the hourly limit.
@@ -31,7 +31,11 @@ export interface DemoState {
   /** The "now" the seed offsets were resolved against. */
   seededAt: IsoDateTime;
   db: Database;
-  session: { role: UserRole };
+  /**
+   * `farmerUserId` is the farmer account this browser registered. Switching to the
+   * farmer role uses it; null means the seeded demo farmer.
+   */
+  session: { role: UserRole; farmerUserId: UserId | null };
   outbox: DemoOutboxMessage[];
   notice: DemoNotice | null;
   /** Rate-limit bookkeeping for the inquiry form (INQ-6). */
@@ -70,7 +74,7 @@ export function freshState(now: Date, role: UserRole = 'buyer', notice: DemoNoti
     schemaVersion: DEMO_SCHEMA_VERSION,
     seededAt: now.toISOString(),
     db: buildSeed(now, defaultSettings),
-    session: { role },
+    session: { role, farmerUserId: null },
     outbox: [],
     notice,
     inquiryAttempts: [],
@@ -84,6 +88,7 @@ function looksLikeDemoState(v: unknown): v is DemoState {
   if (!Array.isArray(v.inquiryAttempts)) return false;
   const roles = ['buyer', 'farmer', 'administrator'];
   if (typeof v.session.role !== 'string' || !roles.includes(v.session.role)) return false;
+  if (v.session.farmerUserId !== null && typeof v.session.farmerUserId !== 'string') return false;
   for (const key of ['farmer_profiles', 'products', 'product_availability', 'communities', 'farm_private_locations']) {
     if (!Array.isArray(v.db[key])) return false;
   }

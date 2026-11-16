@@ -113,3 +113,9 @@
     gap: var(--space-16);
   }
 }
+
+.home-hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-6);
+}

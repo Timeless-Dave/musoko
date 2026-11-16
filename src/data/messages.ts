@@ -1,5 +1,5 @@
 import { copy } from '@/content/copy';
-import type { InquiryBuyerContact, FarmerPrivateContact, Inquiry } from '@/domain/types';
+import type { InquiryBuyerContact, FarmerPrivateContact, Inquiry, ReplyKind } from '@/domain/types';
 import type { OutboundNotification } from './ports/notifications';
 
 /**
@@ -89,6 +89,27 @@ export function buyerClosedNotice(args: {
     ...to,
     template: 'inquiry_closed',
     body: copy.notify.buyerClosed(args.farmName, statusLink(args.inquiry.statusToken)),
+    relatedInquiryId: args.inquiry.id,
+  };
+}
+
+/**
+ * Tells the buyer, by the channel they chose, that the farmer replied. The note
+ * and the farmer's phone are not in it: they live on the private status page,
+ * and the phone is there only for a confirmed "Contact me" (INQ-4).
+ */
+export function buyerReplyNotice(args: {
+  inquiry: Inquiry;
+  buyer: InquiryBuyerContact | null;
+  farmName: string;
+  kind: ReplyKind;
+}): OutboundNotification | null {
+  const to = buyerChannel(args.inquiry, args.buyer);
+  if (!to) return null;
+  return {
+    ...to,
+    template: 'inquiry_reply',
+    body: copy.notify.buyerReply(args.farmName, args.kind, statusLink(args.inquiry.statusToken)),
     relatedInquiryId: args.inquiry.id,
   };
 }

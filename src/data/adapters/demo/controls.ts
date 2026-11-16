@@ -8,7 +8,7 @@ export function createDemoControls(runtime: DemoRuntime, runJobs: DemoControls['
     ready: () => runtime.ready(),
     reset: () => runtime.reset(),
     async switchRole(role) {
-      await runtime.commit((s) => ({ ...s, session: { role } }));
+      await runtime.commit((s) => ({ ...s, session: { ...s.session, role } }));
       return sessionFor(runtime.read());
     },
     async getTableCounts() {

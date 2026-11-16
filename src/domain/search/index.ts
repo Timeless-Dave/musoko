@@ -38,3 +38,12 @@ export function matchProductType(terms: string, productTypes: readonly ProductTy
   }
   return best;
 }
+
+/**
+ * True when free text carries a phone number, an email address or a street
+ * address. Used to keep contact details out of places they do not belong, such
+ * as a reply note that any reader of the status page could see.
+ */
+export function containsContactDetail(text: string): boolean {
+  return new RegExp(EMAIL.source, 'i').test(text) || new RegExp(PHONE.source).test(text) || new RegExp(STREET.source, 'i').test(text);
+}

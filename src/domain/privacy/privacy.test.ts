@@ -28,7 +28,7 @@ import { findPrivateLeaks } from './leaks';
 const now = new Date('2026-11-15T12:00:00.000Z');
 const iso = (d: string) => `${d}T10:00:00.000Z`;
 const settings: Settings = {
-  availabilityWindowDays: 14, inquiryReminderHours: 48, inquiryAutoCloseDays: 14, outcomePromptDays: 3,
+  availabilityWindowDays: 14, comingSoonHorizonMonths: 12, farmerNumbersWindowDays: 30, inquiryReminderHours: 48, inquiryAutoCloseDays: 14, outcomePromptDays: 3,
   searchEventRetentionDays: 90, buyerContactRetentionDays: 30, minimumSampleSize: 5,
   searchTermMaxLength: 60, inquiryRateLimitPerHour: 5, inquiryMinFillSeconds: 3,
   scheduledJobsIntervalMinutes: 5,

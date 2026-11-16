@@ -50,3 +50,19 @@ export function formatListingPrice(
 export function formatDate(value: string | Date): string {
   return format(typeof value === 'string' ? new Date(value) : value, 'd MMM yyyy');
 }
+
+/**
+ * "4.50" or "$4" to whole cents. Null for anything that is not a plain amount
+ * with at most two decimals, so a typo is caught rather than rounded.
+ */
+export function parseDollars(text: string): number | null {
+  const cleaned = text.trim().replace(/^\$/, '').replace(/,/g, '');
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+  return Math.round(Number(cleaned) * 100);
+}
+
+/** 450 to "4.50", 1500 to "15", for filling a price field. */
+export function centsToDollarsText(cents: number): string {
+  const dollars = cents / 100;
+  return Number.isInteger(dollars) ? String(dollars) : dollars.toFixed(2);
+}

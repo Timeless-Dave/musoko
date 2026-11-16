@@ -1,0 +1,1 @@
+export { FarmerRegistration } from './FarmerRegistration';

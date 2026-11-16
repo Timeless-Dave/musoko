@@ -144,7 +144,7 @@
 }
 @media (min-width: 48rem) {
   .site-footer__grid {
-    grid-template-columns: 1.2fr 0.8fr 1.2fr;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 1.2fr;
     gap: var(--space-12);
   }
 }

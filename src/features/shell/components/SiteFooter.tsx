@@ -28,6 +28,16 @@ export function SiteFooter() {
             </li>
           </ul>
         </nav>
+        <nav aria-label={copy.footer.farmers}>
+          <ul className="site-footer__links">
+            <li>
+              <Link href="/join">{copy.footer.join}</Link>
+            </li>
+            <li>
+              <Link href="/dashboard">{copy.footer.dashboard}</Link>
+            </li>
+          </ul>
+        </nav>
         <p className="site-footer__statement">{copy.transaction.statement}</p>
       </div>
     </Section>

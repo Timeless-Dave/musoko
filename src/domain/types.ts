@@ -237,6 +237,10 @@ export interface AggregateCount {
 // ---------- settings ----------
 export interface Settings {
   availabilityWindowDays: number;
+  /** How many months ahead a farmer can set "Coming soon". */
+  comingSoonHorizonMonths: number;
+  /** How far back the farmer's own numbers look. */
+  farmerNumbersWindowDays: number;
   inquiryReminderHours: number;
   inquiryAutoCloseDays: number;
   outcomePromptDays: number;

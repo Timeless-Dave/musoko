@@ -1,9 +1,15 @@
 import { buildPublicCatalogue } from '@/domain/privacy';
 import {
   buildInquiry,
+  buildReply,
+  canRecordOutcome,
   checkInquiryAbuse,
+  inquiryAfterReply,
+  inquiryAfterRecordedOutcome,
   inquiryRequestSchema,
+  outcomeInputSchema,
   pruneAttempts,
+  replyInputSchema,
   resolveInquiryTargets,
   toBuyerInquiryView,
   toInquiryRecord,
@@ -15,6 +21,7 @@ import { newId, newToken } from '@/lib/ids';
 import {
   buyerClosedNotice,
   buyerConfirmationNotice,
+  buyerReplyNotice,
   farmerReceivedNotice,
   farmerReminderNotice,
 } from '../../messages';
@@ -22,6 +29,7 @@ import type { Actor } from '../../ports/auth';
 import { GatewayError } from '../../ports/errors';
 import type { InquiryGateway } from '../../ports/inquiries';
 import type { NotificationService, OutboundNotification } from '../../ports/notifications';
+import { invalid, requireOwnFarm } from './access';
 import type { DemoRuntime } from './store';
 
 /**
@@ -154,6 +162,70 @@ export function createDemoInquiries(
         throw new GatewayError('forbidden', 'Only the farmer an inquiry was sent to, or an administrator, can see it.');
       }
       return copyOf([...rows].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((i) => toInquiryRecord(db, i)));
+    },
+
+    async replyToInquiry(actor: Actor, inquiryId, input) {
+      await runtime.ready();
+      const parsed = replyInputSchema.safeParse(input);
+      if (!parsed.success) throw invalid('That reply is not valid.', fieldErrors(parsed.error.issues));
+      const now = runtime.clock.now();
+      let after: Database | null = null;
+
+      await runtime.commit((state) => {
+        const farm = requireOwnFarm(state.db, actor);
+        const inquiry = state.db.inquiries.find((i) => i.id === inquiryId);
+        if (!inquiry) throw new GatewayError('not_found', 'That inquiry does not exist.');
+        if (inquiry.farmerProfileId !== farm.id) throw new GatewayError('forbidden', 'That inquiry was not sent to your farm.');
+        const phone = state.db.farmer_private_contacts.find((c) => c.farmerProfileId === farm.id)?.phone ?? null;
+        const built = buildReply({ id: newId('reply'), inquiry, values: parsed.data, farmerPhone: phone, now });
+        if (!built.ok) throw invalid('That reply could not be sent.', built.fields);
+        const db: Database = {
+          ...state.db,
+          inquiry_replies: [...state.db.inquiry_replies, built.reply],
+          inquiries: state.db.inquiries.map((i) => (i.id === inquiryId ? inquiryAfterReply(i, now) : i)),
+        };
+        after = db;
+        return { ...state, db };
+      });
+
+      // Stored. Now the buyer hears by the channel they chose, through the port. The note and the phone stay on the private page.
+      const db = after!;
+      const inquiry = db.inquiries.find((i) => i.id === inquiryId)!;
+      await deliver(
+        notifications,
+        buyerReplyNotice({ inquiry, buyer: buyerContact(db, inquiry.id), farmName: farmName(db, inquiry), kind: parsed.data.kind }),
+      );
+      return copyOf(toInquiryRecord(db, inquiry));
+    },
+
+    async recordInquiryOutcome(actor: Actor, inquiryId, outcome) {
+      await runtime.ready();
+      const parsed = outcomeInputSchema.safeParse({ outcome });
+      if (!parsed.success) throw invalid('That answer is not valid.', { outcome: 'invalid' });
+      const now = runtime.clock.now();
+      let after: Database | null = null;
+
+      await runtime.commit((state) => {
+        const farm = requireOwnFarm(state.db, actor);
+        const inquiry = state.db.inquiries.find((i) => i.id === inquiryId);
+        if (!inquiry) throw new GatewayError('not_found', 'That inquiry does not exist.');
+        if (inquiry.farmerProfileId !== farm.id) throw new GatewayError('forbidden', 'That inquiry was not sent to your farm.');
+        const existing = state.db.inquiry_outcomes.find((o) => o.inquiryId === inquiryId) ?? null;
+        if (!canRecordOutcome(inquiry, existing)) {
+          throw invalid('An outcome cannot be recorded for this inquiry.', { form: 'outcome_not_allowed' });
+        }
+        // Only the answer and the day. No amount, no payment detail.
+        const row = { inquiryId, outcome: parsed.data.outcome, recordedAt: now.toISOString() };
+        const db: Database = {
+          ...state.db,
+          inquiry_outcomes: [...state.db.inquiry_outcomes.filter((o) => o.inquiryId !== inquiryId), row],
+          inquiries: state.db.inquiries.map((i) => (i.id === inquiryId ? inquiryAfterRecordedOutcome(i, parsed.data.outcome, now) : i)),
+        };
+        after = db;
+        return { ...state, db };
+      });
+      const db = after!;
+      return copyOf(toInquiryRecord(db, db.inquiries.find((i) => i.id === inquiryId)!));
     },
 
     async runJobs() {

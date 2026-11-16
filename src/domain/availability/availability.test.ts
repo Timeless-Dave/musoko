@@ -3,8 +3,12 @@ import { asId, type ProductAvailability, type ProductId } from '../types';
 import {
   availabilityRank,
   compareByAvailability,
+  comingSoonMonths,
   confirmAvailability,
   effectiveStatus,
+  isValidComingSoonMonth,
+  markComingSoon,
+  markUnavailable,
 } from './index';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -103,5 +107,43 @@ describe('confirmAvailability', () => {
     const copy = structuredClone(input);
     confirmAvailability(input, now, settings);
     expect(input).toEqual(copy);
+  });
+});
+
+describe('farmer changes (AVAIL-5)', () => {
+  const settingsH = { comingSoonHorizonMonths: 12 };
+
+  it('lists the months a farmer can choose, starting this month, from settings', () => {
+    const months = comingSoonMonths(now, settingsH);
+    expect(months).toHaveLength(12);
+    expect(months[0]).toBe('2026-11');
+    expect(months[1]).toBe('2026-12');
+    expect(months[2]).toBe('2027-01');
+    expect(months[11]).toBe('2027-10');
+    expect(comingSoonMonths(now, { comingSoonHorizonMonths: 3 })).toEqual(['2026-11', '2026-12', '2027-01']);
+  });
+  it('accepts only those months', () => {
+    expect(isValidComingSoonMonth('2027-06', now, settingsH)).toBe(true);
+    expect(isValidComingSoonMonth('2026-10', now, settingsH)).toBe(false);
+    expect(isValidComingSoonMonth('2028-01', now, settingsH)).toBe(false);
+    expect(isValidComingSoonMonth('June', now, settingsH)).toBe(false);
+  });
+  it('marks coming soon with a month and no confirmation time', () => {
+    const r = markComingSoon(avail(), '2027-06', now);
+    expect(r.availability).toMatchObject({ status: 'coming_soon', expectedMonth: '2027-06', lastConfirmedAt: null });
+    expect(r.statusChanged).toBe(true);
+    expect(effectiveStatus(r.availability, now, settings)).toBe('coming_soon');
+  });
+  it('marks a listing as having none right now', () => {
+    const r = markUnavailable(avail(), now);
+    expect(r.availability).toMatchObject({ status: 'unconfirmed', lastConfirmedAt: null, expectedMonth: null });
+    expect(effectiveStatus(r.availability, now, settings)).toBe('unconfirmed');
+    expect(markUnavailable(r.availability, now).statusChanged).toBe(false);
+  });
+  it('still available moves a coming-soon listing to available now', () => {
+    const coming = markComingSoon(avail(), '2027-06', now).availability;
+    const r = confirmAvailability(coming, now, settings);
+    expect(r.availability).toMatchObject({ status: 'available_now', expectedMonth: null, lastConfirmedAt: now.toISOString() });
+    expect(r.statusChanged).toBe(true);
   });
 });
