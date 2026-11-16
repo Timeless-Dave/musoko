@@ -11,6 +11,7 @@ import { Button, MetaLine, StatusMark } from '@/design-system/primitives';
 import { EmptyState, SkeletonBar, SkeletonRegion } from '@/design-system/patterns';
 import { useActor, useSession } from '@/features/auth';
 import { DemoMark, ResetDemoData } from '@/features/demo';
+import { useMounted } from '@/lib/useMounted';
 import { formatDate, formatListingPrice, formatUnitPrice } from '@/lib/format';
 
 /** The demo farmer owns this farm in the seed. Public data only is read here. */
@@ -113,8 +114,11 @@ function DemoData() {
     queryFn: () => services.gateway.listPublicProducts(),
   });
 
-  const isFarmer = session?.role === 'farmer';
-  const listings = products.data?.filter((p) => p.farm.id === DEMO_FARMER_FARM_ID);
+  // Held back until hydration is done: the session may already be cached by the demo strip.
+  const mounted = useMounted();
+  const isFarmer = mounted && session?.role === 'farmer';
+  const countData = mounted ? counts.data : undefined;
+  const listings = mounted ? products.data?.filter((p) => p.farm.id === DEMO_FARMER_FARM_ID) : undefined;
   const failed = counts.isError || products.isError;
 
   if (failed) {
@@ -127,9 +131,9 @@ function DemoData() {
     <div className="demo-data">
       <div className="specimen">
         <h3 className="specimen__name">Table counts</h3>
-        {counts.data ? (
+        {countData ? (
           <ul className="ledger">
-            {Object.entries(counts.data).map(([table, count]) => (
+            {Object.entries(countData).map(([table, count]) => (
               <li className="ledger__row" key={table} data-testid={`count-${table}`}>
                 <span>{table}</span>
                 <span className="ledger__count">{count}</span>

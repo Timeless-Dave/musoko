@@ -34,8 +34,15 @@ export function RoleSwitcher({ layout }: { layout: 'inline' | 'stacked' }) {
   }
 
   return (
-    <fieldset className={cn('role-switcher', `role-switcher--${layout}`)} aria-busy={pending ? true : undefined}>
-      <legend className="role-switcher__legend">{copy.demo.roleLabel}</legend>
+    <div
+      role="group"
+      aria-labelledby={`${name}-legend`}
+      className={cn('role-switcher', `role-switcher--${layout}`)}
+      aria-busy={pending ? true : undefined}
+    >
+      <span className="role-switcher__legend" id={`${name}-legend`}>
+        {copy.demo.roleLabel}
+      </span>
       <div className="role-switcher__options">
         {ROLES.map((role) => (
           <label className="role-switcher__option" key={role}>
@@ -56,6 +63,6 @@ export function RoleSwitcher({ layout }: { layout: 'inline' | 'stacked' }) {
           {copy.demo.roleFailed}
         </p>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
