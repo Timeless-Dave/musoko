@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { copy } from '@/content/copy';
-import { blurFor } from '@/content/image-credits';
-import { PhotoFrame } from '@/design-system/patterns';
+import { PhotoCycle } from '@/design-system/patterns';
 import { MetaLine } from '@/design-system/primitives';
 import type { PublicFarm } from '@/domain/types';
 import { DemoMark } from '@/features/demo';
@@ -20,24 +19,26 @@ export function FarmCard({
   miles?: number | null;
   sizes?: string;
 }) {
-  const photo = farm.photos[0];
+  const photos = farm.photos.map((p) => p.src);
   const href = `/farmers/${farm.slug}`;
   return (
     <article className="farm-card">
-      <Link href={href} className="farm-card__photo" tabIndex={-1} aria-hidden="true">
-        {photo ? (
-          <PhotoFrame ratio="3:2" src={photo.src} alt="" sizes={sizes} blurDataURL={blurFor(photo.src)} />
-        ) : (
-          <div className="farm-card__no-photo" />
-        )}
-      </Link>
+      <div className="farm-card__media">
+        <Link href={href} className="farm-card__photo" tabIndex={-1} aria-hidden="true">
+          {photos.length ? (
+            <PhotoCycle ratio="3:2" srcs={photos} sizes={sizes} />
+          ) : (
+            <div className="farm-card__no-photo" />
+          )}
+        </Link>
+        {farm.intro ? <p className="farm-card__intro">{farm.intro}</p> : null}
+      </div>
       <h3 className="farm-card__name">
         <Link href={href}>{farm.farmName}</Link>
       </h3>
       <p className="farm-card__place">
         {farm.farmerName} · {farm.location.town}
       </p>
-      <p className="farm-card__intro">{farm.intro}</p>
       <MetaLine>
         <span>{copy.claims.listed}</span>
         {listings != null ? <span>{copy.farms.listings(listings)}</span> : null}

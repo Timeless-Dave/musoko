@@ -25,6 +25,23 @@ export const CATEGORY_PHOTO: Record<ProductCategory, string> = {
   other: '/images/produce/honey.jpg',
 };
 
+/** Extra photographs of the same listing type, when we have them. */
+const TYPE_EXTRAS: Record<string, readonly string[]> = {
+  eggs: ['/images/produce/eggs-carton.jpg', '/images/farms/hens-on-pasture.jpg'],
+  honey: ['/images/farms/beehives.jpg'],
+  milk: ['/images/farms/dairy-herd.jpg', '/images/produce/fresh-cheese.jpg'],
+  'whole-chicken': ['/images/farms/hens-on-pasture.jpg'],
+  'ground-beef': ['/images/farms/cattle-at-fence.jpg'],
+  'culinary-herbs': ['/images/farms/kitchen-garden.jpg'],
+};
+
+export function listingPhotos(product: PublicProduct): { src: string; focus?: 'center' | 'left' | 'right' | 'top' }[] {
+  const primary = product.photo?.src;
+  if (!primary) return [];
+  const extras = (TYPE_EXTRAS[product.productType.slug] ?? []).filter((src) => src !== primary);
+  return [{ src: primary, focus: 'center' }, { src: primary, focus: 'left' }, { src: primary, focus: 'right' }, ...extras.map((src) => ({ src }))];
+}
+
 export const STATUS_FILL = { available_now: 'full', coming_soon: 'half', unconfirmed: 'hollow' } as const;
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

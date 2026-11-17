@@ -19,11 +19,34 @@ export function AssistantFab() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [lines, setLines] = useState<Line[]>([{ role: 'guide', text: copy.assistant.welcome }]);
+  const [tone, setTone] = useState<'ground' | 'inverse'>('ground');
   const end = useRef<HTMLDivElement>(null);
+  const fab = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' });
   }, [lines, open]);
+
+  useEffect(() => {
+    const button = fab.current;
+    if (!button) return;
+    const read = () => {
+      const box = button.getBoundingClientRect();
+      const x = box.left + box.width / 2;
+      const y = box.top + box.height / 2;
+      const stack = document.elementsFromPoint(x, y);
+      const section = stack.find((el) => el instanceof HTMLElement && el.hasAttribute('data-tone') && el !== button);
+      const next = section instanceof HTMLElement && section.getAttribute('data-tone') === 'inverse' ? 'inverse' : 'ground';
+      setTone(next);
+    };
+    read();
+    window.addEventListener('scroll', read, { passive: true });
+    window.addEventListener('resize', read);
+    return () => {
+      window.removeEventListener('scroll', read);
+      window.removeEventListener('resize', read);
+    };
+  }, []);
 
   const ask = (question: string) => {
     const q = question.trim();
@@ -35,7 +58,14 @@ export function AssistantFab() {
 
   return (
     <>
-      <button type="button" className="assistant-fab" aria-label={copy.assistant.label} onClick={() => setOpen(true)}>
+      <button
+        ref={fab}
+        type="button"
+        className="assistant-fab"
+        data-tone={tone}
+        aria-label={copy.assistant.label}
+        onClick={() => setOpen(true)}
+      >
         <Logo size={28} />
       </button>
       <Sheet open={open} onOpenChange={setOpen} title={copy.assistant.title} closeLabel={copy.assistant.close}>

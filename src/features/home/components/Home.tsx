@@ -7,7 +7,6 @@ import { blurFor } from '@/content/image-credits';
 import { PhotoFrame } from '@/design-system/patterns';
 import { Button, Section } from '@/design-system/primitives';
 import {
-  CategoryRail,
   FarmCard,
   ProductCard,
   ProductCardSkeleton,
@@ -21,9 +20,8 @@ import {
 } from '@/features/catalogue';
 import { MarketRow } from '@/features/farmers-markets';
 import { useMounted } from '@/lib/useMounted';
-
-const HERO = '/images/farms/vegetable-rows.jpg';
-const HERO_INSET = '/images/farms/carrots-in-hands.jpg';
+import { HeroPhotos } from './HeroPhotos';
+import { HowItWorks } from './HowItWorks';
 
 export function Home() {
   const router = useRouter();
@@ -76,27 +74,8 @@ export function Home() {
               </Button>
             </div>
           </div>
-          <div className="home-hero__photos" aria-hidden="true">
-            <PhotoFrame
-              ratio="4:3"
-              src={HERO}
-              alt=""
-              sizes="(min-width: 75rem) 36rem, 45vw"
-              priority
-              blurDataURL={blurFor(HERO)}
-              className="home-hero__photo"
-            />
-            <PhotoFrame
-              ratio="1:1"
-              src={HERO_INSET}
-              alt=""
-              sizes="12rem"
-              blurDataURL={blurFor(HERO_INSET)}
-              className="home-hero__inset"
-            />
-          </div>
+          <HeroPhotos />
         </div>
-        <CategoryRail hrefFor={(category) => (category ? `/food?category=${category}` : '/food')} />
       </Section>
 
       <Section pad="tight" aria-labelledby="home-available">
@@ -141,21 +120,7 @@ export function Home() {
       </Section>
 
       <Section tone="inverse" aria-labelledby="home-how">
-        <h2 id="home-how" className="display-l">
-          {copy.home.howTitle}
-        </h2>
-        <ol className="home-how">
-          {copy.home.how.map((step, i) => (
-            <li key={step.title}>
-              <span className="home-how__number" aria-hidden="true">
-                {i + 1}
-              </span>
-              <h3 className="home-how__title">{step.title}</h3>
-              <p>{step.body}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="home-how__statement">{copy.transaction.statement}</p>
+        <HowItWorks />
       </Section>
 
       <Section pad="tight" aria-labelledby="home-markets">
@@ -192,14 +157,32 @@ export function Home() {
 
       <Section pad="tight" className="home-notes">
         <div className="home-notes__grid">
-          <div>
-            <h2 className="display-s">{copy.home.compareTitle}</h2>
-            <p>{copy.home.compareBody}</p>
-          </div>
-          <div>
-            <h2 className="display-s">{copy.home.laterTitle}</h2>
-            <p>{copy.home.laterBody}</p>
-          </div>
+          <article className="home-notes__card" tabIndex={0}>
+            <PhotoFrame
+              ratio="16:9"
+              src="/images/markets/fruit-stall.jpg"
+              alt=""
+              sizes="(min-width: 48rem) 40vw, 100vw"
+              blurDataURL={blurFor('/images/markets/fruit-stall.jpg')}
+            />
+            <div className="home-notes__reveal">
+              <h2 className="display-s">{copy.home.compareTitle}</h2>
+              <p>{copy.home.compareBody}</p>
+            </div>
+          </article>
+          <article className="home-notes__card" tabIndex={0}>
+            <PhotoFrame
+              ratio="16:9"
+              src="/images/farms/ploughed-field.jpg"
+              alt=""
+              sizes="(min-width: 48rem) 40vw, 100vw"
+              blurDataURL={blurFor('/images/farms/ploughed-field.jpg')}
+            />
+            <div className="home-notes__reveal">
+              <h2 className="display-s">{copy.home.laterTitle}</h2>
+              <p>{copy.home.laterBody}</p>
+            </div>
+          </article>
         </div>
       </Section>
     </>

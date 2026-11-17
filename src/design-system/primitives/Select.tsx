@@ -1,11 +1,28 @@
 'use client';
 
-import { useId, type ComponentProps, type Ref } from 'react';
-import { CaretDown } from '@phosphor-icons/react';
-import { cn } from '@/lib/cn';
-import { FieldFrame } from './Field';
+import {
+  Children,
+  isValidElement,
+  useState,
+  type ChangeEvent,
+  type ComponentProps,
+  type OptionHTMLAttributes,
+  type ReactNode,
+  type Ref,
+} from 'react';
+import { Listbox, type ListOption } from './Listbox';
 
-/** A native select, so phones get their own picker. Options are plain text. */
+function optionsOf(children: ReactNode): ListOption[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (!isValidElement(child) || child.type !== 'option') return [];
+    const props = child.props as OptionHTMLAttributes<HTMLOptionElement>;
+    const value = props.value == null ? '' : String(props.value);
+    const label = typeof props.children === 'string' ? props.children : value;
+    return [{ value, label }];
+  });
+}
+
+/** Custom listbox with the old native-select API, so existing forms stay as they are. */
 export function Select({
   label,
   optionalLabel,
@@ -13,8 +30,10 @@ export function Select({
   error,
   className,
   children,
-  ref,
-  ...rest
+  value,
+  defaultValue,
+  onChange,
+  disabled,
 }: {
   label: string;
   optionalLabel?: string;
@@ -22,25 +41,26 @@ export function Select({
   error?: string;
   ref?: Ref<HTMLSelectElement>;
 } & Omit<ComponentProps<'select'>, 'ref'>) {
-  const autoId = useId();
-  const id = rest.id ?? autoId;
+  const options = optionsOf(children);
+  const controlled = value !== undefined;
+  const [inner, setInner] = useState(String(defaultValue ?? options[0]?.value ?? ''));
+  const current = controlled ? String(value) : inner;
   return (
-    <FieldFrame id={id} label={label} optionalLabel={optionalLabel} hint={hint} error={error}>
-      {({ describedBy }) => (
-        <div className="select">
-          <select
-            {...rest}
-            ref={ref}
-            id={id}
-            className={cn('control', 'control--select', className)}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={describedBy}
-          >
-            {children}
-          </select>
-          <CaretDown className="select__caret" size={20} weight="bold" aria-hidden="true" />
-        </div>
-      )}
-    </FieldFrame>
+    <Listbox
+      label={label}
+      optionalLabel={optionalLabel}
+      hint={hint}
+      error={error}
+      value={current}
+      disabled={disabled}
+      className={className}
+      searchable={options.length > 6}
+      options={options}
+      onValueChange={(next) => {
+        if (!controlled) setInner(next);
+        const event = { target: { value: next }, currentTarget: { value: next } } as ChangeEvent<HTMLSelectElement>;
+        onChange?.(event);
+      }}
+    />
   );
 }

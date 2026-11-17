@@ -3,13 +3,9 @@
 import { useId, useState, type FormEvent } from 'react';
 import { MagnifyingGlass, MapPin } from '@phosphor-icons/react';
 import { copy } from '@/content/copy';
+import { Listbox } from '@/design-system/primitives';
 import { useSelectedCommunity } from '../hooks';
 
-/**
- * Search and town in one bar: the first thing on the homepage and the top of
- * the marketplace. The town is a choice from a list, never typed and never
- * read from the device.
- */
 export function SearchBar({
   initialQuery = '',
   onSearch,
@@ -50,22 +46,17 @@ export function SearchBar({
         </div>
       </div>
       <div className="search-bar__field search-bar__field--near">
-        <label htmlFor={`${id}-near`} className="search-bar__label">
-          {copy.search.near}
-        </label>
+        <span className="search-bar__label">{copy.search.near}</span>
         <div className="search-bar__control">
-          <MapPin size={22} weight="bold" aria-hidden="true" />
-          <select
-            id={`${id}-near`}
+          <Listbox
+            compact
+            searchable
+            leading={<MapPin size={22} weight="bold" aria-hidden="true" />}
+            label={copy.search.near}
             value={community?.slug ?? ''}
-            onChange={(event) => setCommunitySlug(event.target.value)}
-          >
-            {communities.map((c) => (
-              <option key={c.id} value={c.slug} title={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            onValueChange={setCommunitySlug}
+            options={communities.map((c) => ({ value: c.slug, label: c.name, hint: c.county }))}
+          />
         </div>
       </div>
       <button type="submit" className="search-bar__submit">

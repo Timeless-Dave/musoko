@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { services } from '@/data';
 import { copy } from '@/content/copy';
-import { blurFor } from '@/content/image-credits';
-import { PhotoFrame } from '@/design-system/patterns';
-import { Button, MetaLine, StatusMark } from '@/design-system/primitives';
+import { PhotoCycle } from '@/design-system/patterns';
+import { Button, MetaLine, Tag } from '@/design-system/primitives';
 import type { PublicProduct } from '@/domain/types';
 import { CompareToggle } from '@/features/compare';
 import { DemoMark } from '@/features/demo';
 import { formatDate, formatListingPrice, formatUnitPrice } from '@/lib/format';
-import { pickupSummary, quantityLine, statusDetail, STATUS_FILL } from '../format';
+import { useMounted } from '@/lib/useMounted';
+import { listingPhotos, pickupSummary, quantityLine, statusDetail } from '../format';
 
 /**
  * The photograph, then the three answers in order: what it is and who grows it,
@@ -27,35 +27,26 @@ export function ProductCard({
   sizes?: string;
   priority?: boolean;
 }) {
-  const now = services.clock.now();
-  const detail = statusDetail(product, now);
+  const mounted = useMounted();
+  const detail = mounted ? statusDetail(product, services.clock.now()) : null;
   const pickup = pickupSummary(product.pickupOptions);
   const quantity = quantityLine(product);
   const href = `/farmers/${product.farm.slug}#${product.id}`;
+  const photos = listingPhotos(product);
 
   return (
     <article className="product-card">
       <Link href={href} className="product-card__photo" tabIndex={-1} aria-hidden="true">
-        {product.photo ? (
-          <PhotoFrame
-            ratio="4:3"
-            src={product.photo.src}
-            alt=""
-            sizes={sizes}
-            priority={priority}
-            blurDataURL={blurFor(product.photo.src)}
-          />
+        {photos.length ? (
+          <PhotoCycle ratio="4:3" srcs={photos} sizes={sizes} priority={priority} />
         ) : (
           <div className="product-card__no-photo" />
         )}
-      </Link>
-      <p className="product-card__status">
-        <StatusMark fill={STATUS_FILL[product.availability.status]} />
-        <span>
-          {copy.availability[product.availability.status]}
-          {detail ? <span className="product-card__status-detail"> · {detail}</span> : null}
+        <span className="product-card__tag">
+          <Tag>{copy.availability[product.availability.status]}</Tag>
         </span>
-      </p>
+      </Link>
+      {detail ? <span className="visually-hidden">{detail}</span> : null}
       <h3 className="product-card__title">
         <Link href={href}>{product.title}</Link>
       </h3>
