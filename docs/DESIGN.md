@@ -81,6 +81,8 @@ These are the marks of generated design. None of them ship.
 
 Decided by the owner on 2026-11-15: one theme is yellow, the other is green. They are the same design with the logo's two colours swapped.
 
+Softened by the owner on 2026-11-16: the saturated logo pair felt too strong as full-page grounds. The theme yellow is now a cream-tinted off-white (`#f6f0e2`; wheat cream `#f3e6bf` was too cream, plain off-white `#f7f5ee` slightly too white) and the theme green a deep forest green (`#22402b`); leaf is `#5e8a45`. The logo vector keeps its own colours; these are the interface grounds.
+
 ```css
 :root {
   --c-yellow: #f2b415;  /* logo leaf yellow, by eye */

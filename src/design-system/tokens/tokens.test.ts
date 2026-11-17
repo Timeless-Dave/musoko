@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -124,7 +124,7 @@ describe('colour keywords', () => {
   it('only tokens.css names a colour keyword', () => {
     const offenders: string[] = [];
     for (const file of walk(SRC)) {
-      const rel = relative(SRC, file);
+      const rel = relative(SRC, file).split(sep).join('/');
       if (rel === 'design-system/tokens/tokens.css') continue;
       readFileSync(file, 'utf8')
         .split('\n')
