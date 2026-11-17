@@ -40,6 +40,35 @@ export function PhotoCycle({
   const photos: PhotoShot[] = srcs
     .map((item) => (typeof item === 'string' ? { src: item } : item))
     .filter((item) => item.src);
+  const signature = photos.map((p) => `${p.src}:${p.focus ?? 'c'}`).join('|');
+  return (
+    <PhotoCycleInner
+      key={signature}
+      photos={photos}
+      ratio={ratio}
+      sizes={sizes}
+      className={className}
+      priority={priority}
+      interval={interval}
+    />
+  );
+}
+
+function PhotoCycleInner({
+  photos,
+  ratio,
+  sizes,
+  className,
+  priority,
+  interval,
+}: {
+  photos: PhotoShot[];
+  ratio: keyof typeof RATIO;
+  sizes: string;
+  className?: string;
+  priority?: boolean;
+  interval: number;
+}) {
   const [index, setIndex] = useState(0);
   const pauseUntil = useRef(0);
 
@@ -79,10 +108,14 @@ export function PhotoCycle({
   }
 
   return (
-    <div className={`photo-cycle ${className ?? ''}`} style={{ aspectRatio: RATIO[ratio] }}>
+    <div
+      className={`photo-cycle ${className ?? ''}`}
+      style={{ aspectRatio: RATIO[ratio] }}
+      data-photo-count={photos.length}
+    >
       {photos.map((shot, i) => (
         <PhotoFrame
-          key={`${shot.src}-${shot.focus ?? 'center'}-${i}`}
+          key={`${shot.src}-${shot.focus ?? 'center'}`}
           ratio={ratio}
           src={shot.src}
           alt=""

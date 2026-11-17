@@ -1,5 +1,5 @@
 import { confirmAvailability } from '@/domain/availability';
-import { buildPublicCatalogue } from '@/domain/privacy';
+import { buildPublicCatalogue, isPubliclyVisible } from '@/domain/privacy';
 import { matchProductType, scrubSearchTerms } from '@/domain/search';
 import type { JobEvent } from '@/domain/jobs';
 import { asId, type EventId, type PublicCatalogue } from '@/domain/types';
@@ -95,7 +95,11 @@ export function createDemoGateway(
       const exists =
         targetKind === 'farmers_market'
           ? db.farmers_markets.some((m) => m.id === targetId && m.moderationStatus === 'visible')
-          : db.pickup_locations.some((l) => l.id === targetId && l.moderationStatus === 'visible');
+          : targetKind === 'pickup_location'
+            ? db.pickup_locations.some((l) => l.id === targetId && l.moderationStatus === 'visible')
+            : targetKind === 'farm'
+              ? db.farmer_profiles.some((f) => f.id === targetId && isPubliclyVisible(f))
+              : db.products.some((p) => p.id === targetId && p.moderationStatus === 'visible');
       if (!exists) throw new GatewayError('not_found', 'That place is not listed.');
 
       const day = runtime.clock.now().toISOString().slice(0, 10);

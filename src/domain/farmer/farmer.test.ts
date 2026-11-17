@@ -265,6 +265,10 @@ describe('the farmer’s own numbers', () => {
     const n = farmerNumbers(db, farm, now, { farmerNumbersWindowDays: 30, availabilityWindowDays: 14 });
     expect(n.outcomes).toEqual({ recorded: 1, sale: 1, new_potential_customer: 0, no: 0, still_discussing: 0 });
   });
+  it('counts anonymous card and profile opens in the window', () => {
+    const n = farmerNumbers(db, farm, now, { farmerNumbersWindowDays: 30, availabilityWindowDays: 14 });
+    expect(n.views).toEqual({ farmProfile: 0, listingCards: 0, contactClicks: 0 });
+  });
   it('has no typical time when nothing was answered', () => {
     const empty = { ...db, inquiries: [inq(1, {})] } as Database;
     expect(farmerNumbers(empty, farm, now, { farmerNumbersWindowDays: 30, availabilityWindowDays: 14 }).replies.medianHours).toBeNull();

@@ -39,7 +39,14 @@ export function listingPhotos(product: PublicProduct): { src: string; focus?: 'c
   const primary = product.photo?.src;
   if (!primary) return [];
   const extras = (TYPE_EXTRAS[product.productType.slug] ?? []).filter((src) => src !== primary);
-  return [{ src: primary, focus: 'center' }, { src: primary, focus: 'left' }, { src: primary, focus: 'right' }, ...extras.map((src) => ({ src }))];
+  const seen = new Set<string>();
+  const shots: { src: string; focus?: 'center' }[] = [];
+  for (const src of [primary, ...extras]) {
+    if (seen.has(src)) continue;
+    seen.add(src);
+    shots.push({ src, focus: 'center' });
+  }
+  return shots;
 }
 
 export const STATUS_FILL = { available_now: 'full', coming_soon: 'half', unconfirmed: 'hollow' } as const;

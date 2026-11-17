@@ -9,6 +9,7 @@ import type {
   FarmerProfileId,
   OutcomeKind,
   Product,
+  ProductId,
   ProductAvailability,
   ProductQuantity,
   ProductType,
@@ -99,6 +100,8 @@ export interface FarmerNumbers {
   inquiries: { total: number; recent: number; awaiting: number; responded: number; closed: number; closedUnanswered: number };
   replies: { answered: number; medianHours: number | null };
   listings: { total: number; availableNow: number; comingSoon: number; unconfirmed: number };
+  /** Anonymous opens of the farm profile and its listing cards, counted in the window. */
+  views: { farmProfile: number; listingCards: number; contactClicks: number };
   outcomes: Record<OutcomeKind, number> & { recorded: number };
 }
 
@@ -124,6 +127,21 @@ export function farmerNumbers(
   const outcomes = db.inquiry_outcomes.filter((o) => inquiries.some((i) => i.id === o.inquiryId));
   const listings = toOwnListings(db, farmId, now).filter((l) => l.product.moderationStatus === 'visible');
   const count = (kind: OutcomeKind) => outcomes.filter((o) => o.outcome === kind).length;
+  const productIds = new Set<ProductId>(listings.map((l) => l.product.id));
+  const sinceDay = new Date(since).toISOString().slice(0, 10);
+  const inWindow = (day: string) => day >= sinceDay;
+  const previews = db.preview_events ?? [];
+  const sumPreviews = (match: (e: (typeof previews)[number]) => boolean) =>
+    previews.filter((e) => inWindow(e.day) && match(e)).reduce((n, e) => n + e.count, 0);
+  const farmProfile = sumPreviews((e) => e.targetKind === 'farm' && e.targetId === farmId);
+  const listingCards = sumPreviews(
+    (e) => e.targetKind === 'product' && productIds.has(e.targetId as ProductId) && e.surface !== 'inquiry',
+  );
+  const contactClicks = sumPreviews(
+    (e) =>
+      (e.targetKind === 'product' && productIds.has(e.targetId as ProductId) && e.surface === 'inquiry') ||
+      (e.targetKind === 'farm' && e.targetId === farmId && e.surface === 'inquiry'),
+  );
 
   return {
     windowDays: settings.farmerNumbersWindowDays,
@@ -145,6 +163,7 @@ export function farmerNumbers(
       comingSoon: listings.filter((l) => l.status === 'coming_soon').length,
       unconfirmed: listings.filter((l) => l.status === 'unconfirmed').length,
     },
+    views: { farmProfile, listingCards, contactClicks },
     outcomes: {
       recorded: outcomes.length,
       sale: count('sale'),

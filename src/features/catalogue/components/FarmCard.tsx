@@ -6,6 +6,7 @@ import { PhotoCycle } from '@/design-system/patterns';
 import { MetaLine } from '@/design-system/primitives';
 import type { PublicFarm } from '@/domain/types';
 import { DemoMark } from '@/features/demo';
+import { recordPreviewOpen } from '../recordPreview';
 
 /**
  * A farm as a marketplace store card: the land, the farm's name, where it is
@@ -29,20 +30,24 @@ export function FarmCard({
   const place = [farm.location.town, miles != null ? copy.product.away(miles) : null, listings != null ? copy.farms.listings(listings) : null]
     .filter(Boolean)
     .join(' · ');
+  const trackCard = () => recordPreviewOpen({ targetKind: 'farm', targetId: farm.id, surface: 'card' });
   return (
     <article className="farm-card">
       <div className="farm-card__media">
-        <Link href={href} className="farm-card__photo" tabIndex={-1} aria-hidden="true">
+        <div className="farm-card__photo">
           {photos.length ? (
             <PhotoCycle ratio="16:9" srcs={photos} sizes={sizes} />
           ) : (
             <div className="farm-card__no-photo" />
           )}
-        </Link>
+          <Link href={href} className="farm-card__photo-link" tabIndex={-1} aria-hidden="true" onClick={trackCard} />
+        </div>
         {farm.intro ? <p className="farm-card__intro">{farm.intro}</p> : null}
       </div>
       <h3 className="farm-card__name">
-        <Link href={href}>{farm.farmName}</Link>
+        <Link href={href} onClick={trackCard}>
+          {farm.farmName}
+        </Link>
       </h3>
       <p className="farm-card__place">{place}</p>
       <div className="farm-card__foot">

@@ -87,10 +87,39 @@ export interface ScopeMetrics {
   mostOpenedPlaces: Suppressed<PlaceCount[]>;
 }
 
+/** Anonymous discovery clicks from cards, profiles and contact (DATA-4). Not small-sample suppressed. */
+export interface DiscoveryOpens {
+  farmProfiles: number;
+  farmCards: number;
+  listingCards: number;
+  contactClicks: number;
+  placePreviews: number;
+}
+
+export function discoveryOpens(db: Database): DiscoveryOpens {
+  const tally: DiscoveryOpens = {
+    farmProfiles: 0,
+    farmCards: 0,
+    listingCards: 0,
+    contactClicks: 0,
+    placePreviews: 0,
+  };
+  for (const p of db.preview_events) {
+    if (p.targetKind === 'farm' && p.surface === 'profile') tally.farmProfiles += p.count;
+    else if (p.targetKind === 'farm' && p.surface === 'card') tally.farmCards += p.count;
+    else if (p.targetKind === 'farm' && p.surface === 'inquiry') tally.contactClicks += p.count;
+    else if (p.targetKind === 'product' && p.surface === 'card') tally.listingCards += p.count;
+    else if (p.targetKind === 'product' && p.surface === 'inquiry') tally.contactClicks += p.count;
+    else if (p.targetKind === 'farmers_market' || p.targetKind === 'pickup_location') tally.placePreviews += p.count;
+  }
+  return tally;
+}
+
 export interface PilotMetrics {
   /** The availability window the "confirmed" figures use, so the page can say it. */
   availabilityWindowDays: number;
   minimumSampleSize: number;
+  discovery: DiscoveryOpens;
   overall: ScopeMetrics;
   /** Communities with any farm, search or inquiry, by name. */
   communities: ScopeMetrics[];
@@ -184,7 +213,9 @@ function scopeMetrics(
       count: (opened.get(key)?.count ?? 0) + count,
     });
   };
-  for (const p of db.preview_events) addOpen(p.targetKind, p.targetId, p.count);
+  for (const p of db.preview_events) {
+    if (p.targetKind === 'farmers_market' || p.targetKind === 'pickup_location') addOpen(p.targetKind, p.targetId, p.count);
+  }
   for (const a of db.aggregate_counts) {
     if (a.metric !== 'preview_opens') continue;
     if (a.marketId !== null) addOpen('farmers_market', a.marketId, a.count);
@@ -240,6 +271,7 @@ export function buildPilotMetrics(db: Database, now: Date, settings: Settings): 
   return {
     availabilityWindowDays: settings.availabilityWindowDays,
     minimumSampleSize: settings.minimumSampleSize,
+    discovery: discoveryOpens(db),
     overall: scopeMetrics(db, now, settings, null, ''),
     communities,
   };
