@@ -5,11 +5,22 @@ import { expect, test } from '@playwright/test';
  * IDs refer to docs/ACCEPTANCE.md.
  */
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('musoko.welcome.v1', 'buyer');
+    } catch {
+      /* ignore */
+    }
+  });
+});
+
 test('homepage answers what, how much and where without a click', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('searchbox', { name: 'What local food are you looking for?' })).toBeVisible();
-  await expect(page.getByRole('combobox', { name: 'Near' })).toHaveValue('helena-west-helena');
-  const shelf = page.getByRole('list', { name: /Available now near Helena-West Helena/ });
+  await expect(page.getByRole('button', { name: /Your town: Helena-West Helena/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: /Available now near Helena-West Helena/ })).toBeVisible();
+  const shelf = page.locator('#home-available-row');
   const first = shelf.getByRole('article').first();
   await expect(first).toContainText('Available now');
   await expect(first).toContainText('$');
@@ -57,13 +68,14 @@ test('PRICE-1 and PRICE-3: unit price shown where it is reliable and nowhere els
 
 test('search and filters live in the URL and narrow the list', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('searchbox').fill('eggs');
-  await page.getByRole('button', { name: 'Find local food' }).click();
+  const search = page.getByRole('searchbox', { name: 'What local food are you looking for?' });
+  await search.fill('eggs');
+  await search.press('Enter');
   await expect(page).toHaveURL(/\/food\?q=eggs/);
   const cards = page.getByRole('article');
   await expect(cards.first()).toContainText(/eggs/i);
   await page.reload();
-  await expect(page.getByRole('searchbox')).toHaveValue('eggs');
+  await expect(page.getByRole('searchbox', { name: 'What local food are you looking for?' })).toHaveValue('eggs');
   await page.goto('/food?q=zzzz');
   await expect(page.getByText('No listings match.')).toBeVisible();
 });

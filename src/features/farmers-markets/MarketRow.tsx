@@ -10,7 +10,7 @@ import { scheduleLines } from '@/features/catalogue';
 import { DemoMark } from '@/features/demo';
 
 /** General market photographs. They illustrate a market, not this market. */
-const MARKET_PHOTOS = [
+export const MARKET_PHOTOS = [
   { src: '/images/markets/crates-of-greens.jpg', alt: 'Crates of cabbages, herbs, aubergines and cucumbers at a market.' },
   { src: '/images/markets/produce-close.jpg', alt: 'Radishes, limes and other produce piled on a market stall.' },
   { src: '/images/markets/vegetable-crates.jpg', alt: 'Green crates of peppers, leeks, cauliflower and tomatoes at a market.' },
