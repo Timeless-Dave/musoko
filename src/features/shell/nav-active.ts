@@ -7,5 +7,8 @@ export function isNavActive(pathname: string | null, href: string): boolean {
   if (href === '/farmers') {
     return pathname.startsWith('/farmers/') && !pathname.startsWith('/farmers-markets');
   }
+  if (href === '/compare') return pathname.startsWith('/compare');
+  if (href === '/admin') return pathname === '/admin' || pathname.startsWith('/admin/');
+  if (href === '/dashboard') return pathname === '/dashboard' || pathname.startsWith('/dashboard/');
   return pathname.startsWith(`${href}/`);
 }

@@ -9,6 +9,7 @@ export type NavIconName =
   | 'compare'
   | 'join'
   | 'dashboard'
+  | 'admin'
   | 'info'
   | 'camera';
 
@@ -44,13 +45,11 @@ export const SIDEBAR: readonly { label?: string; items: readonly NavItem[] }[] =
     items: [
       { href: '/join', label: copy.shell.join, icon: 'join' },
       { href: '/dashboard', label: copy.shell.dashboard, icon: 'dashboard' },
+      { href: '/admin', label: copy.shell.admin, icon: 'admin' },
     ],
   },
   {
     label: copy.shell.about,
-    items: [
-      { href: '/#how-it-works', label: copy.shell.how, icon: 'info' },
-      { href: '/credits', label: copy.shell.credits, icon: 'camera' },
-    ],
+    items: [{ href: '/#how-it-works', label: copy.shell.how, icon: 'info' }],
   },
 ];

@@ -37,9 +37,19 @@
   border-radius: var(--radius-field);
 }
 .admin-nav a[aria-current='page'] {
-  text-decoration: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 8px;
+  background: var(--ink);
+  color: var(--ground);
+  text-decoration: none;
+}
+.admin-nav--mobile {
+  display: block;
+  margin: 0 calc(-1 * var(--gutter)) var(--space-4);
+  padding: 0 var(--gutter) var(--space-2);
+}
+@media (min-width: 64rem) {
+  .admin-nav--mobile {
+    display: none;
+  }
 }
 @media (hover: hover) {
   .admin-nav a:hover {

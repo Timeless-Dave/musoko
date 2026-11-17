@@ -139,6 +139,8 @@ export const copy = {
     delivery: 'Farm delivery',
     scrollBack: 'Scroll back',
     scrollForward: 'Scroll forward',
+    publicSite: 'Public site',
+    admin: 'Administration',
   },
   categories: {
     vegetables: 'Vegetables',

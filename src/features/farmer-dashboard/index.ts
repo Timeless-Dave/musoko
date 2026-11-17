@@ -1,4 +1,5 @@
 export { DashboardShell } from './DashboardShell';
+export { DashboardAside, DashboardMobileNav, DashboardSidebar } from './DashboardSidebar';
 export { Today } from './Today';
 export { ListingsPage } from './Listings';
 export { ListingForm, EditListing } from './ListingForm';
