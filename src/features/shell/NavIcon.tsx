@@ -1,7 +1,10 @@
+'use client';
+
 import {
   ArrowsLeftRight,
   Basket,
   Camera,
+  GearSix,
   House,
   Info,
   MapTrifold,
@@ -21,6 +24,7 @@ const MAP = {
   compare: ArrowsLeftRight,
   join: Plant,
   dashboard: SquaresFour,
+  admin: GearSix,
   info: Info,
   camera: Camera,
 } as const;

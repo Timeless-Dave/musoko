@@ -22,9 +22,6 @@ export function SiteFooter() {
                 <Link href={item.href}>{item.label}</Link>
               </li>
             ))}
-            <li>
-              <Link href="/credits">{copy.nav.credits}</Link>
-            </li>
           </ul>
         </nav>
         <div>

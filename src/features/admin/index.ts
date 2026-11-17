@@ -1,4 +1,5 @@
 export { AdminShell } from './AdminShell';
+export { AdminAside, AdminMobileNav, AdminSidebar } from './AdminSidebar';
 export { OverviewPage } from './Overview';
 export { RegistrationsPage } from './Registrations';
 export { FarmsPage } from './Farms';
