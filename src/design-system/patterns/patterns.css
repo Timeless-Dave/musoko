@@ -132,6 +132,27 @@
   }
 }
 
+.photo-cycle {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: var(--ground-sunk);
+}
+.photo-cycle__frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 700ms var(--ease-out);
+}
+.photo-cycle__frame.is-on {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-cycle__frame {
+    transition: none;
+  }
+}
+
 /* ---- Skeleton ---- */
 .skeleton-bar {
   display: block;

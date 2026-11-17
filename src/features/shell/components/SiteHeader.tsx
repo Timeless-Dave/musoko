@@ -10,6 +10,7 @@ import { useCompareStore } from '@/features/compare';
 import { isNavActive } from '../nav-active';
 import { NAV } from '../nav';
 import { NavIcon } from '../NavIcon';
+import { FoodMenu } from '../FoodMenu';
 
 function NavLinks({ pathname }: { pathname: string | null }) {
   const compareCount = useCompareStore((s) => s.ids.length);
@@ -17,15 +18,19 @@ function NavLinks({ pathname }: { pathname: string | null }) {
     <ul>
       {NAV.map((item) => (
         <li key={item.href}>
-          <Link href={item.href} aria-current={isNavActive(pathname, item.href) ? 'page' : undefined}>
-            <NavIcon name={item.icon} />
-            {item.label}
-            {item.href === '/compare' && compareCount > 0 ? (
-              <span className="site-nav__badge" aria-label={`${compareCount} listings in compare`}>
-                {compareCount}
-              </span>
-            ) : null}
-          </Link>
+          {item.href === '/food' ? (
+            <FoodMenu pathname={pathname} />
+          ) : (
+            <Link href={item.href} aria-current={isNavActive(pathname, item.href) ? 'page' : undefined}>
+              <NavIcon name={item.icon} />
+              {item.label}
+              {item.href === '/compare' && compareCount > 0 ? (
+                <span className="site-nav__badge" aria-label={`${compareCount} listings in compare`}>
+                  {compareCount}
+                </span>
+              ) : null}
+            </Link>
+          )}
         </li>
       ))}
     </ul>

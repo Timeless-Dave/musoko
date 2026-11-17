@@ -11,6 +11,8 @@ export {
 } from './hooks';
 export {
   CATEGORY_ORDER,
+  CATEGORY_PHOTO,
+  listingPhotos,
   scheduleLines,
   scheduleDays,
   unitPlural,

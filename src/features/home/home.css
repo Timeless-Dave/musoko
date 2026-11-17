@@ -19,8 +19,8 @@
   margin-top: var(--space-2);
 }
 .home-hero__title {
-  max-width: 12ch;
-  font: var(--weight-display) var(--text-display-l) / 1 var(--font-display);
+  max-width: 14ch;
+  font: var(--weight-display) var(--text-display-l) / 0.95 var(--font-display);
   letter-spacing: var(--tracking-l);
   text-wrap: balance;
 }
@@ -30,48 +30,58 @@
   line-height: 1.4;
 }
 .home-hero__photos {
-  display: none;
+  position: relative;
+  padding-bottom: var(--space-8);
+  padding-left: var(--space-8);
+}
+.home-hero__inset {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 42%;
+  box-shadow: 0 0 0 6px var(--ground);
 }
 @media (min-width: 48rem) {
   .home-hero {
     padding-top: var(--space-12);
   }
   .home-hero__grid {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     gap: var(--space-12);
     align-items: center;
     margin-bottom: var(--space-12);
   }
   .home-hero__photos {
-    display: block;
-    position: relative;
-    padding-bottom: var(--space-10);
-    padding-left: var(--space-10);
+    padding-bottom: var(--space-12);
+    padding-left: var(--space-12);
   }
-  /* The small photograph overlaps the large one; the gap between them is the page itself. */
   .home-hero__inset {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 38%;
-    box-shadow: 0 0 0 6px var(--ground);
+    width: 36%;
   }
 }
 .home-how {
   display: grid;
-  gap: var(--space-8);
+  gap: var(--space-12);
   margin: var(--space-10) 0 0;
   padding: 0;
   list-style: none;
 }
 .home-how li {
   display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  padding-top: var(--space-4);
-  border-top: var(--rule-width) solid var(--rule);
+  gap: var(--space-5);
+  align-items: center;
+}
+.home-how__media {
+  position: relative;
 }
 .home-how__number {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  min-width: 2.25rem;
+  padding: 0.15em 0.4em;
+  background: var(--ground);
+  color: var(--ink);
   font: var(--weight-display) var(--text-figure) / 0.9 var(--font-display);
   letter-spacing: var(--tracking-l);
   font-variant-numeric: tabular-nums;
@@ -79,6 +89,10 @@
 .home-how__title {
   font: var(--weight-display) var(--text-display-s) / 1.15 var(--font-display);
   letter-spacing: var(--tracking-s);
+  margin-bottom: var(--space-2);
+}
+.home-how__copy p {
+  max-width: 38ch;
 }
 .home-how__statement {
   max-width: var(--measure);
@@ -86,9 +100,12 @@
   font-weight: var(--weight-strong);
 }
 @media (min-width: 48rem) {
-  .home-how {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .home-how li {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     gap: var(--space-10);
+  }
+  .home-how li:nth-child(even) .home-how__media {
+    order: 2;
   }
 }
 
@@ -101,16 +118,47 @@
   padding-top: var(--space-8);
   border-top: var(--rule-width) solid var(--rule);
 }
+.home-notes__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+}
+.home-notes__reveal {
+  position: absolute;
+  inset: auto 0 0;
+  padding: var(--space-5);
+  background: color-mix(in oklab, var(--ground) 90%, transparent);
+  translate: 0 30%;
+  opacity: 0;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    translate var(--dur-base) var(--ease-out);
+}
+.home-notes__card:hover .home-notes__reveal,
+.home-notes__card:focus-within .home-notes__reveal {
+  opacity: 1;
+  translate: 0 0;
+}
 .home-notes__grid h2 {
   margin-bottom: var(--space-3);
 }
 .home-notes__grid p {
   max-width: 52ch;
+  font-size: var(--text-meta);
 }
 @media (min-width: 48rem) {
   .home-notes__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-16);
+    gap: var(--space-8);
+  }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .home-notes__reveal {
+    position: static;
+    opacity: 1;
+    translate: 0;
+    background: transparent;
+    padding: var(--space-4) 0 0;
   }
 }
 

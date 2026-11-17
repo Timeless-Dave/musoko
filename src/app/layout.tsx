@@ -4,7 +4,7 @@ import { Button } from '@/design-system/primitives';
 import { themeScript } from '@/design-system/theme';
 import { copy } from '@/content/copy';
 import { AssistantFab } from '@/features/assistant';
-import { DemoStrip } from '@/features/demo';
+import { DemoStrip, WelcomeDialog } from '@/features/demo';
 import { SiteFooter, SiteHeader } from '@/features/shell';
 import { Providers } from './providers';
 import './globals.css';
@@ -40,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteFooter />
           <DemoStrip />
           <AssistantFab />
+          <WelcomeDialog />
         </Providers>
       </body>
     </html>

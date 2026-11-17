@@ -17,6 +17,7 @@ import {
 import { services } from '@/data';
 import type { PublicProduct } from '@/domain/types';
 import { formatListingPrice, formatUnitPrice } from '@/lib/format';
+import { useMounted } from '@/lib/useMounted';
 import { useCompareStore } from './store';
 
 export function ComparePage() {
@@ -26,7 +27,8 @@ export function ComparePage() {
   const { data: products } = usePublicProducts();
   const { community } = useSelectedCommunity();
   const milesFrom = useMilesFrom(community);
-  const now = services.clock.now();
+  const mounted = useMounted();
+  const now = useMemo(() => (mounted ? services.clock.now() : null), [mounted]);
 
   const selected = useMemo(() => {
     if (!products) return [];
@@ -91,7 +93,7 @@ export function ComparePage() {
         <span className="compare-status">
           <StatusMark fill={STATUS_FILL[p.availability.status]} />
           {copy.availability[p.availability.status]}
-          {statusDetail(p, now) ? ` · ${statusDetail(p, now)}` : ''}
+          {now && statusDetail(p, now) ? ` · ${statusDetail(p, now)}` : ''}
         </span>
       ),
     },

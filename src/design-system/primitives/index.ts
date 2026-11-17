@@ -1,6 +1,7 @@
 export { Button, type ButtonProps } from './Button';
 export { Field, FieldFrame } from './Field';
 export { Select } from './Select';
+export { Listbox, type ListOption } from './Listbox';
 export { ChoiceGroup, type Choice } from './ChoiceGroup';
 export { Checkbox, CheckGroup } from './Checkbox';
 export { Dialog } from './Dialog';
