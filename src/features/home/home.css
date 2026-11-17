@@ -15,8 +15,20 @@
   justify-items: start;
 }
 .home-hero__text .search-bar {
+  /* Stay stacked in the narrow hero column so Near never overlaps the query. */
   width: 100%;
   margin-top: var(--space-2);
+  grid-template-columns: 1fr;
+  border-radius: var(--radius-panel);
+}
+.home-hero__text .search-bar__field--near {
+  border-top: var(--rule-width) solid var(--rule);
+  border-left: 0;
+  padding-left: var(--space-3);
+}
+.home-hero__text .search-bar__submit {
+  grid-column: 1;
+  width: 100%;
 }
 .home-hero__title {
   max-width: 14ch;
