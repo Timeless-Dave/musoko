@@ -155,22 +155,33 @@
 }
 .photo-cycle__nav {
   position: absolute;
-  inset: auto var(--space-2) var(--space-2);
+  inset: 0;
   z-index: 2;
   display: flex;
-  justify-content: flex-end;
-  gap: var(--space-1);
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--space-2);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.photo-cycle:focus-within .photo-cycle__nav {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .photo-cycle:hover .photo-cycle__nav {
+    opacity: 1;
+  }
 }
 .photo-cycle__btn {
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
-  background: color-mix(in oklab, var(--ground) 88%, transparent);
+  background: color-mix(in oklab, var(--ground) 92%, transparent);
   color: var(--ink);
   box-shadow: 0 1px 3px color-mix(in oklab, var(--c-shade) 30%, transparent);
   cursor: pointer;
