@@ -23,7 +23,7 @@ describe("colour tokens", () => {
   it("has no raw colour value outside tokens.css", () => {
     const offenders: string[] = [];
     for (const file of walk(ROOT)) {
-      const rel = relative(ROOT, file);
+      const rel = relative(ROOT, file).split("\\").join("/");
       if (ALLOWED.has(rel)) continue;
       readFileSync(file, "utf8")
         .split("\n")

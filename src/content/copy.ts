@@ -87,6 +87,8 @@ export const copy = {
     ask: 'Your question',
     send: 'Ask',
     close: 'Close',
+    nudge: "Hi, I'm the Musoko guide. Ask me anything about using the site.",
+    nudgeDismiss: 'Dismiss',
   },
   compare: {
     title: 'Compare listings',
