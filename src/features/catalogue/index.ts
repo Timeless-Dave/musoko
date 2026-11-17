@@ -23,7 +23,8 @@ export {
 } from './format';
 export { ProductCard, ProductCardSkeleton } from './components/ProductCard';
 export { FarmCard } from './components/FarmCard';
-export { SearchBar } from './components/SearchBar';
-export { CategoryRail } from './components/CategoryRail';
 export { Shelf } from './components/Shelf';
+export { ChipRail, type Chip } from './components/ChipRail';
+export { FilterChip, ToggleChip, type FilterOption } from './components/FilterChip';
+export { TownPicker } from './components/TownPicker';
 export { useLogSearch } from './logSearch';

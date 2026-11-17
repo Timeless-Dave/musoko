@@ -4,14 +4,16 @@ import { useMemo } from 'react';
 import { parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from 'nuqs';
 import { copy } from '@/content/copy';
 import { EmptyState } from '@/design-system/patterns';
-import { Button, Section, Select } from '@/design-system/primitives';
+import { Button, Section } from '@/design-system/primitives';
 import type { ProductCategory, PublicProduct } from '@/domain/types';
 import {
   CATEGORY_ORDER,
-  CategoryRail,
+  CATEGORY_PHOTO,
+  ChipRail,
+  FilterChip,
   ProductCard,
   ProductCardSkeleton,
-  SearchBar,
+  ToggleChip,
   useMilesFrom,
   usePublicFarms,
   usePublicProducts,
@@ -29,6 +31,7 @@ const params = {
   q: parseAsString.withDefault(''),
   category: parseAsStringLiteral(CATEGORY_ORDER),
   type: parseAsString,
+  farm: parseAsString,
   status: parseAsStringLiteral(STATUSES).withDefault('available_now'),
   get: parseAsStringLiteral(FULFILMENTS).withDefault('any'),
   max: parseAsInteger,
@@ -80,6 +83,7 @@ export function Marketplace() {
     const list = (products ?? []).filter((p) => {
       if (state.category && p.productType.category !== state.category) return false;
       if (state.type && p.productType.slug !== state.type) return false;
+      if (state.farm && p.farm.slug !== state.farm) return false;
       if (state.status !== 'all' && p.availability.status !== state.status) return false;
       if (state.max != null && p.priceCents > state.max * 100) return false;
       if (state.snap && !snapFarms.has(p.farm.id)) return false;
@@ -118,18 +122,27 @@ export function Marketplace() {
 
   useLogSearch(state.q, searchFilters, community?.id ?? null, products ? results.length : undefined);
 
+  const farmOptions = useMemo(
+    () =>
+      [...(farms ?? [])]
+        .sort((a, b) => a.farmName.localeCompare(b.farmName))
+        .map((f) => ({ value: f.slug, label: `${f.farmName}, ${f.location.town}` })),
+    [farms],
+  );
+
   const filtered =
-    Boolean(state.q || state.category || state.type || state.max != null || state.snap) ||
+    Boolean(state.q || state.category || state.type || state.farm || state.max != null || state.snap) ||
     state.status !== 'available_now' ||
     state.get !== 'any';
   const clear = () =>
-    void setState({ q: null, category: null, type: null, status: null, get: null, max: null, snap: null, sort: null });
+    void setState({ q: null, category: null, type: null, farm: null, status: null, get: null, max: null, snap: null, sort: null });
 
   const categoryHref = (category: ProductCategory | null) => {
     // Built from state, not from window, so the server render and the browser agree.
     const search = new URLSearchParams();
     if (state.q) search.set('q', state.q);
     if (category) search.set('category', category);
+    if (state.farm) search.set('farm', state.farm);
     if (state.status !== 'available_now') search.set('status', state.status);
     if (state.get !== 'any') search.set('get', state.get);
     if (state.max != null) search.set('max', String(state.max));
@@ -139,87 +152,107 @@ export function Marketplace() {
     return query ? `/food?${query}` : '/food';
   };
 
+  const heading = state.q
+    ? copy.food.resultsFor(state.q)
+    : state.category
+      ? copy.categories[state.category]
+      : copy.food.title;
+
   return (
     <>
       <Section pad="none" className="food-top" aria-labelledby="food-title">
-        <h1 id="food-title" className="food-top__title">
-          {copy.food.title}
-        </h1>
-        <SearchBar key={state.q} initialQuery={state.q} onSearch={(q) => void setState({ q: q || null })} size="compact" />
-        <CategoryRail selected={state.category} hrefFor={categoryHref} />
-      </Section>
-
-      <Section pad="none" className="food-results">
-        <div className="filter-bar">
-          <Select
-            label={copy.food.status}
-            value={state.status}
-            onChange={(e) => void setState({ status: e.target.value as (typeof STATUSES)[number] })}
-          >
-            <option value="available_now">{copy.availability.available_now}</option>
-            <option value="coming_soon">{copy.availability.coming_soon}</option>
-            <option value="unconfirmed">{copy.availability.unconfirmed}</option>
-            <option value="all">{copy.food.statusAll}</option>
-          </Select>
-          <Select
-            label={copy.food.type}
-            value={state.type ?? ''}
-            onChange={(e) => void setState({ type: e.target.value || null })}
-          >
-            <option value="">{copy.food.anyType}</option>
-            {typesInCategory.map(([slug, name]) => (
-              <option key={slug} value={slug}>
-                {name}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={copy.food.fulfilment}
-            value={state.get}
-            onChange={(e) => void setState({ get: e.target.value as (typeof FULFILMENTS)[number] })}
-          >
-            <option value="any">{copy.food.fulfilmentAny}</option>
-            <option value="pickup">{copy.food.fulfilmentPickup}</option>
-            <option value="delivery">{copy.food.fulfilmentDelivery}</option>
-          </Select>
-          <Select
-            label={copy.food.price}
-            value={state.max ?? ''}
-            onChange={(e) => void setState({ max: e.target.value ? Number(e.target.value) : null })}
-          >
-            <option value="">{copy.food.priceAny}</option>
-            {PRICE_STEPS.map((dollars) => (
-              <option key={dollars} value={dollars}>
-                {copy.food.priceUnder(dollars)}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={copy.food.sort}
-            value={state.sort}
-            onChange={(e) => void setState({ sort: e.target.value as (typeof SORTS)[number] })}
-          >
-            <option value="distance">{copy.food.sortDistance}</option>
-            <option value="unit_price">{copy.food.sortUnitPrice}</option>
-            <option value="recent">{copy.food.sortRecent}</option>
-          </Select>
-          <label className="filter-bar__check">
-            <input type="checkbox" checked={state.snap} onChange={(e) => void setState({ snap: e.target.checked || null })} />
-            <span>{copy.food.snap}</span>
-          </label>
-        </div>
-
-        <div className="food-results__head">
+        <div className="food-top__head">
+          <h1 id="food-title" className="food-top__title">
+            {heading}
+          </h1>
           <p className="food-results__count" role="status">
             {products ? copy.food.count(results.length) : copy.common.loading}
             {community ? ` near ${community.name}` : ''}
           </p>
+        </div>
+        <ChipRail
+          label={copy.food.category}
+          chips={[
+            { key: 'all', label: copy.food.allCategories, href: categoryHref(null), current: !state.category },
+            ...CATEGORY_ORDER.map((c) => ({
+              key: c,
+              label: copy.categories[c],
+              image: CATEGORY_PHOTO[c],
+              href: categoryHref(c),
+              current: state.category === c,
+            })),
+          ]}
+        />
+      </Section>
+
+      <Section pad="none" className="food-results">
+        <div className="filter-row" role="group" aria-label={copy.food.filters}>
+          <FilterChip
+            label={copy.food.status}
+            value={state.status}
+            defaultValue="available_now"
+            options={[
+              { value: 'available_now', label: copy.availability.available_now },
+              { value: 'coming_soon', label: copy.availability.coming_soon },
+              { value: 'unconfirmed', label: copy.availability.unconfirmed },
+              { value: 'all', label: copy.food.statusAll },
+            ]}
+            onChange={(status) => void setState({ status })}
+          />
+          <FilterChip
+            label={copy.food.type}
+            value={state.type ?? ''}
+            defaultValue=""
+            options={[{ value: '', label: copy.food.anyType }, ...typesInCategory.map(([value, label]) => ({ value, label }))]}
+            onChange={(type) => void setState({ type: type || null })}
+          />
+          <FilterChip
+            label={copy.food.farm}
+            value={state.farm ?? ''}
+            defaultValue=""
+            options={[{ value: '', label: copy.food.anyFarm }, ...farmOptions]}
+            onChange={(farm) => void setState({ farm: farm || null })}
+          />
+          <FilterChip
+            label={copy.food.fulfilment}
+            value={state.get}
+            defaultValue="any"
+            options={[
+              { value: 'any', label: copy.food.fulfilmentAny },
+              { value: 'pickup', label: copy.food.fulfilmentPickup },
+              { value: 'delivery', label: copy.food.fulfilmentDelivery },
+            ]}
+            onChange={(get) => void setState({ get })}
+          />
+          <FilterChip
+            label={copy.food.price}
+            value={state.max != null ? String(state.max) : ''}
+            defaultValue=""
+            options={[
+              { value: '', label: copy.food.priceAny },
+              ...PRICE_STEPS.map((dollars) => ({ value: String(dollars), label: copy.food.priceUnder(dollars) })),
+            ]}
+            onChange={(max) => void setState({ max: max ? Number(max) : null })}
+          />
+          <ToggleChip label={copy.food.snap} pressed={state.snap} onChange={(snap) => void setState({ snap: snap || null })} />
+          <FilterChip
+            label={copy.food.sort}
+            value={state.sort}
+            defaultValue="distance"
+            options={[
+              { value: 'distance', label: copy.food.sortDistance },
+              { value: 'unit_price', label: copy.food.sortUnitPrice },
+              { value: 'recent', label: copy.food.sortRecent },
+            ]}
+            onChange={(sort) => void setState({ sort })}
+          />
           {filtered ? (
-            <Button variant="link" onClick={clear}>
+            <Button variant="link" onClick={clear} className="filter-row__clear">
               {copy.food.clear}
             </Button>
           ) : null}
         </div>
+
         {state.sort === 'unit_price' ? <p className="food-results__note">{copy.food.unitPriceNote}</p> : null}
 
         {products && results.length === 0 ? (

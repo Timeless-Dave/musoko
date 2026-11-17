@@ -1,15 +1,31 @@
-import { ArrowsLeftRight, Basket, MapTrifold, Storefront, UsersThree } from '@phosphor-icons/react';
-import type { NavIcon as NavIconName } from './nav';
+import {
+  ArrowsLeftRight,
+  Basket,
+  Camera,
+  House,
+  Info,
+  MapTrifold,
+  Plant,
+  SquaresFour,
+  Storefront,
+  UsersThree,
+} from '@phosphor-icons/react';
+import type { NavIconName } from './nav';
 
 const MAP = {
+  home: House,
   basket: Basket,
   farm: UsersThree,
   store: Storefront,
   map: MapTrifold,
   compare: ArrowsLeftRight,
+  join: Plant,
+  dashboard: SquaresFour,
+  info: Info,
+  camera: Camera,
 } as const;
 
-export function NavIcon({ name }: { name: NavIconName }) {
+export function NavIcon({ name, size = 22 }: { name: NavIconName; size?: number }) {
   const Icon = MAP[name];
-  return <Icon size={18} weight="bold" aria-hidden="true" />;
+  return <Icon size={size} weight="regular" aria-hidden="true" />;
 }
