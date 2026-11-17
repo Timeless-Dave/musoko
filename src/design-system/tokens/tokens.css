@@ -1,10 +1,11 @@
 /* The only file in src with colour values. DESIGN.md section 3. */
 
 :root {
-  /* ---- brand colours, by eye from the logo raster ---- */
-  --c-yellow: #f2b415;
-  --c-green: #0b4a12;
-  --c-leaf: #3a8a14; /* small marks only; fails 3:1 on both grounds */
+  /* ---- brand colours, softened by the owner 2026-11-16 (was #f2b415 / #0b4a12 / #3a8a14) ----
+     Warm off-white and deep forest green: calmer than the saturated logo pair. */
+  --c-yellow: #f6f0e2;
+  --c-green: #22402b;
+  --c-leaf: #5e8a45; /* small marks only */
 
   /* ---- derived brand tones (shades and tints of the two, not new colours) ---- */
   --c-shade: color-mix(in oklab, var(--c-green) 55%, black); /* scrim, shadow, peel shade */
