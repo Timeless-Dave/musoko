@@ -251,11 +251,22 @@
 }
 .product-card__photo {
   position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   overflow: hidden;
   margin-bottom: var(--space-2);
   border-radius: var(--radius-panel);
+  isolation: isolate;
+}
+.product-card__photo-link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.product-card__photo .photo-cycle {
+  position: relative;
+  z-index: 1;
 }
 .product-card__photo .photo-frame,
 .product-card__photo .photo-cycle {
@@ -269,7 +280,7 @@
 }
 .product-card__tag {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: var(--space-2);
   left: var(--space-2);
   pointer-events: none;
@@ -284,7 +295,7 @@
   transition: transform var(--dur-slow) var(--ease-out);
 }
 @media (hover: hover) {
-  .product-card:hover .photo-frame img {
+  .product-card:hover .photo-cycle__frame.is-on .photo-frame img {
     transform: scale(1.03);
   }
   .product-card:hover .photo-cycle__nav,
@@ -316,6 +327,7 @@
 .farm-card__name a::after {
   content: '';
   position: absolute;
+  z-index: 0;
   inset: 0;
 }
 .product-card__title a:focus-visible,
@@ -408,11 +420,23 @@
   position: relative;
 }
 .farm-card__photo {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   overflow: hidden;
   margin-bottom: var(--space-2);
   border-radius: var(--radius-panel);
+  isolation: isolate;
+}
+.farm-card__photo-link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.farm-card__photo .photo-cycle {
+  position: relative;
+  z-index: 1;
 }
 .farm-card__photo .photo-frame,
 .farm-card__photo .photo-cycle {
@@ -425,7 +449,7 @@
   transition: transform var(--dur-slow) var(--ease-out);
 }
 @media (hover: hover) {
-  .farm-card:hover .photo-frame img {
+  .farm-card:hover .photo-cycle__frame.is-on .photo-frame img {
     transform: scale(1.03);
   }
   .farm-card:hover .photo-cycle__nav,

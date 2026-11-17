@@ -28,3 +28,4 @@ export { ChipRail, type Chip } from './components/ChipRail';
 export { FilterChip, ToggleChip, type FilterOption } from './components/FilterChip';
 export { TownPicker } from './components/TownPicker';
 export { useLogSearch } from './logSearch';
+export { recordPreviewOpen } from './recordPreview';

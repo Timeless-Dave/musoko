@@ -101,6 +101,61 @@
   }
 }
 
+/* ---- KpiTile (role dashboards) ---- */
+.kpi-strip {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 48rem) {
+  .kpi-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.kpi-tile {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-height: var(--tap);
+  padding: var(--space-5);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-field);
+  background: var(--ground-raised);
+}
+.kpi-tile--emphasis {
+  background: var(--ink);
+  color: var(--ground);
+}
+.kpi-tile__icon {
+  display: flex;
+  font-size: 1.25rem;
+  opacity: 0.85;
+}
+.kpi-tile__value {
+  font: var(--weight-display) var(--text-display-m) / var(--leading-display) var(--font-display);
+  letter-spacing: var(--tracking-m);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.kpi-tile__label {
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+  line-height: var(--leading-meta);
+}
+.kpi-tile__note {
+  font-size: var(--text-meta);
+  line-height: var(--leading-meta);
+  opacity: 0.9;
+}
+@media (hover: hover) {
+  a.kpi-tile:hover {
+    filter: brightness(0.97);
+  }
+  a.kpi-tile.kpi-tile--emphasis:hover {
+    filter: brightness(1.08);
+  }
+}
+
 /* ---- PhotoFrame ---- */
 .photo-frame {
   position: relative;
@@ -141,8 +196,13 @@
 .photo-cycle__frame {
   position: absolute;
   inset: 0;
+  z-index: 0;
   opacity: 0;
-  transition: opacity 700ms var(--ease-out);
+  visibility: hidden;
+  transition:
+    opacity 500ms var(--ease-out),
+    visibility 0ms linear 500ms;
+  pointer-events: none;
 }
 .photo-cycle__frame.photo-frame {
   aspect-ratio: unset;
@@ -150,13 +210,22 @@
   height: 100%;
   border-radius: inherit;
 }
+.photo-cycle__frame .photo-frame img {
+  animation: none;
+}
 .photo-cycle__frame.is-on {
+  z-index: 1;
   opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 500ms var(--ease-out),
+    visibility 0ms;
+  pointer-events: auto;
 }
 .photo-cycle__nav {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;

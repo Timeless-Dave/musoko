@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { copy } from '@/content/copy';
 import { blurFor } from '@/content/image-credits';
 import { EmptyState, PhotoFrame } from '@/design-system/patterns';
@@ -12,6 +13,7 @@ import {
   usePublicFarm,
   usePublicMarkets,
   usePublicProducts,
+  recordPreviewOpen,
 } from '@/features/catalogue';
 import { DemoMark } from '@/features/demo';
 import { formatDate } from '@/lib/format';
@@ -21,6 +23,12 @@ export function FarmProfile() {
   const { data: farm, isPending } = usePublicFarm(slug);
   const { data: products } = usePublicProducts();
   const { data: markets } = usePublicMarkets();
+  const loggedProfile = useRef<string | null>(null);
+  useEffect(() => {
+    if (!farm || loggedProfile.current === farm.id) return;
+    loggedProfile.current = farm.id;
+    recordPreviewOpen({ targetKind: 'farm', targetId: farm.id, surface: 'profile' });
+  }, [farm]);
 
   if (isPending) {
     return (
@@ -68,7 +76,12 @@ export function FarmProfile() {
               {farm.isDemo ? <DemoMark /> : null}
             </MetaLine>
             <div className="farm-head__actions">
-              <Button href={`/inquiry/new?farm=${farm.slug}`}>{copy.inquiry.contactFarmer}</Button>
+              <Button
+                href={`/inquiry/new?farm=${farm.slug}`}
+                onClick={() => recordPreviewOpen({ targetKind: 'farm', targetId: farm.id, surface: 'inquiry' })}
+              >
+                {copy.inquiry.contactFarmer}
+              </Button>
             </div>
           </div>
           {photo ? (

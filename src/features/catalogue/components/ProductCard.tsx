@@ -11,6 +11,7 @@ import { DemoMark } from '@/features/demo';
 import { formatDate, formatListingPrice, formatUnitPrice } from '@/lib/format';
 import { useMounted } from '@/lib/useMounted';
 import { listingPhotos, pickupSummary, quantityLine, statusDetail } from '../format';
+import { recordPreviewOpen } from '../recordPreview';
 
 /**
  * The photograph, then the three answers in order: what it is and who grows it,
@@ -33,10 +34,12 @@ export function ProductCard({
   const quantity = quantityLine(product);
   const href = `/farmers/${product.farm.slug}#${product.id}`;
   const photos = listingPhotos(product);
+  const trackCard = () => recordPreviewOpen({ targetKind: 'product', targetId: product.id, surface: 'card' });
+  const trackInquiry = () => recordPreviewOpen({ targetKind: 'product', targetId: product.id, surface: 'inquiry' });
 
   return (
     <article className="product-card">
-      <Link href={href} className="product-card__photo" tabIndex={-1} aria-hidden="true">
+      <div className="product-card__photo">
         {photos.length ? (
           <PhotoCycle ratio="16:10" srcs={photos} sizes={sizes} priority={priority} />
         ) : (
@@ -45,10 +48,13 @@ export function ProductCard({
         <span className="product-card__tag">
           <Tag>{copy.availability[product.availability.status]}</Tag>
         </span>
-      </Link>
+        <Link href={href} className="product-card__photo-link" tabIndex={-1} aria-hidden="true" onClick={trackCard} />
+      </div>
       {detail ? <span className="visually-hidden">{detail}</span> : null}
       <h3 className="product-card__title">
-        <Link href={href}>{product.title}</Link>
+        <Link href={href} onClick={trackCard}>
+          {product.title}
+        </Link>
       </h3>
       <p className="product-card__farm">
         {product.farm.farmName} · {product.farm.town}
@@ -78,6 +84,7 @@ export function ProductCard({
           href={`/inquiry/new?product=${product.id}`}
           className="product-card__contact"
           aria-label={copy.inquiry.contactFarmerAbout(`${product.title}, ${product.farm.farmName}`)}
+          onClick={trackInquiry}
         >
           {copy.inquiry.contactFarmer}
         </Button>

@@ -224,8 +224,11 @@ export interface SearchEvent {
   filters: SearchFilters; communityId: CommunityId | null; resultCount: number;
 }
 export interface PreviewEvent {
-  id: EventId; day: IsoDate; targetKind: 'pickup_location' | 'farmers_market';
-  targetId: string; surface: 'map' | 'list'; count: number;
+  id: EventId; day: IsoDate;
+  targetKind: 'pickup_location' | 'farmers_market' | 'farm' | 'product';
+  targetId: string;
+  surface: 'map' | 'list' | 'card' | 'profile' | 'inquiry';
+  count: number;
 }
 export type AggregateMetric = 'searches' | 'zero_result_searches' | 'inquiries' | 'preview_opens';
 export interface AggregateCount {

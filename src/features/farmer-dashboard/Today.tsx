@@ -4,11 +4,13 @@ import { copy } from '@/content/copy';
 import { Button } from '@/design-system/primitives';
 import { NeedsYou } from './Inquiries';
 import { ListingList } from './Listings';
+import { TodayKpis } from './TodayKpis';
 
 /** Opens on what needs a tap: inquiries to answer, then the listings to confirm. */
 export function Today() {
   return (
     <>
+      <TodayKpis />
       <NeedsYou />
       <section className="dash-section" aria-labelledby="today-listings">
         <div className="dash-section__head">
