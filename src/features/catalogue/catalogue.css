@@ -30,15 +30,17 @@
 .chip-rail__buttons {
   display: none;
 }
-@media (min-width: 64rem) and (hover: hover) {
+@media (min-width: 48rem) {
+  .chip-rail__buttons {
+    display: block;
+    flex: none;
+  }
+}
+@media (min-width: 64rem) {
   .chip-rail__row {
     margin: 0;
     padding-inline: 0;
     flex: 1;
-  }
-  .chip-rail__buttons {
-    display: block;
-    flex: none;
   }
 }
 .chip {
@@ -150,12 +152,39 @@
     text-underline-offset: 3px;
   }
 }
-.shelf__controls .scroll-buttons {
+.shelf__controls-scroll {
   display: none;
 }
-@media (min-width: 48rem) and (hover: hover) {
-  .shelf__controls .scroll-buttons {
+@media (min-width: 48rem) {
+  .shelf__controls-scroll {
     display: flex;
+  }
+}
+.shelf__track {
+  position: relative;
+}
+.shelf__track-scroll {
+  display: none;
+}
+@media (min-width: 48rem) {
+  .shelf__track-scroll {
+    display: flex;
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: var(--space-1);
+    pointer-events: none;
+  }
+  .shelf__track-scroll .scroll-button {
+    pointer-events: auto;
+    background: var(--ink);
+    color: var(--ground);
+    box-shadow: var(--shadow-float);
+  }
+  .shelf__track-scroll .scroll-button:disabled {
+    opacity: 0.35;
   }
 }
 .shelf__row {
@@ -223,11 +252,20 @@
 .product-card__photo {
   position: relative;
   display: block;
+  width: 100%;
+  overflow: hidden;
   margin-bottom: var(--space-2);
   border-radius: var(--radius-panel);
 }
+.product-card__photo .photo-frame,
+.product-card__photo .photo-cycle {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: inherit;
+}
 .product-card__photo .photo-frame {
-  aspect-ratio: 16 / 10 !important;
+  height: auto;
 }
 .product-card__tag {
   position: absolute;
@@ -367,7 +405,17 @@
 }
 .farm-card__photo {
   display: block;
+  width: 100%;
+  overflow: hidden;
   margin-bottom: var(--space-2);
+  border-radius: var(--radius-panel);
+}
+.farm-card__photo .photo-frame,
+.farm-card__photo .photo-cycle {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: inherit;
 }
 .farm-card__photo .photo-frame img {
   transition: transform var(--dur-slow) var(--ease-out);

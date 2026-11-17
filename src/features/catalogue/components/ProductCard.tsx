@@ -38,7 +38,7 @@ export function ProductCard({
     <article className="product-card">
       <Link href={href} className="product-card__photo" tabIndex={-1} aria-hidden="true">
         {photos.length ? (
-          <PhotoCycle ratio="4:3" srcs={photos} sizes={sizes} priority={priority} />
+          <PhotoCycle ratio="16:10" srcs={photos} sizes={sizes} priority={priority} />
         ) : (
           <div className="product-card__no-photo" />
         )}

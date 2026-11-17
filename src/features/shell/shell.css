@@ -205,7 +205,8 @@
   white-space: nowrap;
 }
 .get-toggle__option[aria-current='true'] {
-  background: var(--ground);
+  background: var(--ink);
+  color: var(--ground);
   box-shadow: 0 1px 3px color-mix(in oklab, var(--c-shade) 25%, transparent);
 }
 
@@ -356,8 +357,13 @@
   flex: none;
 }
 .side-nav__link[aria-current='page'] {
-  background: var(--ground-sunk);
+  background: var(--ink);
+  color: var(--ground);
   font-weight: var(--weight-display);
+}
+.side-nav__link[aria-current='page'] .side-nav__badge {
+  background: var(--ground);
+  color: var(--ink);
 }
 @media (hover: hover) {
   .side-nav__link:not([aria-current='page']):hover {

@@ -9,14 +9,16 @@ export function ScrollButtons({
   forward,
   onStep,
   controls,
+  className,
 }: {
   back: boolean;
   forward: boolean;
   onStep: (direction: 1 | -1) => void;
   controls?: string;
+  className?: string;
 }) {
   return (
-    <div className="scroll-buttons">
+    <div className={className ? `scroll-buttons ${className}` : 'scroll-buttons'}>
       <button
         type="button"
         className="scroll-button"

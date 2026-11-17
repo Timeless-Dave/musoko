@@ -41,12 +41,27 @@ export function Shelf({
               {more.label}
             </Link>
           ) : null}
-          <ScrollButtons back={back} forward={forward} onStep={step} controls={rowId} />
+          <ScrollButtons
+            className="shelf__controls-scroll"
+            back={back}
+            forward={forward}
+            onStep={step}
+            controls={rowId}
+          />
         </div>
       </div>
-      <ul ref={ref} id={rowId} className={`shelf__row shelf__row--${size}`} aria-labelledby={id}>
-        {children}
-      </ul>
+      <div className="shelf__track">
+        <ScrollButtons
+          className="shelf__track-scroll"
+          back={back}
+          forward={forward}
+          onStep={step}
+          controls={rowId}
+        />
+        <ul ref={ref} id={rowId} className={`shelf__row shelf__row--${size}`} aria-labelledby={id}>
+          {children}
+        </ul>
+      </div>
     </div>
   );
 }
