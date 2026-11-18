@@ -96,9 +96,10 @@ export const copy = {
   assistant: {
     label: 'Ask Musoko',
     title: 'Ask Musoko',
-    body: 'A guide for using the site, not a shopping assistant and not live farm advice. Your questions are sent to Claude, an AI model made by Anthropic, to write the answer, so leave out personal details.',
-    welcome:
-      'Ask how to find food, send an inquiry, join as a farmer, or what Demo and Listed mean.',
+    body: 'Answers come from Claude, an AI model by Anthropic, using Musoko’s demo listings. Leave out personal details.',
+    welcome: 'Hi! I can find fresh food near you, compare prices, and point you to farms and markets. What are you looking for?',
+    placeholder: 'Ask about food, farms or markets',
+    suggestions: 'Suggested questions',
     thinking: 'Thinking',
     offline: 'The AI guide is not available right now, so here is the closest answer from the Musoko guide:',
     ask: 'Your question',

@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { copy } from '@/content/copy';
 import { Logo } from '@/design-system/brand/Logo';
-import { Button, Field, Sheet } from '@/design-system/primitives';
+import { ArrowUp } from '@phosphor-icons/react';
+import { Sheet } from '@/design-system/primitives';
 import { useSelectedCommunity } from '@/features/catalogue';
+import { GuideMessage } from './GuideMessage';
 import { answerQuestion } from './retrieve';
 
 type Line = { role: 'user' | 'guide'; text: string };
@@ -215,21 +217,41 @@ export function AssistantFab() {
       </button>
       <Sheet open={open} onOpenChange={setOpen} title={copy.assistant.title} closeLabel={copy.assistant.close}>
         <div className="assistant-panel">
-          <p className="assistant-panel__note">{copy.assistant.body}</p>
           <div className="assistant-thread" role="log" aria-live="polite">
-            {lines.map((line, i) => (
-              <p key={`${line.role}-${i}`} className={`assistant-bubble assistant-bubble--${line.role}`}>
-                {line.text || <span className="assistant-bubble__typing">{copy.assistant.thinking}…</span>}
-              </p>
-            ))}
+            {lines.map((line, i) =>
+              line.role === 'user' ? (
+                <p key={i} className="assistant-bubble assistant-bubble--user">
+                  {line.text}
+                </p>
+              ) : (
+                <div key={i} className="assistant-row">
+                  <span className="assistant-avatar" aria-hidden="true">
+                    <Logo size={18} />
+                  </span>
+                  <div className="assistant-bubble assistant-bubble--guide">
+                    {line.text ? (
+                      <GuideMessage text={line.text} />
+                    ) : (
+                      <span className="assistant-typing" aria-label={copy.assistant.thinking}>
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ),
+            )}
+            {lines.length === 1 ? (
+              <div className="assistant-starters" aria-label={copy.assistant.suggestions}>
+                {STARTERS.map((prompt) => (
+                  <button key={prompt} type="button" className="assistant-starter" onClick={() => void ask(prompt)}>
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div ref={end} />
-          </div>
-          <div className="assistant-starters">
-            {STARTERS.map((prompt) => (
-              <button key={prompt} type="button" className="assistant-starter" onClick={() => void ask(prompt)}>
-                {prompt}
-              </button>
-            ))}
           </div>
           <form
             className="assistant-compose"
@@ -238,11 +260,26 @@ export function AssistantFab() {
               void ask(input);
             }}
           >
-            <Field label={copy.assistant.ask} value={input} onChange={(event) => setInput(event.target.value)} />
-            <Button type="submit" variant="primary" loading={busy}>
-              {copy.assistant.send}
-            </Button>
+            <input
+              className="assistant-compose__input"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              aria-label={copy.assistant.ask}
+              placeholder={copy.assistant.placeholder}
+              maxLength={500}
+              enterKeyHint="send"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className="assistant-compose__send"
+              aria-label={copy.assistant.send}
+              disabled={busy || !input.trim()}
+            >
+              <ArrowUp size={18} weight="bold" aria-hidden="true" />
+            </button>
           </form>
+          <p className="assistant-panel__note">{copy.assistant.body}</p>
         </div>
       </Sheet>
     </>

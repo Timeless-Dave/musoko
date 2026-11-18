@@ -49,7 +49,12 @@ ${BRIEF}
 </musoko_brief>`;
 
 const STYLE: Record<Channel, string> = {
-  web: `This conversation is in the chat box on the Musoko website. Write plain text, no markdown, no asterisks. Keep it short: a sentence or two, then a short list with one line per listing (food, farm and town, price, pickup). Include a link only when it helps, as a full URL on its own line.`,
+  web: `This conversation is in the chat box on the Musoko website, which already shows suggested questions as buttons.
+- For a greeting, thanks or small talk, reply in one short friendly sentence and ask what they are looking for. Do not list example questions or describe what you can do.
+- Otherwise start with a one-sentence answer, then at most six list items, each on its own line starting with "- ", one listing or place per item: food, farm and town, price, pickup day and place.
+- Plain text only: no markdown, no bold, no headings, no tables.
+- Put links last, each full URL on its own line, at most two. The chat shows them as buttons, so never write "here" or "this link".
+- Mention that the data is a demo only the first time you give listings in this conversation.`,
   sms: `This conversation is by text message to the Musoko phone line. Reply in plain text under 480 characters: no markdown, no lists longer than three lines. Include at most one full link. If they would want more, invite them to text a follow-up or open the website.`,
   voice: `This conversation is a live phone call. Your words go to a voice that says them to the caller. Answer in one to three short spoken sentences with at most three items. No links, no lists, no symbols: say "five dollars fifty a dozen", not "$5.50/dozen", and say the website as "get musoko dot vercel dot app". Ask one short question if you need their town.`,
 };
