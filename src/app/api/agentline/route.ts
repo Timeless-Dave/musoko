@@ -1,6 +1,7 @@
 import { after } from 'next/server';
 import { agentline, agentlineConfig, type SmsMessage } from '@/server/agentline';
 import { askGuide, normaliseTurns, type Turn } from '@/server/guide/ask';
+import { callBriefing } from '@/server/guide/briefing';
 
 /**
  * AgentLine webhook for the Musoko phone line. Calls and texts both reach
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
 
   if (type === 'sms.received') after(() => answerText(config, event));
   else if (type === 'call.utterance') after(() => answerTurn(config, event));
+  else if (type === 'call.received' || type === 'call.session.start') after(() => brief(config, event));
   else console.info(`[agentline] ${type || 'unknown'} event`);
 
   return Response.json({ ok: true });
@@ -130,7 +132,7 @@ async function answerTurn(config: NonNullable<ReturnType<typeof agentlineConfig>
   if (!callId || !turnId || !pushUrl) return console.error('[agentline] utterance without call or turn ids');
 
   const push = (context: string, disposition = 'done') =>
-    agentline.pushContext(config.key, pushUrl, { turn_id: turnId, disposition, context }, pushToken).catch((error) =>
+    agentline.pushContext(config.key, pushUrl, { turn_id: turnId, disposition, context: context.slice(0, 1900) }, pushToken).catch((error) =>
       console.error(`[agentline] push failed: ${String(error)}`),
     );
 
@@ -165,5 +167,17 @@ async function answerTurn(config: NonNullable<ReturnType<typeof agentlineConfig>
   } catch (error) {
     console.error(`[agentline] guide failed for a call turn: ${String(error)}`);
     await push('The lookup failed. Apologise and suggest trying again, or texting this number.', 'failed');
+  }
+}
+
+/** At the start of a call, give the voice a short briefing so common questions are answered at once. */
+async function brief(config: NonNullable<ReturnType<typeof agentlineConfig>>, event: Envelope) {
+  const callId = event.call_id ?? str(event.payload?.call_id) ?? str(event.payload?.id);
+  if (!callId) return console.info('[agentline] call started without an id');
+  try {
+    const facts = await callBriefing();
+    await agentline.pushContext(config.key, `/v1/calls/${callId}/context`, { disposition: 'facts', context: facts.slice(0, 1950) });
+  } catch (error) {
+    console.error(`[agentline] briefing failed: ${String(error)}`);
   }
 }
