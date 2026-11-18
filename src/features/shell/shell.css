@@ -320,7 +320,7 @@
 @media (min-width: 64rem) {
   .app-frame {
     display: grid;
-    grid-template-columns: 15rem minmax(0, 1fr);
+    grid-template-columns: 16rem minmax(0, 1fr);
   }
   .app-sidebar {
     display: block;
@@ -392,6 +392,92 @@
   font-size: 0.75rem;
   font-weight: var(--weight-display);
   line-height: 1.6;
+}
+
+/* Labels stay on one line; a long one ends in an ellipsis rather than wrapping. */
+.side-nav__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.side-nav__heading {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.side-nav__link {
+  font-size: 1rem;
+}
+
+/* The fold button at the top of the sidebar. */
+.app-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 2.5rem;
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-field);
+  background: transparent;
+  color: var(--ink);
+  font: var(--weight-strong) 0.875rem / 1.2 var(--font-text);
+  cursor: pointer;
+}
+.app-sidebar__toggle svg {
+  flex: none;
+}
+@media (hover: hover) {
+  .app-sidebar__toggle:hover {
+    background: var(--ground-raised);
+  }
+}
+
+/* Folded: a rail of icons. Names stay available as tooltips and to screen readers. */
+@media (min-width: 64rem) {
+  .app-frame {
+    transition: grid-template-columns var(--dur-base) var(--ease-out);
+  }
+  .app-frame:has(.app-sidebar[data-collapsed]) {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+  .app-sidebar[data-collapsed] {
+    padding-inline: var(--space-2);
+  }
+  .app-sidebar[data-collapsed] .side-nav__label,
+  .app-sidebar[data-collapsed] .side-nav__heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .app-sidebar[data-collapsed] .side-nav__link,
+  .app-sidebar[data-collapsed] .app-sidebar__toggle {
+    justify-content: center;
+    padding: 0;
+  }
+  .app-sidebar[data-collapsed] .side-nav__link {
+    position: relative;
+  }
+  .app-sidebar[data-collapsed] .side-nav__badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 1.125rem;
+    padding: 0 0.25rem;
+    font-size: 0.6875rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-frame {
+    transition: none;
+  }
+}
+.drawer .app-sidebar__toggle {
+  display: none;
 }
 
 /* ---- Menu drawer, below 1024px ---- */

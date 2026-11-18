@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRowScroller } from '../useRowScroller';
-import { ScrollButtons } from './ScrollButtons';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { copy } from '@/content/copy';
 
 export interface Chip {
   key: string;
@@ -40,8 +41,16 @@ export function ChipRail({ label, chips }: { label: string; chips: Chip[] }) {
           </li>
         ))}
       </ul>
-      <div className="chip-rail__buttons">
-        <ScrollButtons back={back} forward={forward} onStep={step} />
+      {/* Overlaid on the row's ends, over a fade, so they never take width from the chips. */}
+      <div className="chip-rail__edge chip-rail__edge--back" data-shown={back || undefined}>
+        <button type="button" className="scroll-button" aria-label={copy.shell.scrollBack} onClick={() => step(-1)} tabIndex={back ? 0 : -1}>
+          <CaretLeft size={18} weight="bold" aria-hidden="true" />
+        </button>
+      </div>
+      <div className="chip-rail__edge chip-rail__edge--forward" data-shown={forward || undefined}>
+        <button type="button" className="scroll-button" aria-label={copy.shell.scrollForward} onClick={() => step(1)} tabIndex={forward ? 0 : -1}>
+          <CaretRight size={18} weight="bold" aria-hidden="true" />
+        </button>
       </div>
     </nav>
   );

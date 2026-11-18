@@ -117,23 +117,9 @@ export function Home() {
   return (
     <>
       <Section pad="none" className="home-top" aria-labelledby="home-title">
-        <div className="home-top__head">
-          <div>
-            <h1 id="home-title" className="home-top__title">
-              {shelfNear(copy.home.greeting)}
-            </h1>
-            <p className="home-top__lead">{copy.home.lead}</p>
-          </div>
-          <div className="home-top__actions">
-            <Button href="/food">{copy.home.findFood}</Button>
-            <Button variant="link" href="/farmers">
-              {copy.home.exploreFarmers}
-            </Button>
-            <Button variant="link" href="/join">
-              {copy.home.joinAsFarmer}
-            </Button>
-          </div>
-        </div>
+        <h1 id="home-title" className="visually-hidden">
+          {mounted && town ? copy.home.greeting(town) : copy.home.greetingFallback}
+        </h1>
         <ChipRail label={copy.food.category} chips={feed.chips} />
       </Section>
 

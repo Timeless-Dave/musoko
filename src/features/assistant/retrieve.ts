@@ -1,4 +1,4 @@
-import knowledge from './knowledge.json';
+import knowledge from '@/content/assistant-knowledge.json';
 
 const STOP = new Set(
   'a an the of to and for in on is it this that are be as or if how what where when who why can i my you we they not no with from by at'.split(

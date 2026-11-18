@@ -6,3 +6,4 @@ export { DailyBars, type DailyBar } from './DailyBars';
 export { PhotoFrame } from './PhotoFrame';
 export { PhotoCycle } from './PhotoCycle';
 export { SkeletonBar, SkeletonRegion } from './Skeleton';
+export { DailyArea, type DailyPoint } from './DailyArea';

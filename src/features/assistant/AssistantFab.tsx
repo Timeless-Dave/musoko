@@ -127,12 +127,46 @@ export function AssistantFab() {
     };
   }, []);
 
-  const ask = (question: string) => {
+  const [busy, setBusy] = useState(false);
+
+  /** Streams Claude's answer into the last bubble. Falls back to the local guide if the server has no key or fails. */
+  const ask = async (question: string) => {
     const q = question.trim();
-    if (!q) return;
-    const { answer } = answerQuestion(q);
-    setLines((prev) => [...prev, { role: 'user', text: q }, { role: 'guide', text: answer }]);
+    if (!q || busy) return;
+    const history = lines
+      .slice(1)
+      .filter((line) => line.text)
+      .map((line) => ({ role: line.role === 'user' ? ('user' as const) : ('assistant' as const), content: line.text }));
+    setLines((prev) => [...prev, { role: 'user', text: q }, { role: 'guide', text: '' }]);
     setInput('');
+    setBusy(true);
+    const write = (text: string) =>
+      setLines((prev) => [...prev.slice(0, -1), { role: 'guide', text }]);
+    const fallback = () => write(`${copy.assistant.offline}\n\n${answerQuestion(q).answer}`);
+
+    try {
+      const res = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...history, { role: 'user', content: q }].slice(-20) }),
+      });
+      if (!res.ok || !res.body) return fallback();
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = '';
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        if (text.includes('\u0000')) return fallback();
+        write(text);
+      }
+      if (!text.trim()) fallback();
+    } catch {
+      fallback();
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -182,14 +216,14 @@ export function AssistantFab() {
           <div className="assistant-thread" role="log" aria-live="polite">
             {lines.map((line, i) => (
               <p key={`${line.role}-${i}`} className={`assistant-bubble assistant-bubble--${line.role}`}>
-                {line.text}
+                {line.text || <span className="assistant-bubble__typing">{copy.assistant.thinking}…</span>}
               </p>
             ))}
             <div ref={end} />
           </div>
           <div className="assistant-starters">
             {STARTERS.map((prompt) => (
-              <button key={prompt} type="button" className="assistant-starter" onClick={() => ask(prompt)}>
+              <button key={prompt} type="button" className="assistant-starter" onClick={() => void ask(prompt)}>
                 {prompt}
               </button>
             ))}
@@ -198,11 +232,11 @@ export function AssistantFab() {
             className="assistant-compose"
             onSubmit={(event) => {
               event.preventDefault();
-              ask(input);
+              void ask(input);
             }}
           >
             <Field label={copy.assistant.ask} value={input} onChange={(event) => setInput(event.target.value)} />
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" loading={busy}>
               {copy.assistant.send}
             </Button>
           </form>

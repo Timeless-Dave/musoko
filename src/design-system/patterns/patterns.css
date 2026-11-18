@@ -417,3 +417,135 @@
     animation: none;
   }
 }
+
+/* ---- Daily area: a line with a shaded area under it, like a price chart ---- */
+.daily-area {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+  color: var(--ink);
+}
+.daily-area__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+.daily-area__title {
+  font-weight: var(--weight-strong);
+}
+.daily-area__total {
+  margin-left: auto;
+  font: var(--weight-display) 1.25rem / 1.1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.daily-area__change {
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  font-weight: var(--weight-strong);
+  font-variant-numeric: tabular-nums;
+}
+.daily-area__plot {
+  position: relative;
+  height: 9rem;
+  border-radius: var(--radius-field);
+  box-shadow: inset 0 calc(-1 * var(--rule-width)) 0 var(--rule);
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.daily-area__plot:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: 4px;
+}
+.daily-area__plot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.daily-area__grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  vector-effect: non-scaling-stroke;
+}
+.daily-area__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.daily-area__crosshair {
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}
+.daily-area__max {
+  position: absolute;
+  top: -0.25rem;
+  left: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.daily-area__dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--ground);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.daily-area__dot[data-live] {
+  animation: daily-area-pulse 2.4s var(--ease-out) infinite;
+}
+@keyframes daily-area-pulse {
+  0%,
+  60%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--ground),
+      0 0 0 2px color-mix(in oklab, var(--ink) 40%, transparent);
+  }
+  30% {
+    box-shadow:
+      0 0 0 2px var(--ground),
+      0 0 0 8px color-mix(in oklab, var(--ink) 0%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .daily-area__dot[data-live] {
+    animation: none;
+  }
+}
+.daily-area__tip {
+  position: absolute;
+  top: 0;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-field);
+  background: var(--ink);
+  color: var(--ground);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 6px));
+  pointer-events: none;
+}
+.daily-area__tip[data-edge='start'] {
+  transform: translate(-10%, calc(-100% - 6px));
+}
+.daily-area__tip[data-edge='end'] {
+  transform: translate(-90%, calc(-100% - 6px));
+}
+.daily-area__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}

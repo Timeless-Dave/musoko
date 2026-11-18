@@ -96,9 +96,11 @@ export const copy = {
   assistant: {
     label: 'Ask Musoko',
     title: 'Ask Musoko',
-    body: 'Answers come from the Musoko brief. This is a guide for using the site, not a shopping assistant and not live farm advice.',
+    body: 'A guide for using the site, not a shopping assistant and not live farm advice. Your questions are sent to Claude, an AI model made by Anthropic, to write the answer, so leave out personal details.',
     welcome:
-      'Ask how to find food, send an inquiry, join as a farmer, or what Demo and Listed mean. I only use the Musoko brief — nothing is sent to another service.',
+      'Ask how to find food, send an inquiry, join as a farmer, or what Demo and Listed mean.',
+    thinking: 'Thinking',
+    offline: 'The AI guide is not available right now, so here is the closest answer from the Musoko guide:',
     ask: 'Your question',
     send: 'Ask',
     close: 'Close',
@@ -136,6 +138,8 @@ export const copy = {
   shell: {
     menu: 'Menu',
     closeMenu: 'Close menu',
+    collapseMenu: 'Collapse menu',
+    expandMenu: 'Expand menu',
     home: 'Home',
     food: 'All food',
     farmers: 'Farmers',
@@ -644,6 +648,7 @@ export const copy = {
         viewsUnit: (n: number) => (n === 1 ? '1 view' : `${n} views`),
         inquiriesUnit: (n: number) => (n === 1 ? '1 inquiry' : `${n} inquiries`),
         asTable: 'Show as a table',
+        vsLastWeek: 'vs the week before',
       },
       listing: {
         title: 'How this listing is doing',
