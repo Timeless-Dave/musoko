@@ -51,13 +51,6 @@ export function Shelf({
         </div>
       </div>
       <div className="shelf__track">
-        <ScrollButtons
-          className="shelf__track-scroll"
-          back={back}
-          forward={forward}
-          onStep={step}
-          controls={rowId}
-        />
         <ul ref={ref} id={rowId} className={`shelf__row shelf__row--${size}`} aria-labelledby={id}>
           {children}
         </ul>

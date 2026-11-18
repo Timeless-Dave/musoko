@@ -27,15 +27,6 @@
   flex: none;
   scroll-snap-align: start;
 }
-.chip-rail__buttons {
-  display: none;
-}
-@media (min-width: 48rem) {
-  .chip-rail__buttons {
-    display: block;
-    flex: none;
-  }
-}
 @media (min-width: 64rem) {
   .chip-rail__row {
     margin: 0;
@@ -162,30 +153,6 @@
 }
 .shelf__track {
   position: relative;
-}
-.shelf__track-scroll {
-  display: none;
-}
-@media (min-width: 48rem) {
-  .shelf__track-scroll {
-    display: flex;
-    position: absolute;
-    z-index: 2;
-    inset: 0;
-    align-items: center;
-    justify-content: space-between;
-    padding-inline: var(--space-1);
-    pointer-events: none;
-  }
-  .shelf__track-scroll .scroll-button {
-    pointer-events: auto;
-    background: var(--ink);
-    color: var(--ground);
-    box-shadow: var(--shadow-float);
-  }
-  .shelf__track-scroll .scroll-button:disabled {
-    opacity: 0.35;
-  }
 }
 .shelf__row {
   display: grid;
@@ -847,4 +814,46 @@ h2.shelf__title:not(.shelf__head *) {
 .home-hero__grid,
 .home-hero__text {
   min-width: 0;
+}
+
+/* Chip rail ends: a button over a fade of the page colour, shown only when the row can move that way. */
+.chip-rail {
+  position: relative;
+}
+.chip-rail__edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  width: 4.5rem;
+  pointer-events: none;
+}
+.chip-rail__edge--back {
+  left: 0;
+  justify-content: flex-start;
+  background: linear-gradient(to right, var(--ground) 45%, transparent);
+}
+.chip-rail__edge--forward {
+  right: 0;
+  justify-content: flex-end;
+  background: linear-gradient(to left, var(--ground) 45%, transparent);
+}
+.chip-rail__edge .scroll-button {
+  pointer-events: auto;
+  box-shadow: 0 1px 4px color-mix(in oklab, var(--c-shade) 25%, transparent);
+  background: var(--ground);
+}
+@media (min-width: 48rem) and (hover: hover) {
+  .chip-rail__edge[data-shown] {
+    display: flex;
+  }
+}
+@media (min-width: 64rem) and (hover: hover) {
+  .chip-rail__row {
+    flex: 1;
+    margin: 0;
+    padding-inline: 0;
+  }
 }

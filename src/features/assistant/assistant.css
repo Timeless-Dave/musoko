@@ -157,4 +157,9 @@
     grid-template-columns: 1fr auto;
     align-items: end;
   }
+}.assistant-bubble {
+  white-space: pre-line;
+}
+.assistant-bubble__typing {
+  font-style: italic;
 }
