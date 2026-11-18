@@ -45,6 +45,11 @@ export function monthName(month: YearMonth): string {
   return format(new Date(`${month}-01T12:00:00`), 'MMMM yyyy');
 }
 
+/** "17 Nov" from "2026-11-17", for chart axes and labels. */
+export function dayShort(day: string): string {
+  return format(new Date(`${day}T12:00:00`), 'd MMM');
+}
+
 /** "June" for a short line. */
 export function monthShort(month: YearMonth): string {
   return format(new Date(`${month}-01T12:00:00`), 'MMMM');

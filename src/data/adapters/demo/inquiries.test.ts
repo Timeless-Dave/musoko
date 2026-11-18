@@ -399,3 +399,33 @@ describe('lifecycle jobs through the app (STAT-3 to STAT-5, DPRIV-2)', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe('fileInquiry (the farmer’s own inbox folders)', () => {
+  it('files to buyers or done, survives a reload, and filing back to the inbox undoes it', async () => {
+    const storage = createMemoryStorage();
+    const { services, db } = setup(storage);
+    const [first] = await services.gateway.listInquiriesForActor(farmer);
+    const id = first!.inquiry.id;
+    const before = db().inquiries.find((i) => i.id === id);
+
+    expect((await services.gateway.fileInquiry(farmer, id, 'buyers')).folder).toBe('buyers');
+    const reloaded = setup(storage).services;
+    expect((await reloaded.gateway.listInquiriesForActor(farmer)).find((r) => r.inquiry.id === id)!.folder).toBe('buyers');
+
+    expect((await services.gateway.fileInquiry(farmer, id, 'done')).folder).toBe('done');
+    expect(db().inquiry_folders.filter((f) => f.inquiryId === id)).toHaveLength(1);
+    expect((await services.gateway.fileInquiry(farmer, id, 'inbox')).folder).toBe('inbox');
+    expect(db().inquiry_folders.some((f) => f.inquiryId === id)).toBe(false);
+    // Filing never touches the inquiry itself: status, timestamps and what the buyer sees stay the same.
+    expect(db().inquiries.find((i) => i.id === id)).toEqual(before);
+  });
+
+  it('refuses anyone but the farmer the inquiry was sent to', async () => {
+    const { services, db } = setup();
+    await services.gateway.listInquiriesForActor(farmer);
+    const other = db().inquiries.find((i) => i.farmerProfileId !== DEMO_ACCOUNTS.farmer.farmerProfileId)!;
+    await expect(services.gateway.fileInquiry(farmer, other.id, 'done')).rejects.toMatchObject({ code: 'forbidden' });
+    await expect(services.gateway.fileInquiry(buyer, other.id, 'done')).rejects.toBeInstanceOf(GatewayError);
+    await expect(services.gateway.fileInquiry(admin, other.id, 'done')).rejects.toBeInstanceOf(GatewayError);
+  });
+});

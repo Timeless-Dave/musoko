@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { copy } from '@/content/copy';
 import { BrandWordmark } from '@/design-system/brand/BrandWordmark';
 import { ThemeToggle } from '@/design-system/theme';
 import { TownPicker } from '@/features/catalogue';
@@ -20,7 +19,7 @@ export function SiteHeader() {
         <div className="site-header__menu-slot">
           <MenuDrawer />
         </div>
-        <Link href="/" className="site-header__brand" aria-label={`${copy.brand.name}, home`}>
+        <Link href="/" className="site-header__brand">
           <BrandWordmark logoSize={32} markClassName="site-header__mark" suffixClassName="site-header__name" />
         </Link>
         <div className="site-header__search">

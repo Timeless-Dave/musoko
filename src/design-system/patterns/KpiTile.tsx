@@ -39,16 +39,16 @@ export function KpiTile({
     </>
   );
   const className = emphasis ? 'kpi-tile kpi-tile--emphasis' : 'kpi-tile';
-  if (href) {
-    return (
-      <Link href={href} className={className} role="listitem">
-        {body}
-      </Link>
-    );
-  }
+  // A link cannot also be a list item, so the item wraps it.
   return (
-    <div className={className} role="listitem">
-      {body}
+    <div role="listitem" className="kpi-tile__item">
+      {href ? (
+        <Link href={href} className={className}>
+          {body}
+        </Link>
+      ) : (
+        <div className={className}>{body}</div>
+      )}
     </div>
   );
 }

@@ -15,7 +15,7 @@ import type {
   PrivacyInput,
 } from '@/domain/farmer';
 import type { ReplyInput } from '@/domain/inquiry';
-import type { InquiryId, OutcomeKind, ProductId } from '@/domain/types';
+import type { InquiryFolder, InquiryId, OutcomeKind, ProductId } from '@/domain/types';
 import { useActor } from '@/features/auth';
 
 /**
@@ -106,5 +106,7 @@ export const useSetAvailability = () =>
   );
 export const useReply = () =>
   useWrite((a, input: { inquiryId: InquiryId; reply: ReplyInput }) => services.gateway.replyToInquiry(a, input.inquiryId, input.reply));
+export const useFileInquiry = () =>
+  useWrite((a, input: { inquiryId: InquiryId; folder: InquiryFolder }) => services.gateway.fileInquiry(a, input.inquiryId, input.folder));
 export const useRecordOutcome = () =>
   useWrite((a, input: { inquiryId: InquiryId; outcome: OutcomeKind }) => services.gateway.recordInquiryOutcome(a, input.inquiryId, input.outcome));

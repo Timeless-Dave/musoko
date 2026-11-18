@@ -201,6 +201,13 @@ export interface InquiryReply {
 }
 export type OutcomeKind = 'sale' | 'new_potential_customer' | 'no' | 'still_discussing';
 export interface InquiryOutcome { inquiryId: InquiryId; outcome: OutcomeKind; recordedAt: IsoDateTime }
+/** Where the farmer has filed an inquiry in their own inbox. */
+export type InquiryFolder = 'inbox' | 'buyers' | 'done';
+/**
+ * The farmer's own filing. Seen only by that farmer; it changes no status, no
+ * count and nothing the buyer sees. No row means the inquiry is in the inbox.
+ */
+export interface InquiryFolderEntry { inquiryId: InquiryId; folder: Exclude<InquiryFolder, 'inbox'>; updatedAt: IsoDateTime }
 
 // ---------- claims ----------
 export type ClaimType = 'snap_ebt' | 'practice' | 'licence' | 'certification';
@@ -279,6 +286,7 @@ export interface Database {
   inquiry_buyer_contacts: InquiryBuyerContact[];
   inquiry_replies: InquiryReply[];
   inquiry_outcomes: InquiryOutcome[];
+  inquiry_folders: InquiryFolderEntry[];
   claims: Claim[];
   search_events: SearchEvent[];
   preview_events: PreviewEvent[];

@@ -80,6 +80,7 @@ export function buildSeed(now: Date, settings: Settings): Database {
     inquiry_buyer_contacts: inquiries.contacts,
     inquiry_replies: inquiries.replies,
     inquiry_outcomes: inquiries.outcomes,
+    inquiry_folders: [],
     claims: buildClaims(now),
     search_events: buildSearchEvents(now),
     preview_events: buildPreviewEvents(now),

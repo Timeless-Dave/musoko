@@ -12,9 +12,12 @@ import {
 } from 'react';
 import { Listbox, type ListOption } from './Listbox';
 
+/** Options in order, including those inside an <optgroup>. */
 function optionsOf(children: ReactNode): ListOption[] {
-  return Children.toArray(children).flatMap((child) => {
-    if (!isValidElement(child) || child.type !== 'option') return [];
+  return Children.toArray(children).flatMap((child): ListOption[] => {
+    if (!isValidElement(child)) return [];
+    if (child.type === 'optgroup') return optionsOf((child.props as { children?: ReactNode }).children);
+    if (child.type !== 'option') return [];
     const props = child.props as OptionHTMLAttributes<HTMLOptionElement>;
     const value = props.value == null ? '' : String(props.value);
     const label = typeof props.children === 'string' ? props.children : value;

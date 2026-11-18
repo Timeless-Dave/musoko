@@ -112,8 +112,12 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+.kpi-tile__item {
+  display: grid;
+}
 .kpi-tile {
   display: grid;
+  height: 100%;
   gap: var(--space-1);
   align-content: start;
   min-height: var(--tap);
@@ -153,6 +157,126 @@
   }
   a.kpi-tile.kpi-tile--emphasis:hover {
     filter: brightness(1.08);
+  }
+}
+
+/* ---- DailyBars: one series of daily counts. Ink marks, recessive axis. ---- */
+.daily-bars {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+.daily-bars__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.daily-bars__title {
+  font-weight: var(--weight-strong);
+}
+.daily-bars__total {
+  font-size: var(--text-meta);
+}
+.daily-bars__plot {
+  position: relative;
+  height: 7.5rem;
+  padding-top: var(--space-4);
+  box-shadow: inset 0 calc(-1 * var(--rule-width)) 0 var(--rule);
+}
+/* The peak value, with a hairline at its height. */
+.daily-bars__max {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+.daily-bars__plot::before {
+  content: '';
+  position: absolute;
+  top: var(--space-4);
+  left: 0;
+  right: 0;
+  border-top: var(--rule-width) dashed var(--rule);
+}
+.daily-bars__cols {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+.daily-bars__col {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  height: 100%;
+}
+.daily-bars__bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--ink);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.daily-bars__cols:has([data-active]) .daily-bars__col:not([data-active]) .daily-bars__bar {
+  opacity: 0.45;
+}
+.daily-bars__tip {
+  position: absolute;
+  top: 0;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-field);
+  background: var(--ground-raised);
+  box-shadow: var(--shadow-float);
+  font-size: var(--text-meta);
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+.daily-bars__tip[data-edge='start'] {
+  transform: translate(-10%, -100%);
+}
+.daily-bars__tip[data-edge='end'] {
+  transform: translate(-90%, -100%);
+}
+.daily-bars__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+.daily-bars__table summary {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-strong);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.daily-bars__table summary:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+.daily-bars__table table {
+  border-collapse: collapse;
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+.daily-bars__table th,
+.daily-bars__table td {
+  padding: var(--space-1) var(--space-4) var(--space-1) 0;
+  border-bottom: var(--rule-width) solid var(--rule);
+  text-align: left;
+  font-weight: var(--weight-text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .daily-bars__bar {
+    transition: none;
   }
 }
 

@@ -15,7 +15,7 @@ export const DEMO_STORAGE_KEY = 'musoko.demo.v1';
  * with a different version is replaced by a fresh seed and the visitor sees a
  * notice. Nothing is wiped silently.
  */
-export const DEMO_SCHEMA_VERSION = 6;
+export const DEMO_SCHEMA_VERSION = 7;
 
 /**
  * One accepted inquiry from one browser tab, kept only to apply the hourly limit.

@@ -3,6 +3,7 @@ import type {
   Database,
   Inquiry,
   InquiryClosedReason,
+  InquiryFolder,
   InquiryOutcome,
   InquiryReply,
   InquiryStatus,
@@ -50,6 +51,8 @@ export interface InquiryRecord {
   pickupName: string | null;
   reply: InquiryReply | null;
   outcome: InquiryOutcome | null;
+  /** The farmer's own filing: inbox, buyers or done. */
+  folder: InquiryFolder;
 }
 
 function latestReply(db: Database, inquiry: Inquiry): InquiryReply | null {
@@ -129,5 +132,6 @@ export function toInquiryRecord(db: Database, inquiry: Inquiry): InquiryRecord {
     pickupName: pickupName(db, inquiry).name,
     reply: latestReply(db, inquiry),
     outcome: db.inquiry_outcomes.find((o) => o.inquiryId === inquiry.id) ?? null,
+    folder: (db.inquiry_folders ?? []).find((f) => f.inquiryId === inquiry.id)?.folder ?? 'inbox',
   };
 }

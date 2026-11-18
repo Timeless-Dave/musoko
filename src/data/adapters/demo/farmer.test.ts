@@ -514,4 +514,30 @@ describe('the farmer’s numbers', () => {
     expect(n.outcomes.recorded).toBe(1);
     expect((await failure(services.gateway.getFarmerNumbers(otherFarmer))).code).toBe('forbidden');
   });
+
+  it('gives each own listing its own figures, adding up to no more than the farm’s', async () => {
+    const { services } = setup();
+    const n = await services.gateway.getFarmerNumbers(farmer);
+    const listings = await services.gateway.listOwnListings(farmer);
+    const visible = listings.filter((l) => l.product.moderationStatus === 'visible');
+    expect(Object.keys(n.byListing).sort()).toEqual(visible.map((l) => l.product.id).sort());
+    const all = Object.values(n.byListing);
+    expect(all.reduce((s, l) => s + l.inquiriesTotal, 0)).toBeLessThanOrEqual(n.inquiries.total);
+    expect(all.reduce((s, l) => s + l.awaiting, 0)).toBeLessThanOrEqual(n.inquiries.awaiting);
+    expect(all.reduce((s, l) => s + l.views, 0)).toBe(n.views.listingCards);
+    expect(all.some((l) => l.inquiriesTotal > 0)).toBe(true);
+  });
+
+  it('gives one entry per day in the window, oldest first, and the days add up to the window totals', async () => {
+    const { services } = setup();
+    const n = await services.gateway.getFarmerNumbers(farmer);
+    expect(n.daily).toHaveLength(n.windowDays);
+    expect([...n.daily].map((d) => d.day).sort()).toEqual(n.daily.map((d) => d.day));
+    const views = n.daily.reduce((s, d) => s + d.views, 0);
+    expect(views).toBe(n.views.farmProfile + n.views.listingCards);
+    expect(views).toBeGreaterThan(0);
+    for (const l of Object.values(n.byListing)) {
+      expect(l.daily.reduce((s, d) => s + d.views, 0)).toBe(l.views);
+    }
+  });
 });

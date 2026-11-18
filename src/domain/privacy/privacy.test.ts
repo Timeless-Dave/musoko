@@ -143,6 +143,7 @@ function db(): Database {
     ],
     inquiry_replies: [],
     inquiry_outcomes: [],
+    inquiry_folders: [],
     claims,
     search_events: [],
     preview_events: [],

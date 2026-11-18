@@ -1,16 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { copy } from '@/content/copy';
 import { services } from '@/data';
-import { EmptyState } from '@/design-system/patterns';
+import { EmptyState, PhotoFrame } from '@/design-system/patterns';
 import { Button, MetaLine, Section } from '@/design-system/primitives';
 import type { OwnFarm } from '@/domain/farmer';
 import { useSession } from '@/features/auth';
 import { DemoMark } from '@/features/demo';
 import { useMounted } from '@/lib/useMounted';
 import { failureWords } from './errors';
-import { useApproveProfile, useConfirmReview, useOwnFarm, useSetPublication } from './hooks';
+import { useApproveProfile, useConfirmReview, useNow, useOwnFarm, useOwnListings, useSetPublication } from './hooks';
 
 /**
  * Wraps every dashboard page. Only a signed-in farmer gets past it; anyone else
@@ -71,14 +72,7 @@ function Frame({ children }: { children: ReactNode }) {
   return (
     <>
       <Section pad="none">
-        <div className="dash-head">
-          <h1 className="dash-head__name">{farm.profile.farmName}</h1>
-          <MetaLine>
-            <span>{farm.town}</span>
-            <span>{copy.dashboard.state[farm.state]}</span>
-            {farm.profile.isDemo ? <DemoMark /> : null}
-          </MetaLine>
-        </div>
+        <FarmHead farm={farm} />
       </Section>
       <Section pad="none">
         <div className="dash-body">
@@ -87,6 +81,37 @@ function Frame({ children }: { children: ReactNode }) {
         </div>
       </Section>
     </>
+  );
+}
+
+/** Farm photo, a greeting by time of day, and one line on where the farm stands. */
+function FarmHead({ farm }: { farm: OwnFarm }) {
+  const now = useNow();
+  const { data: listings } = useOwnListings();
+  const photo = farm.profile.photos[0];
+  const isPublic = farm.state === 'listed' || farm.state === 'listed_awaiting_review';
+  return (
+    <div className="dash-head">
+      {photo ? (
+        <PhotoFrame ratio="1:1" src={photo.src} alt="" sizes="96px" className="dash-head__photo" />
+      ) : null}
+      <div className="dash-head__text">
+        <h1 className="dash-head__name">
+          {copy.dashboard.today.greeting(now.getHours())}, {farm.profile.farmName}
+        </h1>
+        <MetaLine>
+          <span>{farm.town}</span>
+          <span>{copy.dashboard.state[farm.state]}</span>
+          {listings ? <span>{copy.dashboard.today.listingCount(listings.length)}</span> : null}
+          {isPublic ? (
+            <Link href={`/farmers/${farm.profile.slug}`} className="dash-link">
+              {copy.dashboard.today.publicPage}
+            </Link>
+          ) : null}
+          {farm.profile.isDemo ? <DemoMark /> : null}
+        </MetaLine>
+      </div>
+    </div>
   );
 }
 

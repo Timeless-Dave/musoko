@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { choose } from './choose';
 
 /**
  * Step 4: map, equivalent list, markets list. IDs refer to docs/ACCEPTANCE.md.
@@ -49,14 +50,14 @@ test('filters narrow both views and live in the URL', async ({ page }) => {
   await page.goto('/map');
   await expect(page.locator('.place-row').first()).toBeVisible();
   const all = await page.locator('.place-row').count();
-  await page.getByLabel('Show').selectOption('market');
+  await choose(page, 'Show', 'Farmers markets');
   await expect(page).toHaveURL(/show=market/);
   await expect(page.getByRole('heading', { name: 'Farms', level: 2 })).toHaveCount(0);
   const markets = await page.locator('.place-row').count();
   expect(markets).toBeGreaterThan(0);
   expect(markets).toBeLessThan(all);
 
-  await page.getByLabel('Town').selectOption('helena-west-helena');
+  await choose(page, 'Town', 'Helena-West Helena');
   await expect(page).toHaveURL(/town=helena-west-helena/);
   for (const text of await page.locator('.place-row').allInnerTexts()) expect(text).toContain('Helena-West Helena');
 

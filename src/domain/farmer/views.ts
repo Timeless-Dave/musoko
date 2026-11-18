@@ -103,6 +103,28 @@ export interface FarmerNumbers {
   /** Anonymous opens of the farm profile and its listing cards, counted in the window. */
   views: { farmProfile: number; listingCards: number; contactClicks: number };
   outcomes: Record<OutcomeKind, number> & { recorded: number };
+  /** The same figures for each of the farm's own listings, by product id. */
+  byListing: Record<string, ListingNumbers>;
+  /** One entry per day in the window, oldest first: anonymous views and inquiries received. */
+  daily: DailyCount[];
+}
+
+export interface DailyCount {
+  /** YYYY-MM-DD */
+  day: string;
+  views: number;
+  inquiries: number;
+}
+
+/** One listing's figures. Views and contact taps are in the window; inquiries are in the window and in all. */
+export interface ListingNumbers {
+  views: number;
+  contactTaps: number;
+  inquiriesRecent: number;
+  inquiriesTotal: number;
+  awaiting: number;
+  salesReported: number;
+  daily: DailyCount[];
 }
 
 const HOUR_MS = 3_600_000;
@@ -142,6 +164,19 @@ export function farmerNumbers(
       (e.targetKind === 'product' && productIds.has(e.targetId as ProductId) && e.surface === 'inquiry') ||
       (e.targetKind === 'farm' && e.targetId === farmId && e.surface === 'inquiry'),
   );
+  // Every day in the window, oldest first, so a quiet day shows as zero rather than going missing.
+  const days = Array.from({ length: settings.farmerNumbersWindowDays }, (_, i) =>
+    new Date(now.getTime() - (settings.farmerNumbersWindowDays - 1 - i) * DAY_MS).toISOString().slice(0, 10),
+  );
+  const series = (isView: (e: (typeof previews)[number]) => boolean, isInquiry: (i: (typeof inquiries)[number]) => boolean): DailyCount[] =>
+    days.map((day) => ({
+      day,
+      views: previews.filter((e) => e.day === day && isView(e)).reduce((n, e) => n + e.count, 0),
+      inquiries: inquiries.filter((i) => i.createdAt.slice(0, 10) === day && isInquiry(i)).length,
+    }));
+  const isFarmView = (e: (typeof previews)[number]) =>
+    e.surface !== 'inquiry' &&
+    ((e.targetKind === 'farm' && e.targetId === farmId) || (e.targetKind === 'product' && productIds.has(e.targetId as ProductId)));
 
   return {
     windowDays: settings.farmerNumbersWindowDays,
@@ -171,5 +206,26 @@ export function farmerNumbers(
       no: count('no'),
       still_discussing: count('still_discussing'),
     },
+    byListing: Object.fromEntries(
+      listings.map((l) => {
+        const id = l.product.id;
+        const asked = inquiries.filter((i) => i.productId === id);
+        const sales = outcomes.filter((o) => o.outcome === 'sale' && asked.some((i) => i.id === o.inquiryId)).length;
+        const numbers: ListingNumbers = {
+          views: sumPreviews((e) => e.targetKind === 'product' && e.targetId === id && e.surface !== 'inquiry'),
+          contactTaps: sumPreviews((e) => e.targetKind === 'product' && e.targetId === id && e.surface === 'inquiry'),
+          inquiriesRecent: asked.filter((i) => Date.parse(i.createdAt) >= since).length,
+          inquiriesTotal: asked.length,
+          awaiting: asked.filter((i) => i.status === 'awaiting_response').length,
+          salesReported: sales,
+          daily: series(
+            (e) => e.targetKind === 'product' && e.targetId === id && e.surface !== 'inquiry',
+            (i) => i.productId === id,
+          ),
+        };
+        return [id, numbers];
+      }),
+    ),
+    daily: series(isFarmView, () => true),
   };
 }

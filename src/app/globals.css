@@ -8,6 +8,7 @@
 @import '../features/catalogue/catalogue.css';
 @import '../features/map/map.css';
 @import '../features/home/home.css';
+@import '../features/welcome/welcome.css';
 @import '../features/compare/compare.css';
 @import '../features/assistant/assistant.css';
 @import '../features/inquiry/inquiry.css';

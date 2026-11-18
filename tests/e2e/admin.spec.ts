@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { choose } from './choose';
 
 /**
  * Step 7: the administrator dashboard. IDs refer to docs/ACCEPTANCE.md.
@@ -68,7 +69,7 @@ test('CONS-1, CONS-2, TRUST-1, MODE-1: a profile started for a farmer is a draft
   await asAdmin(page, '/admin/farms/new');
   await page.getByLabel('Farm name').fill('Fennel Row Farm');
   await page.getByLabel('Your name').fill('Mateo Brandvold');
-  await page.getByLabel('Nearest town').selectOption({ label: 'Wynne' });
+  await choose(page, 'Nearest town', 'Wynne');
   await page.getByLabel('What do you grow or make?').fill('Turnips and kale.');
   await page.getByRole('button', { name: 'Save the draft' }).click();
   await expect(page.getByText('Enter a mobile number or an email')).toBeVisible();
@@ -279,7 +280,9 @@ test('STAT-1, INQ-5, INQ-7: the awaiting-response list shows what is stuck, long
   // MODE-2: a farmer's reply moves it out of the list.
   await switchRole(page, 'Farmer');
   await page.goto('/dashboard/inquiries');
-  const card = page.getByRole('listitem').filter({ hasText: 'Renata Voss' }).filter({ hasText: 'Collard' }).first();
+  // The farmer's inquiries are an inbox: open the one to answer.
+  await page.getByRole('list', { name: 'Inquiries in this folder' }).getByRole('button').filter({ hasText: 'Renata Voss' }).filter({ hasText: 'Collard' }).first().click();
+  const card = page.locator('.inquiry-card');
   await card.getByRole('button', { name: 'Available', exact: true }).click();
   await expect(card.getByRole('status')).toHaveText('Your reply was sent.');
   await switchRole(page, 'Administrator');

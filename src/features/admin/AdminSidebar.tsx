@@ -66,9 +66,12 @@ function WorkLinks({
                 <Icon size={22} weight="regular" aria-hidden="true" />
                 <span>{item.label}</span>
                 {count > 0 ? (
-                  <span className="side-nav__badge" aria-label={`${count} items need attention`}>
-                    {count}
-                  </span>
+                  <>
+                    <span className="side-nav__badge" aria-hidden="true">
+                      {count}
+                    </span>
+                    <span className="visually-hidden">({count})</span>
+                  </>
                 ) : null}
               </Link>
             </li>

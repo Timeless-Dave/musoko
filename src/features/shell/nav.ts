@@ -50,6 +50,9 @@ export const SIDEBAR: readonly { label?: string; items: readonly NavItem[] }[] =
   },
   {
     label: copy.shell.about,
-    items: [{ href: '/#how-it-works', label: copy.shell.how, icon: 'info' }],
+    items: [
+      { href: '/welcome', label: copy.shell.welcome, icon: 'info' },
+      { href: '/#how-it-works', label: copy.shell.how, icon: 'info' },
+    ],
   },
 ];

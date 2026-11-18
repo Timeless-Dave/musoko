@@ -2,20 +2,12 @@
 
 import { useState } from 'react';
 import { copy } from '@/content/copy';
-import { EmptyState } from '@/design-system/patterns';
-import { Button, ChoiceGroup } from '@/design-system/primitives';
-import { outcomePromptDue, type InquiryRecord } from '@/domain/inquiry';
+import { Button } from '@/design-system/primitives';
+import type { InquiryFolder, InquiryId } from '@/domain/types';
+import { formatDate } from '@/lib/format';
+import { failureWords } from './errors';
 import { InquiryCard } from './InquiryCard';
-import { useNow, useOwnFarm, useOwnInquiries, useSettings } from './hooks';
-
-type Filter = 'waiting' | 'answered' | 'closed' | 'all';
-
-const matches: Record<Filter, (r: InquiryRecord) => boolean> = {
-  waiting: (r) => r.inquiry.status === 'awaiting_response',
-  answered: (r) => r.inquiry.status === 'responded',
-  closed: (r) => r.inquiry.status === 'closed',
-  all: () => true,
-};
+import { useFileInquiry, useNow, useOwnFarm, useOwnInquiries, useSettings } from './hooks';
 
 function useInquiryData() {
   const { data: records } = useOwnInquiries();
@@ -25,70 +17,50 @@ function useInquiryData() {
   return { records, farm, settings, now };
 }
 
-/** The inquiries to act on first: unanswered, and answered ones whose outcome question is due. */
-export function NeedsYou() {
-  const { records, farm, settings, now } = useInquiryData();
-  // A card stays in its own list once acted on, so its "saved" line is not taken away with it.
-  const [kept, setKept] = useState<ReadonlyMap<string, 'waiting' | 'follow'>>(new Map());
-  const keep = (id: string, list: 'waiting' | 'follow') => setKept((current) => new Map(current).set(id, list));
-  if (!records || !farm || !settings) return <p role="status">{copy.common.loading}</p>;
+const FOLDERS: readonly InquiryFolder[] = ['inbox', 'buyers', 'done'];
+/** The two moves offered from each folder. */
+const MOVES: Record<InquiryFolder, readonly InquiryFolder[]> = {
+  inbox: ['done', 'buyers'],
+  buyers: ['done', 'inbox'],
+  done: ['buyers', 'inbox'],
+};
 
-  const waiting = records.filter((r) => matches.waiting(r) || kept.get(r.inquiry.id) === 'waiting');
-  const followUp = records.filter(
-    (r) => kept.get(r.inquiry.id) === 'follow' || (!waiting.includes(r) && outcomePromptDue(r.inquiry, r.outcome, now, settings)),
-  );
-  const shownWaiting = waiting.filter((r, i) => i < 3 || kept.get(r.inquiry.id) === 'waiting');
-  const card = (r: InquiryRecord, list: 'waiting' | 'follow') => (
-    <InquiryCard
-      key={r.inquiry.id}
-      record={r}
-      farmPhone={farm.contact.phone}
-      isDemo={farm.profile.isDemo}
-      now={now}
-      settings={settings}
-      onActed={() => keep(r.inquiry.id, list)}
-    />
-  );
-  return (
-    <>
-      <section className="dash-section" aria-labelledby="today-waiting">
-        <div className="dash-section__head">
-          <h2 id="today-waiting" className="dash-title">
-            {copy.dashboard.today.waiting}
-          </h2>
-          <Button variant="link" href="/dashboard/inquiries">
-            {copy.dashboard.today.seeAll}
-          </Button>
-        </div>
-        {shownWaiting.length === 0 ? (
-          <p className="dash-lead">{copy.dashboard.today.waitingNone}</p>
-        ) : (
-          <ul className="inquiry-list">{shownWaiting.map((r) => card(r, 'waiting'))}</ul>
-        )}
-      </section>
-      {followUp.length > 0 ? (
-        <section className="dash-section" aria-labelledby="today-follow">
-          <h2 id="today-follow" className="dash-title">
-            {copy.dashboard.today.followUp}
-          </h2>
-          <ul className="inquiry-list">{followUp.map((r) => card(r, 'follow'))}</ul>
-        </section>
-      ) : null}
-    </>
-  );
-}
-
+/**
+ * The farmer's inquiries as a message inbox, in three folders of their own:
+ * Inbox, Buyers and Done. Moving one never changes what the buyer sees, and
+ * every move can be undone or reversed later.
+ */
 export function InquiriesPage() {
   const { records, farm, settings, now } = useInquiryData();
-  const [chosen, setChosen] = useState<Filter | null>(null);
-  // A card stays in view once acted on, so its "saved" line is not taken away with it.
-  const [kept, setKept] = useState<ReadonlySet<string>>(new Set());
+  const file = useFileInquiry();
+  const words = copy.dashboard.inquiries;
+  const f = words.folders;
+  const [folder, setFolder] = useState<InquiryFolder>('inbox');
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [moved, setMoved] = useState<{ id: string; from: InquiryFolder; to: InquiryFolder } | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
 
   if (!records || !farm || !settings) return <p role="status">{copy.common.loading}</p>;
-  const count = (f: Filter) => records.filter(matches[f]).length;
-  const filter: Filter = chosen ?? (count('waiting') > 0 ? 'waiting' : 'all');
-  const shown = records.filter((r) => matches[filter](r) || kept.has(r.inquiry.id));
-  const words = copy.dashboard.inquiries;
+  const inFolder = (name: InquiryFolder) => records.filter((r) => r.folder === name);
+  const shown = inFolder(folder);
+  const selected = records.find((r) => r.inquiry.id === openId) ?? null;
+
+  async function move(id: string, from: InquiryFolder, to: InquiryFolder) {
+    setFailed(null);
+    try {
+      await file.mutateAsync({ inquiryId: id as InquiryId, folder: to });
+      setMoved({ id, from, to });
+    } catch (error) {
+      setFailed(failureWords(error, f.failed));
+    }
+  }
+
+  async function undo() {
+    if (!moved) return;
+    const last = moved;
+    await move(last.id, last.to, last.from);
+    setMoved(null);
+  }
 
   return (
     <section className="dash-section" aria-labelledby="inquiries-title">
@@ -96,36 +68,113 @@ export function InquiriesPage() {
         {words.title}
       </h2>
       <p className="dash-lead">{words.lead}</p>
-      <ChoiceGroup
-        legend={words.filterLabel}
-        name="inquiry-filter"
-        layout="chips"
-        value={filter}
-        onChange={(v) => setChosen(v as Filter)}
-        choices={[
-          { value: 'waiting', label: `${words.filterWaiting} (${count('waiting')})` },
-          { value: 'answered', label: `${words.filterAnswered} (${count('answered')})` },
-          { value: 'closed', label: `${words.filterClosed} (${count('closed')})` },
-          { value: 'all', label: `${words.filterAll} (${count('all')})` },
-        ]}
-      />
-      {shown.length === 0 ? (
-        <EmptyState sentence={words.none} />
-      ) : (
-        <ul className="inquiry-list">
-          {shown.map((r) => (
-            <InquiryCard
-              key={r.inquiry.id}
-              record={r}
-              farmPhone={farm.contact.phone}
-              isDemo={farm.profile.isDemo}
-              now={now}
-              settings={settings}
-              onActed={() => setKept((current) => new Set(current).add(r.inquiry.id))}
-            />
-          ))}
-        </ul>
-      )}
+      <div className="inbox-folders" role="group" aria-label={f.label}>
+        {FOLDERS.map((name) => (
+          <button
+            key={name}
+            type="button"
+            className="inbox-folder"
+            aria-pressed={folder === name}
+            onClick={() => {
+              setFolder(name);
+              setOpenId(null);
+              setMoved(null);
+            }}
+          >
+            {f.name[name]} <span className="inbox-folder__count">{inFolder(name).length}</span>
+          </button>
+        ))}
+      </div>
+      <p className="dash-note">{f.private}</p>
+
+      <div className="inbox" data-open={selected ? 'true' : undefined}>
+        <div className="inbox__list">
+          {shown.length === 0 ? (
+            <p className="dash-calm">{f.empty[folder]}</p>
+          ) : (
+            <ul aria-label={f.list}>
+              {shown.map((r) => (
+                <li key={r.inquiry.id}>
+                  <button
+                    type="button"
+                    className="inbox-row"
+                    aria-current={r.inquiry.id === openId ? 'true' : undefined}
+                    onClick={() => {
+                      setOpenId(r.inquiry.id);
+                      setMoved(null);
+                    }}
+                  >
+                    <span className="inbox-row__top">
+                      <span className="inbox-row__who" data-waiting={r.inquiry.status === 'awaiting_response' || undefined}>
+                        {r.buyer?.name ?? words.contactDeleted}
+                      </span>
+                      <time dateTime={r.inquiry.createdAt} className="inbox-row__when">
+                        {formatDate(r.inquiry.createdAt)}
+                      </time>
+                    </span>
+                    <span className="inbox-row__about">
+                      {words.about} {r.productTitle ?? r.productTypeName ?? copy.inquiry.askedAnythingElse}
+                      {r.inquiry.status === 'awaiting_response' ? <strong> · {f.waiting}</strong> : null}
+                    </span>
+                    <span className="inbox-row__snippet">{r.buyer?.message || f.noMessage}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="inbox__read">
+          {selected ? (
+            <>
+              <div className="inbox__bar">
+                <button type="button" className="inbox__back dash-link" onClick={() => setOpenId(null)}>
+                  ← {f.back}
+                </button>
+                <div className="inbox__moves">
+                  {MOVES[selected.folder].map((to) => (
+                    <Button
+                      key={to}
+                      variant={to === 'done' ? 'primary' : 'secondary'}
+                      loading={file.isPending && file.variables?.folder === to}
+                      onClick={() => void move(selected.inquiry.id, selected.folder, to)}
+                    >
+                      {to === 'done' ? f.markDone : to === 'buyers' ? f.toBuyers : f.toInbox}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <p role="status" className="dash-status">
+                {moved && moved.id === selected.inquiry.id ? (
+                  <>
+                    {f.moved(f.name[moved.to])}{' '}
+                    <Button variant="link" onClick={() => void undo()}>
+                      {f.undo}
+                    </Button>
+                  </>
+                ) : null}
+              </p>
+              {failed ? (
+                <p role="alert" className="dash-error">
+                  {failed}
+                </p>
+              ) : null}
+              <ul className="inquiry-list">
+                <InquiryCard
+                  key={selected.inquiry.id}
+                  record={selected}
+                  farmPhone={farm.contact.phone}
+                  isDemo={farm.profile.isDemo}
+                  now={now}
+                  settings={settings}
+                />
+              </ul>
+            </>
+          ) : (
+            <p className="inbox__choose">{f.choose}</p>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

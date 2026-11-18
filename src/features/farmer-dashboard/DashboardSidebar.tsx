@@ -42,9 +42,12 @@ function WorkLinks({ pathname, waiting }: { pathname: string | null; waiting: nu
               <Icon size={22} weight="regular" aria-hidden="true" />
               <span>{item.label}</span>
               {item.href === '/dashboard/inquiries' && waiting > 0 ? (
-                <span className="side-nav__badge" aria-label={`${waiting} inquiries waiting`}>
-                  {waiting}
-                </span>
+                <>
+                  <span className="side-nav__badge" aria-hidden="true">
+                    {waiting}
+                  </span>
+                  <span className="visually-hidden">({waiting})</span>
+                </>
               ) : null}
             </Link>
           </li>
