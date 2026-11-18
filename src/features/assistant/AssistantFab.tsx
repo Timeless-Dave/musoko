@@ -4,15 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import { copy } from '@/content/copy';
 import { Logo } from '@/design-system/brand/Logo';
 import { Button, Field, Sheet } from '@/design-system/primitives';
+import { useSelectedCommunity } from '@/features/catalogue';
 import { answerQuestion } from './retrieve';
 
 type Line = { role: 'user' | 'guide'; text: string };
 
 const STARTERS = [
-  'How do I find food near me?',
-  'How do I contact a farmer?',
-  'Is this real data?',
-  'How do I join as a farmer?',
+  'What fresh food is available near me now?',
+  'Where are the cheapest eggs?',
+  'Which farmers markets are open on Saturday?',
+  'How do I get to Delta Saturday Stalls from Pine Bluff?',
+  'Can I pay on Musoko?',
 ];
 
 /** How long the page must sit untouched before the guide says hello. */
@@ -128,6 +130,7 @@ export function AssistantFab() {
   }, []);
 
   const [busy, setBusy] = useState(false);
+  const { community } = useSelectedCommunity();
 
   /** Streams Claude's answer into the last bubble. Falls back to the local guide if the server has no key or fails. */
   const ask = async (question: string) => {
@@ -148,7 +151,7 @@ export function AssistantFab() {
       const res = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...history, { role: 'user', content: q }].slice(-20) }),
+        body: JSON.stringify({ town: community?.name ?? null, messages: [...history, { role: 'user', content: q }].slice(-20) }),
       });
       if (!res.ok || !res.body) return fallback();
       const reader = res.body.getReader();
