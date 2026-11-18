@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useId, useState } from 'react';
 import { format, formatDistanceStrict } from 'date-fns';
 import { copy } from '@/content/copy';
@@ -88,7 +89,11 @@ export function ListingRow({ listing, now, settings }: { listing: OwnListing; no
   return (
     <li className="listing-row">
       <div className="listing-row__main">
-        <h3 className="listing-row__title">{product.title}</h3>
+        <h3 className="listing-row__title">
+          <Link href={`/dashboard/listings/${product.id}`} className="listing-row__link">
+            {product.title}
+          </Link>
+        </h3>
         <MetaLine>
           <span>{productType.name}</span>
           <span>{formatListingPrice(product.priceCents, product.sellingUnit, product.unitSize)}</span>

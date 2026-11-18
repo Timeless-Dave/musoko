@@ -1,5 +1,5 @@
 import type { BuyerInquiryView, InquiryRecord, InquiryRequestInput, InquirySignals, ReplyInput } from '@/domain/inquiry';
-import type { InquiryId, OutcomeKind } from '@/domain/types';
+import type { InquiryFolder, InquiryId, OutcomeKind } from '@/domain/types';
 import type { Actor } from './auth';
 
 export interface InquiryReceipt {
@@ -54,4 +54,13 @@ export interface InquiryGateway {
    * inquiry (STAT-5) unless the answer is "Still discussing".
    */
   recordInquiryOutcome(actor: Actor, inquiryId: InquiryId, outcome: OutcomeKind): Promise<InquiryRecord>;
+
+  /**
+   * The farmer files an inquiry sent to their own farm under inbox, buyers or done.
+   * Filing is the farmer's own: it changes no status, no count, and nothing the
+   * buyer sees, and filing back to the inbox undoes it.
+   *
+   * Rejects with GatewayError: `forbidden`, `not_found`, `invalid` (`folder`).
+   */
+  fileInquiry(actor: Actor, inquiryId: InquiryId, folder: InquiryFolder): Promise<InquiryRecord>;
 }

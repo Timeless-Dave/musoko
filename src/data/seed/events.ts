@@ -7,6 +7,8 @@ import {
   type SearchFilters,
 } from '@/domain/types';
 import { communityId } from './communities';
+import { farmId } from './farms';
+import { productId } from './products';
 import { productTypeId } from './product-types';
 import { dayOnly } from './time';
 import { marketId } from './markets';
@@ -93,10 +95,36 @@ export function buildPreviewEvents(now: Date): PreviewEvent[] {
     [21, 'farmers_market', marketId(2), 'list', 2],
     [27, 'pickup_location', pickupLocationId(1), 'list', 3],
   ];
-  return rows.map(([ago, targetKind, targetId, surface, count], i) => ({
+  const places = rows.map(([ago, targetKind, targetId, surface, count], i) => ({
     id: asId<EventId>(`preview-${String(i + 1).padStart(3, '0')}`),
     day: dayOnly(now, ago), targetKind, targetId, surface, count,
   }));
+  return [...places, ...demoFarmViews(now, places.length)];
+}
+
+/**
+ * A month of fictional, anonymous opens for the demo farmer's farm and listings,
+ * so their charts have something to show. Counts per day only, like every event.
+ * The numbers follow a fixed pattern, so the seed is the same on every load.
+ */
+function demoFarmViews(now: Date, offset: number): PreviewEvent[] {
+  const out: PreviewEvent[] = [];
+  const push = (ago: number, targetKind: 'farm' | 'product', targetId: string, surface: PreviewEvent['surface'], count: number) => {
+    if (count <= 0) return;
+    out.push({ id: asId<EventId>(`preview-${String(offset + out.length + 1).padStart(3, '0')}`), day: dayOnly(now, ago), targetKind, targetId, surface, count });
+  };
+  for (let ago = 0; ago < 30; ago++) {
+    // Busier toward market day and in the most recent fortnight.
+    const lift = ago < 14 ? 2 : 0;
+    const wave = [3, 1, 2, 0, 4, 6, 2][ago % 7]!;
+    push(ago, 'farm', farmId(1), 'profile', wave + lift);
+    for (let n = 1; n <= 7; n++) {
+      const views = (wave + n * 3 + ago) % 5 - (n > 4 ? 1 : 0) + (ago < 14 ? 1 : 0);
+      push(ago, 'product', productId(n), 'card', views);
+      if ((ago + n) % 9 === 0) push(ago, 'product', productId(n), 'inquiry', 1);
+    }
+  }
+  return out;
 }
 
 /** Rolled-up counts for a period older than searchEventRetentionDays, so the raw rows are already gone. */

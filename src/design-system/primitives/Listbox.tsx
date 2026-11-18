@@ -55,6 +55,9 @@ export function Listbox({
   const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = options.find((o) => o.value === value) ?? null;
+  const shown = selected?.label || placeholder || label;
+  // The accessible name carries the visible text, so voice control and screen readers agree.
+  const name = shown === label ? label : `${label}: ${shown}`;
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return options;
@@ -111,12 +114,12 @@ export function Listbox({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
-        aria-label={label}
+        aria-label={name}
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
       >
         {leading}
-        <span className="listbox__value">{selected?.label || placeholder || label}</span>
+        <span className="listbox__value">{shown}</span>
         <CaretDown className="listbox__caret" size={16} weight="bold" aria-hidden="true" />
       </button>
       {open ? (

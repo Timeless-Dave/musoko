@@ -32,6 +32,7 @@ export function createLiveServices(): Services {
       listInquiriesForActor: reject,
       replyToInquiry: reject,
       recordInquiryOutcome: reject,
+      fileInquiry: reject,
       registerFarmer: reject,
       getOwnFarm: reject,
       updateOwnProfile: reject,

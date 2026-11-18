@@ -20,7 +20,7 @@ import type { InquiryGateway } from './inquiries';
 
 export interface PreviewOpenInput {
   targetKind: PreviewEvent['targetKind'];
-  /** The market or pickup location id. */
+  /** Farm, product, market or pickup id. */
   targetId: string;
   surface: PreviewEvent['surface'];
 }

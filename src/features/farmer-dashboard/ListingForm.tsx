@@ -21,6 +21,7 @@ import { CATEGORY_ORDER, useProductTypes } from '@/features/catalogue';
 import { centsToDollarsText, formatListingPrice, formatUnitPrice, parseDollars } from '@/lib/format';
 import { useMounted } from '@/lib/useMounted';
 import { fieldWords, failureWords } from './errors';
+import { ListingOverview } from './ListingOverview';
 import { monthName, presetLabel, unitCount, unitName } from './format';
 import { useCreateListing, useNow, useOwnListings, useRemoveListing, useSettings, useUpdateListing } from './hooks';
 
@@ -190,10 +191,13 @@ function Body({
 
   return (
     <section className="dash-section" aria-labelledby="listing-form-title">
-      <Button variant="link" href="/dashboard/listings">
-        {words.back}
-      </Button>
-      <h2 id="listing-form-title" className="dash-title">
+      <div>
+        <Button variant="link" href="/dashboard/listings">
+          {words.back}
+        </Button>
+      </div>
+      {existing ? <ListingOverview listing={existing} /> : null}
+      <h2 id="listing-form-title" className={existing ? 'dash-subtitle' : 'dash-title'}>
         {existing ? words.editTitle : words.newTitle}
       </h2>
       <form className="dash-form" onSubmit={(e) => void submit(e)} noValidate>

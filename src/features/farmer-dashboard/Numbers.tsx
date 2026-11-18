@@ -30,6 +30,9 @@ export function NumbersPage() {
         />
         <StatFigure figure={n.inquiries.closedUnanswered} label={words.unanswered} />
         <StatFigure figure={n.listings.availableNow} label={words.listingsNow} note={words.listingsOf(n.listings.availableNow, n.listings.total)} />
+        <StatFigure figure={n.views.farmProfile} label={words.farmProfileViews} note={words.window(n.windowDays)} />
+        <StatFigure figure={n.views.listingCards} label={words.listingCardViews} note={words.window(n.windowDays)} />
+        <StatFigure figure={n.views.contactClicks} label={words.contactClicks} note={words.window(n.windowDays)} />
         <StatFigure figure={n.outcomes.sale} label={words.outcomesSale} note={copy.dashboard.inquiries.selfReported} />
         <StatFigure figure={n.outcomes.new_potential_customer} label={words.outcomesNew} note={copy.dashboard.inquiries.selfReported} />
       </StatGrid>

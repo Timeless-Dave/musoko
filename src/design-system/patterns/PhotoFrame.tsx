@@ -1,7 +1,14 @@
 import Image from 'next/image';
 import { cn } from '@/lib/cn';
 
-const RATIOS = { '4:3': '4 / 3', '3:2': '3 / 2', '1:1': '1 / 1', '16:9': '16 / 9', '4:5': '4 / 5' } as const;
+const RATIOS = {
+  '4:3': '4 / 3',
+  '3:2': '3 / 2',
+  '1:1': '1 / 1',
+  '16:9': '16 / 9',
+  '16:10': '16 / 10',
+  '4:5': '4 / 5',
+} as const;
 const FOCUS = {
   center: 'center',
   top: 'center top',

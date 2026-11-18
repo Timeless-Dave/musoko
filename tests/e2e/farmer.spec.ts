@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { choose } from './choose';
 
 /**
  * Step 6: farmer registration and dashboard. IDs refer to docs/ACCEPTANCE.md.
@@ -49,6 +50,13 @@ async function asFarmer(page: Page, path = '/dashboard') {
   await switchRole(page, 'Farmer');
   await expect(page.getByRole('heading', { level: 1, name: 'Cypress Knee Gardens' })).toBeVisible();
 }
+/** Opens one inquiry from the inbox list and returns its card. */
+async function openInquiry(page: Page, who: string, about: string) {
+  await page.getByRole('list', { name: 'Inquiries in this folder' }).getByRole('button').filter({ hasText: who }).filter({ hasText: about }).first().click();
+  const card = page.locator('.inquiry-card');
+  await expect(card).toBeVisible();
+  return card;
+}
 const listing = (page: Page, title: string) => page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: title, exact: true }) });
 const check = async (page: Page) => expect((await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze()).violations).toEqual([]);
 
@@ -95,7 +103,7 @@ test('AVAIL-5: Coming soon takes a month and shows to buyers; None right now say
   await asFarmer(page, '/dashboard/listings');
   const row = listing(page, 'Collard greens');
   await row.getByRole('button', { name: 'Coming soon' }).click();
-  await row.getByLabel('Month').selectOption({ index: 3 });
+  await choose(row, 'Month', { index: 3 });
   await row.getByRole('button', { name: 'Set coming soon' }).click();
   await expect(row.getByRole('status')).toContainText('Marked coming soon for');
   await expect(row.getByText(/Coming soon, expected/)).toBeVisible();
@@ -118,7 +126,7 @@ test('AVAIL-5: Coming soon takes a month and shows to buyers; None right now say
 
 test('PRICE, CLAIM-2: a new listing takes presets, shows the unit price, and asks for the licence on eggs', async ({ page }) => {
   await asFarmer(page, '/dashboard/listings/new');
-  await page.getByLabel('What is it?').selectOption({ label: 'Tomatoes' });
+  await choose(page, 'What is it?', 'Tomatoes');
   await expect(page.getByLabel('Name buyers will see')).toHaveValue('Tomatoes');
   await page.getByLabel('Name buyers will see').fill('Slicing tomatoes, 5 lb box');
   await page.getByRole('radio', { name: '5 lb box' }).check();
@@ -136,7 +144,7 @@ test('PRICE, CLAIM-2: a new listing takes presets, shows the unit price, and ask
 
   // Eggs need the licence confirmation.
   await page.goto('/dashboard/listings/new');
-  await page.getByLabel('What is it?').selectOption({ label: 'Eggs' });
+  await choose(page, 'What is it?', 'Eggs');
   await page.getByRole('radio', { name: 'Dozen' }).check();
   await page.getByLabel('Price in dollars').fill('5');
   await page.getByRole('button', { name: 'Save listing' }).click();
@@ -172,7 +180,7 @@ test('a listing can be edited and removed, and buyers see the change', async ({ 
 
 test('INQ-3, STAT-1, MODE-2: one tap replies, the buyer’s page shows it, and no phone goes with it', async ({ page }) => {
   await asFarmer(page, '/dashboard/inquiries');
-  const card = page.getByRole('listitem').filter({ hasText: 'Renata Voss' }).filter({ hasText: 'Collard' }).first();
+  const card = await openInquiry(page, 'Renata Voss', 'Collard');
   await expect(card.getByText('Awaiting response')).toBeVisible();
   await expect(card.getByText('Wants a text back: 870-555-0171')).toBeVisible();
   await card.getByRole('button', { name: 'Add a short note' }).click();
@@ -199,8 +207,7 @@ test('INQ-3, STAT-1, MODE-2: one tap replies, the buyer’s page shows it, and n
 
 test('INQ-4: Contact me asks first, and shares the phone with that buyer only', async ({ page }) => {
   await asFarmer(page, '/dashboard/inquiries');
-  const card = page.getByRole('listitem').filter({ hasText: 'Renata Voss' }).filter({ hasText: 'cherry' }).first();
-  await expect(card).toBeVisible();
+  const card = await openInquiry(page, 'Renata Voss', 'cherry');
   await card.getByRole('button', { name: 'Contact me' }).click();
   const dialog = page.getByRole('dialog', { name: 'Share your phone number?' });
   await expect(dialog).toContainText('870-555-0101');
@@ -226,7 +233,7 @@ test('INQ-4: Contact me asks first, and shares the phone with that buyer only', 
 
 test('INQ-4: a note that carries a phone number is refused in words', async ({ page }) => {
   await asFarmer(page, '/dashboard/inquiries');
-  const card = page.getByRole('listitem').filter({ hasText: 'Renata Voss' }).filter({ hasText: 'Collard' }).first();
+  const card = await openInquiry(page, 'Renata Voss', 'Collard');
   await card.getByRole('button', { name: 'Add a short note' }).click();
   await card.getByLabel('Short note for the buyer').fill('Text me on 870-555-0101');
   await card.getByRole('button', { name: 'Available', exact: true }).click();
@@ -234,9 +241,40 @@ test('INQ-4: a note that carries a phone number is refused in words', async ({ p
   expect((await stored(page)).db.inquiry_replies.some((r) => r.inquiryId === 'inq-01')).toBe(false);
 });
 
+test('the inquiry inbox files to Buyers and Done, undoes, moves back, and survives a reload', async ({ page }) => {
+  await asFarmer(page, '/dashboard/inquiries');
+  const folder = (name: string) => page.getByRole('group', { name: 'Folders' }).getByRole('button', { name: new RegExp(`^${name}`) });
+  const rows = page.getByRole('list', { name: 'Inquiries in this folder' }).getByRole('button');
+  const inboxCount = await rows.count();
+
+  await openInquiry(page, 'Renata Voss', 'Collard');
+  await page.getByRole('button', { name: 'Move to buyers' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moved to Buyers.' })).toBeVisible();
+  // Undo puts it straight back.
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect.poll(async () => (await stored(page)).db as unknown as { inquiry_folders: unknown[] }).toMatchObject({ inquiry_folders: [] });
+
+  await page.getByRole('button', { name: 'Mark done' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moved to Done.' })).toBeVisible();
+  await page.reload();
+  await expect(rows).toHaveCount(inboxCount - 1);
+  await folder('Done').click();
+  await openInquiry(page, 'Renata Voss', 'Collard');
+  // Changing your mind later: back to the inbox.
+  await page.getByRole('button', { name: 'Move back to inbox' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moved to Inbox.' })).toBeVisible();
+  await folder('Inbox').click();
+  await expect(rows).toHaveCount(inboxCount);
+
+  // The buyer's page is untouched by any of it.
+  const state = await stored(page);
+  expect(state.db.inquiries.find((i) => i.id === 'inq-01')).toMatchObject({ status: 'awaiting_response' });
+});
+
 test('OUT-1, OUT-2, STAT-5: the outcome question appears some days after a reply, takes one tap, and closes the inquiry', async ({ page }) => {
-  await asFarmer(page, '/dashboard');
+  await asFarmer(page, '/dashboard/inquiries');
   // inq-05 was answered 3.5 days ago in the seed, so the question is due.
+  await openInquiry(page, 'Lucille Marchetti', 'Collard');
   const question = page.getByRole('group', { name: 'Did this inquiry result in a sale or new customer relationship?' });
   await expect(question).toHaveCount(1);
   await expect(question.getByText(/asks for no amounts and no payment details|no amounts and no payment details/)).toBeVisible();
@@ -248,6 +286,7 @@ test('OUT-1, OUT-2, STAT-5: the outcome question appears some days after a reply
   expect((await stored(page)).db.inquiry_outcomes.some((o) => o.inquiryId === 'inq-05')).toBe(false);
 
   await page.reload();
+  await openInquiry(page, 'Lucille Marchetti', 'Collard');
   const again = page.getByRole('group', { name: /Did this inquiry result/ });
   await again.getByRole('button', { name: 'Yes, a sale' }).click();
   await expect(page.getByText('Your answer was saved.')).toBeVisible();
@@ -256,6 +295,7 @@ test('OUT-1, OUT-2, STAT-5: the outcome question appears some days after a reply
   expect(state.db.inquiries.find((i) => i.id === 'inq-05')).toMatchObject({ status: 'closed', closedReason: 'outcome_recorded' });
 
   await page.reload();
+  await openInquiry(page, 'Lucille Marchetti', 'Collard');
   await expect(page.getByRole('group', { name: /Did this inquiry result/ })).toHaveCount(0);
 });
 
@@ -350,7 +390,7 @@ test('profile edits, practices and pickup choices are saved and survive a reload
 
   await page.getByRole('checkbox', { name: 'Pasture raised' }).check();
   await page.getByLabel('What to say').fill('Cottage food registration');
-  await page.getByLabel('Kind').selectOption('licence');
+  await choose(page, 'Kind', 'Licence');
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await page.getByRole('button', { name: 'Save these' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Saved.' }).nth(1)).toBeVisible();
@@ -387,7 +427,7 @@ test('CONS-2, TRUST-1, MODE-1: a farmer registers, becomes a draft awaiting revi
 
   await page.getByLabel('Farm name').fill('Cypress Row Farm');
   await page.getByLabel('Your name').fill('Ada Marsh');
-  await page.getByLabel('Nearest town').selectOption({ label: 'Pine Bluff' });
+  await choose(page, 'Nearest town', 'Pine Bluff');
   await page.getByLabel('What do you grow or make?').fill('Greens and eggs.');
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: /Step 2 of 2/ })).toBeVisible();
@@ -408,7 +448,7 @@ test('CONS-2, TRUST-1, MODE-1: a farmer registers, becomes a draft awaiting revi
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Cypress Row Farm' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Musoko will review your profile.' })).toBeVisible();
-  await expect(page.getByText('Waiting for Musoko’s review')).toBeVisible();
+  await expect(page.getByText('Waiting for Musoko’s review').first()).toBeVisible();
 
   const state = await stored(page);
   const profile = state.db.farmer_profiles.find((f) => f.slug === 'cypress-row-farm')!;
@@ -435,7 +475,7 @@ test('CONS-2, TRUST-1, MODE-1: a farmer registers, becomes a draft awaiting revi
 
   // The new farmer can add a listing, which stays private with the profile.
   await page.goto('/dashboard/listings/new');
-  await page.getByLabel('What is it?').selectOption({ label: 'Collard greens' });
+  await choose(page, 'What is it?', 'Collard greens');
   await page.getByRole('radio', { name: 'By the bunch' }).check();
   await page.getByLabel('Price in dollars').fill('3.50');
   await page.getByRole('button', { name: 'Save listing' }).click();

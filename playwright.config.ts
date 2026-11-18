@@ -6,7 +6,8 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
   reporter: "list",
-  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure" },
+  // Tests start with the first-visit welcome dialog already seen, so it does not cover the page.
+  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure", storageState: "tests/e2e/storage-state.json" },
   projects: [
     { name: "phone", use: { ...devices["Pixel 7"] } },
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

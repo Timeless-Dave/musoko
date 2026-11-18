@@ -48,6 +48,23 @@ describe('preview-open counting (DATA-4)', () => {
     expect(events(storage).find((e) => e.day === '2026-11-15' && e.targetId === 'pickup-03')?.count).toBe(1);
   });
 
+  it('counts farm and product opens the same way', async () => {
+    const storage = createMemoryStorage();
+    const { gateway, demo } = createDemoServices({ clock, storage });
+    await demo!.ready();
+    // The seed already has some opens for the demo farm today; each open adds exactly one.
+    const count = (kind: string, id: string, surface: string) =>
+      events(storage)
+        .filter((e) => e.day === '2026-11-15' && e.targetKind === kind && e.targetId === id && e.surface === surface)
+        .reduce((n, e) => n + e.count, 0);
+    const farmBefore = count('farm', 'farm-01', 'profile');
+    const productBefore = count('product', 'prod-003', 'card');
+    await gateway.recordPreviewOpen({ targetKind: 'farm', targetId: 'farm-01', surface: 'profile' });
+    await gateway.recordPreviewOpen({ targetKind: 'product', targetId: 'prod-003', surface: 'card' });
+    expect(count('farm', 'farm-01', 'profile')).toBe(farmBefore + 1);
+    expect(count('product', 'prod-003', 'card')).toBe(productBefore + 1);
+  });
+
   it('rejects a place that does not exist or is the wrong kind', async () => {
     const { gateway } = createDemoServices({ clock, storage: createMemoryStorage() });
     await expect(

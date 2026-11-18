@@ -228,6 +228,31 @@ export function createDemoInquiries(
       return copyOf(toInquiryRecord(db, db.inquiries.find((i) => i.id === inquiryId)!));
     },
 
+    async fileInquiry(actor: Actor, inquiryId, folder) {
+      await runtime.ready();
+      if (folder !== 'inbox' && folder !== 'buyers' && folder !== 'done') {
+        throw invalid('That folder does not exist.', { folder: 'invalid' });
+      }
+      const now = runtime.clock.now();
+      let after: Database | null = null;
+
+      await runtime.commit((state) => {
+        const farm = requireOwnFarm(state.db, actor);
+        const inquiry = state.db.inquiries.find((i) => i.id === inquiryId);
+        if (!inquiry) throw new GatewayError('not_found', 'That inquiry does not exist.');
+        if (inquiry.farmerProfileId !== farm.id) throw new GatewayError('forbidden', 'That inquiry was not sent to your farm.');
+        const others = (state.db.inquiry_folders ?? []).filter((f) => f.inquiryId !== inquiryId);
+        const db: Database = {
+          ...state.db,
+          inquiry_folders: folder === 'inbox' ? others : [...others, { inquiryId, folder, updatedAt: now.toISOString() }],
+        };
+        after = db;
+        return { ...state, db };
+      });
+      const db = after!;
+      return copyOf(toInquiryRecord(db, db.inquiries.find((i) => i.id === inquiryId)!));
+    },
+
     async runJobs() {
       await runtime.ready();
       const now = runtime.clock.now();
