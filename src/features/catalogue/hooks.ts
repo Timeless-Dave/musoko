@@ -18,6 +18,10 @@ export const usePublicMarkets = () =>
   useQuery({ queryKey: ['public', 'markets'], queryFn: () => services.gateway.listPublicMarkets() });
 export const usePublicPickupLocations = () =>
   useQuery({ queryKey: ['public', 'pickup-locations'], queryFn: () => services.gateway.listPublicPickupLocations() });
+export const useDirectoryFarms = () =>
+  useQuery({ queryKey: ['public', 'directory'], queryFn: () => services.gateway.listDirectoryFarms() });
+export const useDirectoryFarm = (slug: string) =>
+  useQuery({ queryKey: ['public', 'directory', slug], queryFn: () => services.gateway.getDirectoryFarmBySlug(slug) });
 export const useCommunities = () =>
   useQuery({ queryKey: ['public', 'communities'], queryFn: () => services.gateway.listCommunities() });
 export const useProductTypes = () =>

@@ -4,6 +4,8 @@ export {
   usePublicFarm,
   usePublicMarkets,
   usePublicPickupLocations,
+  useDirectoryFarms,
+  useDirectoryFarm,
   useCommunities,
   useProductTypes,
   useSelectedCommunity,

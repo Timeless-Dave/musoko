@@ -1,3 +1,4 @@
+import { buildFarmerPlanning } from '@/domain/planning';
 import { confirmAvailability, isValidComingSoonMonth, markComingSoon, markUnavailable } from '@/domain/availability';
 import { recordFarmerConsent, recordFarmerReview, republishProfile, unpublishProfile } from '@/domain/consent';
 import {
@@ -403,6 +404,10 @@ export function createDemoFarmer(runtime: DemoRuntime): FarmerGateway {
     async getFarmerNumbers(actor) {
       const { db, farm, now } = await read(actor);
       return farmerNumbers(db, farm.id, now, db.settings);
+    },
+    async getFarmerPlanning(actor) {
+      const { db, farm, now } = await read(actor);
+      return buildFarmerPlanning(db, farm.id, now, db.settings);
     },
   };
 }

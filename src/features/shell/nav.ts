@@ -11,7 +11,9 @@ export type NavIconName =
   | 'dashboard'
   | 'admin'
   | 'info'
-  | 'camera';
+  | 'camera'
+  | 'pickup'
+  | 'institution';
 
 export interface NavItem {
   href: string;
@@ -19,16 +21,17 @@ export interface NavItem {
   icon: NavIconName;
 }
 
-/** Footer links. Only routes that exist. */
+/** Footer links, in the order of the primary navigation. Only routes that exist. */
 export const NAV: readonly NavItem[] = [
   { href: '/food', label: copy.nav.food, icon: 'basket' },
   { href: '/farmers', label: copy.nav.farmers, icon: 'farm' },
   { href: '/farmers-markets', label: copy.nav.markets, icon: 'store' },
-  { href: '/map', label: copy.nav.map, icon: 'map' },
-  { href: '/compare', label: copy.nav.compare, icon: 'compare' },
+  { href: '/pickup', label: copy.nav.pickup, icon: 'pickup' },
+  { href: '/institutions', label: copy.nav.institutions, icon: 'institution' },
+  { href: '/about', label: copy.nav.about, icon: 'info' },
 ];
 
-/** The left sidebar on wide screens and the menu drawer on phones, in three groups. */
+/** The left sidebar on wide screens and the menu drawer on phones. The first group is the primary navigation. */
 export const SIDEBAR: readonly { label?: string; items: readonly NavItem[] }[] = [
   {
     items: [
@@ -36,6 +39,14 @@ export const SIDEBAR: readonly { label?: string; items: readonly NavItem[] }[] =
       { href: '/food', label: copy.shell.food, icon: 'basket' },
       { href: '/farmers', label: copy.shell.farmers, icon: 'farm' },
       { href: '/farmers-markets', label: copy.shell.markets, icon: 'store' },
+      { href: '/pickup', label: copy.shell.pickup, icon: 'pickup' },
+      { href: '/institutions', label: copy.shell.institutions, icon: 'institution' },
+      { href: '/about', label: copy.shell.aboutPage, icon: 'info' },
+    ],
+  },
+  {
+    label: copy.shell.tools,
+    items: [
       { href: '/map', label: copy.shell.map, icon: 'map' },
       { href: '/compare', label: copy.shell.compare, icon: 'compare' },
     ],
@@ -46,13 +57,6 @@ export const SIDEBAR: readonly { label?: string; items: readonly NavItem[] }[] =
       { href: '/join', label: copy.shell.join, icon: 'join' },
       { href: '/dashboard', label: copy.shell.dashboard, icon: 'dashboard' },
       { href: '/admin', label: copy.shell.admin, icon: 'admin' },
-    ],
-  },
-  {
-    label: copy.shell.about,
-    items: [
-      { href: '/welcome', label: copy.shell.welcome, icon: 'info' },
-      { href: '/#how-it-works', label: copy.shell.how, icon: 'info' },
     ],
   },
 ];

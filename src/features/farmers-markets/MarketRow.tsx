@@ -75,12 +75,22 @@ export function MarketRow({
               </a>
               {market.contactPhone ? <a href={`tel:${market.contactPhone}`}>{market.contactPhone}</a> : null}
               {market.contactEmail ? <a href={`mailto:${market.contactEmail}`}>{market.contactEmail}</a> : null}
+              {market.website ? (
+                <a href={market.website} target="_blank" rel="noreferrer">
+                  {copy.markets.website}
+                </a>
+              ) : null}
+              {!market.website && market.sources[0] ? (
+                <a href={market.sources[0]} target="_blank" rel="noreferrer">
+                  {copy.pickupPage.source}
+                </a>
+              ) : null}
             </p>
           </>
         )}
         <MetaLine>
           <span>{market.town}</span>
-          {market.isDemo ? <DemoMark /> : null}
+          {market.isDemo ? <DemoMark /> : <span className="public-mark" title={copy.pickupPage.source}>{copy.pickupPage.publicMarket}</span>}
         </MetaLine>
       </div>
     </article>

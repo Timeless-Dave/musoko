@@ -16,6 +16,21 @@ const ROWS: Row[] = [
   { slug: 'wynne', name: 'Wynne', county: 'Cross', centre: { lat: 35.224, lng: -90.787 } },
   { slug: 'lake-village', name: 'Lake Village', county: 'Chicot', centre: { lat: 33.329, lng: -91.282 } },
   { slug: 'clarendon', name: 'Clarendon', county: 'Monroe', centre: { lat: 34.693, lng: -91.314 } },
+  // Added with the public farm directory: towns where listed real farms are.
+  { slug: 'lexa', name: 'Lexa', county: 'Phillips', centre: { lat: 34.598, lng: -90.752 } },
+  { slug: 'augusta', name: 'Augusta', county: 'Woodruff', centre: { lat: 35.282, lng: -91.365 } },
+  { slug: 'jonesboro', name: 'Jonesboro', county: 'Craighead', centre: { lat: 35.842, lng: -90.704 } },
+  { slug: 'brookland', name: 'Brookland', county: 'Craighead', centre: { lat: 35.9, lng: -90.582 } },
+  { slug: 'bono', name: 'Bono', county: 'Craighead', centre: { lat: 35.909, lng: -90.802 } },
+  { slug: 'tyronza', name: 'Tyronza', county: 'Poinsett', centre: { lat: 35.487, lng: -90.358 } },
+  { slug: 'trumann', name: 'Trumann', county: 'Poinsett', centre: { lat: 35.674, lng: -90.507 } },
+  { slug: 'harrisburg', name: 'Harrisburg', county: 'Poinsett', centre: { lat: 35.564, lng: -90.717 } },
+  { slug: 'lonoke', name: 'Lonoke', county: 'Lonoke', centre: { lat: 34.784, lng: -91.9 } },
+  { slug: 'cabot', name: 'Cabot', county: 'Lonoke', centre: { lat: 34.975, lng: -92.017 } },
+  { slug: 'marion', name: 'Marion', county: 'Crittenden', centre: { lat: 35.2145, lng: -90.1965 } },
+  { slug: 'osceola', name: 'Osceola', county: 'Mississippi', centre: { lat: 35.7051, lng: -89.9695 } },
+  { slug: 'newport', name: 'Newport', county: 'Jackson', centre: { lat: 35.6067, lng: -91.2818 } },
+  { slug: 'des-arc', name: 'Des Arc', county: 'Prairie', centre: { lat: 34.977, lng: -91.495 } },
 ];
 
 export const communityId = (slug: string): CommunityId => asId<CommunityId>(`com-${slug}`);

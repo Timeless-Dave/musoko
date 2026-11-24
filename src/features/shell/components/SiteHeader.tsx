@@ -7,6 +7,7 @@ import { TownPicker } from '@/features/catalogue';
 import { GetToggle } from './GetToggle';
 import { GlobalSearch } from './GlobalSearch';
 import { MenuDrawer } from './MenuDrawer';
+import { SidebarToggle } from './SidebarNav';
 
 /**
  * The top bar, on every page: menu (below 1024px), brand, search, town,
@@ -18,6 +19,7 @@ export function SiteHeader() {
       <div className="site-header__bar">
         <div className="site-header__menu-slot">
           <MenuDrawer />
+          <SidebarToggle />
         </div>
         <Link href="/" className="site-header__brand">
           <BrandWordmark logoSize={32} markClassName="site-header__mark" suffixClassName="site-header__name" />

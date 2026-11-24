@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
-import { CaretDoubleLeft, CaretDoubleRight } from '@phosphor-icons/react';
+import { SidebarSimple } from '@phosphor-icons/react';
 import { usePersistentString } from '@/lib/usePersistentString';
 import { copy } from '@/content/copy';
 import { useCompareStore } from '@/features/compare';
@@ -63,32 +63,37 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+const SIDEBAR_KEY = 'musoko.sidebar';
+
 /**
- * Fixed beside the content from 1024px. It folds down to a rail of icons, and
- * the choice is remembered in this browser. Below 1024px the same links live in
- * the menu drawer.
+ * Fixed beside the content from 1024px. It folds down to a rail of icons from
+ * the toggle beside the logo, and the choice is remembered in this browser.
+ * Below 1024px the same links live in the menu drawer.
  */
 export function AppSidebar() {
-  const [state, setState] = usePersistentString('musoko.sidebar', 'open');
-  const collapsed = state === 'collapsed';
+  const [state] = usePersistentString(SIDEBAR_KEY, 'open');
   return (
-    <aside className="app-sidebar" data-collapsed={collapsed || undefined}>
-      <button
-        type="button"
-        className="app-sidebar__toggle"
-        aria-expanded={!collapsed}
-        aria-label={collapsed ? copy.shell.expandMenu : copy.shell.collapseMenu}
-        title={collapsed ? copy.shell.expandMenu : copy.shell.collapseMenu}
-        onClick={() => setState(collapsed ? 'open' : 'collapsed')}
-      >
-        {collapsed ? (
-          <CaretDoubleRight size={18} weight="bold" aria-hidden="true" />
-        ) : (
-          <CaretDoubleLeft size={18} weight="bold" aria-hidden="true" />
-        )}
-        <span className="side-nav__label">{copy.shell.collapseMenu}</span>
-      </button>
+    <aside className="app-sidebar" data-collapsed={state === 'collapsed' || undefined}>
       <SidebarNav />
     </aside>
+  );
+}
+
+/** One icon in the top bar, beside the logo, that folds and unfolds the sidebar. */
+export function SidebarToggle() {
+  const [state, setState] = usePersistentString(SIDEBAR_KEY, 'open');
+  const collapsed = state === 'collapsed';
+  const label = collapsed ? copy.shell.expandMenu : copy.shell.collapseMenu;
+  return (
+    <button
+      type="button"
+      className="icon-button sidebar-toggle"
+      aria-expanded={!collapsed}
+      aria-label={label}
+      title={label}
+      onClick={() => setState(collapsed ? 'open' : 'collapsed')}
+    >
+      <SidebarSimple size={22} weight="regular" aria-hidden="true" />
+    </button>
   );
 }

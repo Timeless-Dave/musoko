@@ -32,6 +32,8 @@
  *           Every farm has a private location and a private contact row.
  *  SEED-11  claims.ts: farmer-reported snap_ebt on farm-01, 06, 08.
  *  SEED-12  inquiries.ts: 10 inquiries (3 awaiting, 3 responded, 4 closed). inq-10 has no buyer contact row.
+ *  SEED-14  institutions.ts: 5 fictional institutional buyers (2 keep their name private) with planned needs.
+ *  SEED-15  directory.ts: real farms listed from their own public pages. Not demo: no prices, no listings.
  *  SEED-13  users.ts: user-demo-farmer (owns farm-01), user-demo-buyer, user-demo-admin. DEMO_ACCOUNTS.
  */
 import type { Database, Settings } from '@/domain/types';
@@ -40,6 +42,8 @@ import { buildCommunities } from './communities';
 import { buildAggregateCounts, buildPreviewEvents, buildSearchEvents } from './events';
 import { buildFarms } from './farms';
 import { buildInquiries } from './inquiries';
+import { buildInstitutions } from './institutions';
+import { buildDirectoryFarms } from './directory';
 import { buildMarkets } from './markets';
 import { buildPickupLocations, buildPickupOptions } from './pickups';
 import { buildProductTypes } from './product-types';
@@ -57,6 +61,7 @@ export function buildSeed(now: Date, settings: Settings): Database {
   const markets = buildMarkets();
   const inquiries = buildInquiries(now);
   const users = buildUsers(now);
+  const institutions = buildInstitutions(now);
 
   return {
     regions: buildRegions(),
@@ -82,6 +87,10 @@ export function buildSeed(now: Date, settings: Settings): Database {
     inquiry_outcomes: inquiries.outcomes,
     inquiry_folders: [],
     claims: buildClaims(now),
+    directory_farms: buildDirectoryFarms(),
+    institutions: institutions.institutions,
+    institution_contacts: institutions.contacts,
+    institution_needs: institutions.needs,
     search_events: buildSearchEvents(now),
     preview_events: buildPreviewEvents(now),
     aggregate_counts: buildAggregateCounts(now, settings.searchEventRetentionDays),

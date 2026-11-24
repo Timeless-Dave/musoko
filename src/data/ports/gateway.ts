@@ -1,6 +1,7 @@
 import type {
   Community,
   CommunityId,
+  DirectoryFarm,
   ProductAvailability,
   ProductId,
   ProductType,
@@ -17,6 +18,7 @@ import type { Actor } from './auth';
 import type { AdminGateway } from './admin';
 import type { FarmerGateway } from './farmer';
 import type { InquiryGateway } from './inquiries';
+import type { InstitutionGateway } from './institutions';
 
 export interface PreviewOpenInput {
   targetKind: PreviewEvent['targetKind'];
@@ -29,7 +31,7 @@ export interface PreviewOpenInput {
  * Public methods return projection types or reference rows only. Privileged
  * methods take the acting user and check the role before returning anything.
  */
-export interface DataGateway extends InquiryGateway, FarmerGateway, AdminGateway {
+export interface DataGateway extends InquiryGateway, FarmerGateway, AdminGateway, InstitutionGateway {
   // ----- public -----
   getSettings(): Promise<Settings>;
   listRegions(): Promise<Region[]>;
@@ -41,6 +43,9 @@ export interface DataGateway extends InquiryGateway, FarmerGateway, AdminGateway
   listPublicProducts(): Promise<PublicProduct[]>;
   listPublicMarkets(): Promise<PublicMarket[]>;
   listPublicPickupLocations(): Promise<PublicPickupLocation[]>;
+  /** Real farms listed from their own public pages. No prices, no listings. */
+  listDirectoryFarms(): Promise<DirectoryFarm[]>;
+  getDirectoryFarmBySlug(slug: string): Promise<DirectoryFarm | null>;
   /** Anonymous: no session or device id. Terms are scrubbed before storage. */
   recordSearch(input: {
     rawTerms: string;

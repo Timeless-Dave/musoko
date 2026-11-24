@@ -14,6 +14,7 @@
 @import '../features/inquiry/inquiry.css';
 @import '../features/farmer-dashboard/dashboard.css';
 @import '../features/admin/admin.css';
+@import '../features/institutions/institutions.css';
 @import '../features/styleguide/styleguide.css';
 
 /* Tailwind keeps its spacing scale and utilities; colours and breakpoints are Musoko's own. */

@@ -11,6 +11,7 @@ import type { NotificationService } from '../../ports/notifications';
 import { createDemoAdmin } from './admin';
 import { createDemoFarmer } from './farmer';
 import { createDemoInquiries } from './inquiries';
+import { createDemoInstitutions } from './institutions';
 import type { DemoRuntime } from './store';
 
 // Public reads go only through buildPublicCatalogue. This file never reads the
@@ -24,6 +25,7 @@ export function createDemoGateway(
   const inquiries = createDemoInquiries(runtime, notifications);
   const farmer = createDemoFarmer(runtime);
   const admin = createDemoAdmin(runtime, inquiries.runJobs);
+  const institutions = createDemoInstitutions(runtime, notifications);
   async function catalogue(): Promise<PublicCatalogue> {
     await runtime.ready();
     const { db } = runtime.read();
@@ -38,6 +40,7 @@ export function createDemoGateway(
     ...inquiries,
     ...farmer,
     ...admin,
+    ...institutions,
     async getSettings() {
       await runtime.ready();
       return copyOf(runtime.read().db.settings);
@@ -59,6 +62,15 @@ export function createDemoGateway(
     },
     async listPublicPickupLocations() {
       return (await catalogue()).pickupLocations;
+    },
+    async listDirectoryFarms() {
+      await runtime.ready();
+      return copyOf(runtime.read().db.directory_farms.filter((f) => f.status !== 'removed'));
+    },
+    async getDirectoryFarmBySlug(slug) {
+      await runtime.ready();
+      const farm = runtime.read().db.directory_farms.find((f) => f.slug === slug && f.status !== 'removed');
+      return farm ? copyOf(farm) : null;
     },
 
     async recordSearch({ rawTerms, filters, communityId, resultCount }) {

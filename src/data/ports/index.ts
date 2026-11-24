@@ -14,6 +14,7 @@ export * from './map';
 export * from './images';
 export * from './gateway';
 export * from './inquiries';
+export * from './institutions';
 export * from './farmer';
 export * from './admin';
 export * from './demo';

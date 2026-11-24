@@ -99,67 +99,220 @@
   }
 }
 
+/* ---- The chat sheet: a thread that fills the space, a pill composer at the bottom ---- */
 .assistant-panel {
-  display: grid;
-  gap: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: min(72dvh, 42rem);
   min-height: 0;
 }
-.assistant-panel__note {
-  font-size: var(--text-meta);
-  color: var(--ink-muted);
-}
 .assistant-thread {
-  display: grid;
-  gap: var(--space-3);
-  max-height: min(50dvh, 22rem);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
   overflow-y: auto;
-  padding-right: var(--space-1);
+  padding: var(--space-1) var(--space-1) var(--space-2) 0;
+  overscroll-behavior: contain;
+}
+.assistant-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+.assistant-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--ground);
 }
 .assistant-bubble {
   margin: 0;
-  max-width: 38rem;
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-panel);
-  white-space: pre-wrap;
-  font-size: var(--text-meta);
-  line-height: 1.45;
+  border-radius: 1.125rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 .assistant-bubble--guide {
+  max-width: calc(100% - 2.5rem);
+  border-top-left-radius: 0.375rem;
   background: var(--ground-sunk);
-  justify-self: start;
 }
 .assistant-bubble--user {
+  align-self: flex-end;
+  max-width: 85%;
+  border-bottom-right-radius: 0.375rem;
   background: var(--ink);
   color: var(--ground);
-  justify-self: end;
+  white-space: pre-wrap;
 }
+
+/* The guide's answer, laid out. */
+.guide-message {
+  display: grid;
+  gap: var(--space-2);
+}
+.guide-message p {
+  margin: 0;
+}
+.guide-message ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.guide-message li {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-field);
+  background: var(--ground);
+}
+.guide-message__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0 2px;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--ground);
+  font-size: 0.8125rem;
+  font-weight: var(--weight-strong);
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+@media (hover: hover) {
+  .guide-link:hover {
+    background: var(--ink-hover);
+  }
+}
+
+/* Three dots while the guide looks things up. */
+.assistant-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+.assistant-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  opacity: 0.35;
+  animation: assistant-dot 1.1s var(--ease-in-out) infinite;
+}
+.assistant-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.assistant-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes assistant-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assistant-typing span {
+    animation: none;
+  }
+}
+
+/* Suggested questions: only before the first question, as tappable chips. */
 .assistant-starters {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  padding-left: 2.5rem;
 }
 .assistant-starter {
   min-height: 2.25rem;
-  padding: 0 var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border: var(--rule-width) solid var(--rule);
   border-radius: var(--radius-pill);
-  background: transparent;
+  background: var(--ground);
   color: inherit;
-  font: var(--weight-strong) 0.8125rem / 1.2 var(--font-text);
+  font: var(--weight-strong) 0.8125rem / 1.3 var(--font-text);
+  text-align: left;
   cursor: pointer;
 }
-.assistant-compose {
-  display: grid;
-  gap: var(--space-3);
-}
-@media (min-width: 48rem) {
-  .assistant-compose {
-    grid-template-columns: 1fr auto;
-    align-items: end;
+@media (hover: hover) {
+  .assistant-starter:hover {
+    background: var(--ground-sunk);
   }
-}.assistant-bubble {
-  white-space: pre-line;
 }
-.assistant-bubble__typing {
-  font-style: italic;
+
+.assistant-compose {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.assistant-compose__input {
+  width: 100%;
+  height: 3rem;
+  padding: 0 3.5rem 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--ground-sunk);
+  color: var(--ink);
+  font: var(--weight-text) 1rem / 1.2 var(--font-text);
+}
+.assistant-compose__input::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+.assistant-compose__input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 var(--focus-width) var(--focus-color);
+}
+.assistant-compose__send {
+  position: absolute;
+  right: 0.375rem;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--ground);
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.assistant-compose__send:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.assistant-panel__note {
+  flex: none;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
 }

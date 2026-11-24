@@ -104,6 +104,9 @@ export function InquiryCard({
     <li className="inquiry-card">
       <div className="inquiry-card__head">
         <h3 className="inquiry-card__who">{buyer?.name ?? words.contactDeleted}</h3>
+        {record.inquiry.buyerKind === 'institution' ? (
+          <p className="pill-note">{copy.institutions.fromInstitution(buyer?.organisation ?? null)}</p>
+        ) : null}
         <p className="inquiry-card__state">{words.status[inquiry.status]}</p>
       </div>
       <MetaLine>

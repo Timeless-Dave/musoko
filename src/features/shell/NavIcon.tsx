@@ -3,10 +3,12 @@
 import {
   ArrowsLeftRight,
   Basket,
+  Buildings,
   Camera,
   GearSix,
   House,
   Info,
+  MapPin,
   MapTrifold,
   Plant,
   SquaresFour,
@@ -27,6 +29,8 @@ const MAP = {
   admin: GearSix,
   info: Info,
   camera: Camera,
+  pickup: MapPin,
+  institution: Buildings,
 } as const;
 
 export function NavIcon({ name, size = 22 }: { name: NavIconName; size?: number }) {

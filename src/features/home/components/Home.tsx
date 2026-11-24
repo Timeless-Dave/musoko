@@ -17,14 +17,17 @@ import {
   Shelf,
   type Chip,
   useMilesFrom,
+  useDirectoryFarms,
   usePublicFarms,
   usePublicMarkets,
   usePublicProducts,
   useSelectedCommunity,
 } from '@/features/catalogue';
 import { MarketCard } from '@/features/farmers-markets';
+import { DirectoryCard } from '@/features/farmers';
 import { useMounted } from '@/lib/useMounted';
 import { HowItWorks } from './HowItWorks';
+import { HomeHero } from './HomeHero';
 
 const BANNER = '/images/farms/carrots-in-hands.jpg';
 const DAY_MS = 86_400_000;
@@ -52,6 +55,7 @@ export function Home() {
   const { data: products } = usePublicProducts();
   const { data: farms } = usePublicFarms();
   const { data: markets } = usePublicMarkets();
+  const { data: directory } = useDirectoryFarms();
   const town = mounted ? (community?.name ?? '') : '';
   const ready = mounted && products != null && farms != null && markets != null;
   const shelfNear = (fn: (t: string) => string) => (town ? fn(town) : fn(''));
@@ -117,9 +121,7 @@ export function Home() {
   return (
     <>
       <Section pad="none" className="home-top" aria-labelledby="home-title">
-        <h1 id="home-title" className="visually-hidden">
-          {mounted && town ? copy.home.greeting(town) : copy.home.greetingFallback}
-        </h1>
+        <HomeHero town={town} />
         <ChipRail label={copy.food.category} chips={feed.chips} />
       </Section>
 
@@ -160,6 +162,21 @@ export function Home() {
           )}
         </Shelf>
       </Section>
+
+      {directory?.length ? (
+        <Section pad="none" className="home-shelf" aria-labelledby="home-directory">
+          <Shelf id="home-directory" title={copy.directory.title} hint={copy.directory.badgeHint} more={{ href: '/farmers#directory-title', label: copy.home.seeAllFarmers }} size="wide">
+            {[...directory]
+              .sort((a, b) => (milesFrom(a.communityId) ?? 9999) - (milesFrom(b.communityId) ?? 9999))
+              .slice(0, 12)
+              .map((farm) => (
+                <li key={farm.id}>
+                  <DirectoryCard farm={farm} miles={milesFrom(farm.communityId)} />
+                </li>
+              ))}
+          </Shelf>
+        </Section>
+      ) : null}
 
       <Section pad="none" className="home-shelf" aria-label={copy.home.banner.title}>
         <article className="banner">
