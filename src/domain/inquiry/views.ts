@@ -44,7 +44,7 @@ export interface BuyerInquiryView {
 /** One inquiry as the farmer it was sent to, or an administrator, sees it. Buyer contact is null once retention has deleted it. */
 export interface InquiryRecord {
   inquiry: Inquiry;
-  buyer: { name: string; phone: string | null; email: string | null; message: string } | null;
+  buyer: { name: string; phone: string | null; email: string | null; message: string; organisation: string | null } | null;
   productTitle: string | null;
   productTypeName: string | null;
   farmName: string;
@@ -125,7 +125,7 @@ export function toInquiryRecord(db: Database, inquiry: Inquiry): InquiryRecord {
   const type = inquiry.productTypeId ? db.product_types.find((t) => t.id === inquiry.productTypeId) : undefined;
   return {
     inquiry,
-    buyer: contact ? { name: contact.name, phone: contact.phone, email: contact.email, message: contact.message } : null,
+    buyer: contact ? { name: contact.name, phone: contact.phone, email: contact.email, message: contact.message, organisation: contact.organisation ?? null } : null,
     productTitle: product?.title ?? null,
     productTypeName: type?.name ?? null,
     farmName: farm?.farmName ?? '',

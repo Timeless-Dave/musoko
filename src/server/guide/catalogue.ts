@@ -4,6 +4,8 @@ import { distanceKm, kmToMiles } from '@/domain/geo';
 import type {
   Community,
   Coordinates,
+  DirectoryFarm,
+  PublicInstitution,
   PublicFarm,
   PublicMarket,
   PublicPickupLocation,
@@ -21,6 +23,9 @@ export interface Catalogue {
   markets: PublicMarket[];
   pickups: PublicPickupLocation[];
   communities: Community[];
+  /** Real farms from their own public pages: no prices, no listings. */
+  directory: DirectoryFarm[];
+  institutions: PublicInstitution[];
 }
 
 let cached: { at: number; value: Catalogue } | null = null;
@@ -29,14 +34,16 @@ const TTL_MS = 5 * 60_000;
 export async function loadCatalogue(): Promise<Catalogue> {
   if (cached && Date.now() - cached.at < TTL_MS) return cached.value;
   const g = services.gateway;
-  const [products, farms, markets, pickups, communities] = await Promise.all([
+  const [products, farms, markets, pickups, communities, directory, institutions] = await Promise.all([
     g.listPublicProducts(),
     g.listPublicFarms(),
     g.listPublicMarkets(),
     g.listPublicPickupLocations(),
     g.listCommunities(),
+    g.listDirectoryFarms(),
+    g.listPublicInstitutions(),
   ]);
-  const value = { products, farms, markets, pickups, communities };
+  const value = { products, farms, markets, pickups, communities, directory, institutions };
   cached = { at: Date.now(), value };
   return value;
 }

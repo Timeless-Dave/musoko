@@ -194,6 +194,8 @@ export function toPublicMarket(market: FarmersMarket, farms: PublicFarm[]): Publ
     directionsUrl: market.directionsUrl,
     farms: farms.filter((f) => f.marketIds.includes(market.id)).map(toFarmSummary),
     isDemo: market.isDemo,
+    website: market.website ?? null,
+    sources: market.sources ?? [],
   };
 }
 

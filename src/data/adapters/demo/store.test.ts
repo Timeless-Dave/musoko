@@ -247,7 +247,7 @@ describe('other controls', () => {
     const s = open(createMemoryStorage());
     const counts = await s.demo!.getTableCounts();
     expect(counts.farmer_profiles).toBe(12);
-    expect(counts.farmers_markets).toBe(5);
+    expect(counts.farmers_markets).toBe(15);
     expect(Object.keys(counts)).not.toContain('settings');
   });
   it('rejects image upload until a later step', async () => {

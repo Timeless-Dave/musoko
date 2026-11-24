@@ -196,8 +196,9 @@ export function guideTools(context: { town: string | null; now: Date }) {
         .map((m) =>
           [
             `- ${m.name}, ${m.town}${from ? ` (about ${Math.round(milesBetween(from.centre, m.point))} mi from ${from.name})` : ''}.`,
-            `  ${scheduleLines(m.schedule).join(', ')}. ${m.venue}. ${m.seasonNote}`,
-            `  Farmers: ${m.farms.map((f) => f.farmName).join(', ') || 'none listed yet'}.`,
+            `  ${m.schedule.length ? `${scheduleLines(m.schedule).join(', ')}. ` : ''}${m.venue}. ${m.seasonNote}`,
+            m.isDemo ? '  Demo market (fictional).' : `  Real market, from its public listing; check days before going.${m.website ? ` Market page: ${m.website}` : ''}`,
+            m.farms.length ? `  Musoko farmers who sell here: ${m.farms.map((f) => f.farmName).join(', ')}.` : '',
             m.contactPhone ? `  Market contact: ${m.contactPhone}` : '',
           ]
             .filter(Boolean)
@@ -241,5 +242,195 @@ export function guideTools(context: { town: string | null; now: Date }) {
     },
   });
 
-  return [findListings, findFarms, farmDetails, farmersMarkets, directions, towns];
+  const farmDirectory = betaZodTool({
+    name: 'farm_directory',
+    description:
+      'Real Delta farms listed from their own public pages (not demo data): what each offers, how to buy (farm stand, pick-your-own, CSA, markets, online, delivery), season and website. They have no prices or listings on Musoko. Use alongside find_farms whenever someone asks about farms, a food, or a town.',
+    inputSchema: z.object({
+      town: z.string().optional(),
+      food: z.string().optional().describe('A food word, e.g. "eggs", "beef", "strawberries".'),
+      name: z.string().optional(),
+    }),
+    run: async (input) => {
+      const cat = await loadCatalogue();
+      const from = findCommunity(cat, input.town ?? context.town);
+      let farms = cat.directory;
+      if (input.name) farms = farms.filter((f) => norm(f.farmName).includes(norm(input.name!)));
+      if (input.food) {
+        const q = norm(input.food).replace(/(es|s)$/, '');
+        farms = farms.filter((f) => norm(`${f.offers.join(' ')} ${f.summary}`).includes(q));
+      }
+      const miles = (communityId: string) => {
+        const c = centreOf(cat, communityId);
+        return from && c ? milesBetween(from.centre, c) : 0;
+      };
+      farms = [...farms].sort((a, b) => miles(a.communityId) - miles(b.communityId));
+      if (!farms.length) return 'No farm in the public directory matches.';
+      return farms
+        .slice(0, 6)
+        .map((f) =>
+          [
+            `- ${f.farmName}, ${f.town}, ${f.county} County${milesText(cat, from, f.communityId)}. Real farm, public listing.`,
+            `  ${f.summary}`,
+            `  Offers: ${f.offers.join(', ')}.${f.season ? ` Season: ${f.season}` : ''}`,
+            `  How to buy: ${f.howToBuy.map((h) => h.detail).join(' ')}`,
+            f.deliveryTowns.length ? `  Delivers to: ${f.deliveryTowns.join(', ')}.` : '',
+            f.website ? `  Website: ${f.website}` : '',
+            `  On Musoko: ${SITE}/farmers/public/${f.slug}`,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        )
+        .join('\n');
+    },
+  });
+
+  /** The cheapest available listing per food type, near the town, with its cost for one selling unit. */
+  function cheapestByType(cat: Catalogue, from: Community | null, maxMiles: number) {
+    const best = new Map<string, PublicProduct>();
+    for (const p of cat.products) {
+      if (p.availability.status !== 'available_now') continue;
+      const c = centreOf(cat, p.farm.communityId);
+      if (from && c && milesBetween(from.centre, c) > maxMiles) continue;
+      const cur = best.get(p.productType.id);
+      if (!cur || p.priceCents < cur.priceCents) best.set(p.productType.id, p);
+    }
+    return best;
+  }
+
+  const planBasket = betaZodTool({
+    name: 'plan_basket',
+    description:
+      'Builds an affordable, varied basket of local food available now within a budget: vegetables, fruit, a protein (eggs, meat, beans or peas) and a staple, choosing low prices and as few farms as practical. Returns items, farms, pickup and the total at listed prices. Use for "what can I get for $25", "a cheap healthy week", "feed a family of four".',
+    inputSchema: z.object({
+      budgetDollars: z.number().positive().max(1000),
+      town: z.string().optional(),
+      people: z.number().int().positive().max(20).optional(),
+      avoid: z.array(z.string()).optional().describe('Foods or categories to leave out.'),
+      maxMiles: z.number().positive().max(200).optional(),
+    }),
+    run: async (input) => {
+      const cat = await loadCatalogue();
+      const from = findCommunity(cat, input.town ?? context.town);
+      const avoid = (input.avoid ?? []).map(norm);
+      const best = cheapestByType(cat, from, input.maxMiles ?? 40);
+      const pool = [...best.values()].filter((p) => !avoid.some((a) => norm(`${p.title} ${p.productType.name} ${p.productType.category}`).includes(a)));
+      // One from each group first, cheapest first; then more vegetables and fruit while the budget lasts.
+      const groups: Record<string, string[]> = {
+        vegetables: ['vegetables', 'herbs'], fruit: ['fruits'], protein: ['eggs', 'meat_poultry', 'grains_legumes'], staple: ['grains_legumes', 'dairy'],
+      };
+      const budget = Math.round(input.budgetDollars * 100);
+      const chosen: PublicProduct[] = [];
+      let spent = 0;
+      const take = (p: PublicProduct) => {
+        if (chosen.includes(p) || spent + p.priceCents > budget) return false;
+        chosen.push(p);
+        spent += p.priceCents;
+        return true;
+      };
+      for (const cats of Object.values(groups)) {
+        const options = pool.filter((p) => cats.includes(p.productType.category)).sort((a, b) => a.priceCents - b.priceCents);
+        for (const p of options) if (take(p)) break;
+      }
+      const extras = pool.filter((p) => ['vegetables', 'fruits'].includes(p.productType.category)).sort((a, b) => a.priceCents - b.priceCents);
+      for (const p of extras) take(p);
+      if (!chosen.length) return `Nothing available now fits $${input.budgetDollars}${from ? ` near ${from.name}` : ''}. Try a bigger budget or a wider distance.`;
+      const byFarm = new Map<string, PublicProduct[]>();
+      for (const p of chosen) byFarm.set(p.farm.farmName, [...(byFarm.get(p.farm.farmName) ?? []), p]);
+      return [
+        `Basket at listed prices: $${(spent / 100).toFixed(2)} of $${input.budgetDollars}${input.people ? ` for ${input.people}` : ''}, from ${byFarm.size} farm${byFarm.size === 1 ? '' : 's'}${from ? ` near ${from.name}` : ''}.`,
+        ...[...byFarm.entries()].map(([farm, items]) =>
+          [`${farm}:`, ...items.map((p) => `- ${p.title}: ${formatListingPrice(p.priceCents, p.sellingUnit, p.unitSize)}`), `  ${pickupSummary(items[0].pickupOptions) ?? 'Pickup arranged with the farmer'}.`].join('\n'),
+        ),
+        'Pickup is free at the farm, market or pickup spot. Delivery, where a farmer offers it, is arranged and priced by the farmer and is not included. Prices are demo listings.',
+        `Food: ${SITE}/food`,
+      ].join('\n');
+    },
+  });
+
+  const compareCosts = betaZodTool({
+    name: 'compare_costs',
+    description:
+      'Compares the total cost of a shopping list across farms: the cheapest way to buy each item, the total, how many farms (stops) that takes, and the cheapest single farm that has most of the list. Use for "where is it cheapest to buy eggs, greens and honey", or comparing farms on total cost including pickup trips.',
+    inputSchema: z.object({
+      items: z.array(z.object({ food: z.string(), quantity: z.number().positive().max(100).optional() })).min(1).max(10),
+      town: z.string().optional(),
+      maxMiles: z.number().positive().max(200).optional(),
+    }),
+    run: async (input) => {
+      const cat = await loadCatalogue();
+      const from = findCommunity(cat, input.town ?? context.town);
+      const near = (p: PublicProduct) => {
+        const c = centreOf(cat, p.farm.communityId);
+        return !from || !c || milesBetween(from.centre, c) <= (input.maxMiles ?? 60);
+      };
+      const lines: string[] = [];
+      const perFarm = new Map<string, { cents: number; found: number }>();
+      let total = 0;
+      const stops = new Set<string>();
+      for (const item of input.items) {
+        const q = norm(item.food).replace(/(es|s)$/, '');
+        const qty = item.quantity ?? 1;
+        const matches = cat.products.filter((p) => p.availability.status === 'available_now' && near(p) && norm(`${p.title} ${p.productType.name}`).includes(q));
+        if (!matches.length) {
+          lines.push(`- ${item.food}: not available now nearby.`);
+          continue;
+        }
+        const cheapest = [...matches].sort((a, b) => a.priceCents - b.priceCents)[0];
+        total += cheapest.priceCents * qty;
+        stops.add(cheapest.farm.farmName);
+        lines.push(`- ${item.food} x${qty}: cheapest ${cheapest.title} at ${cheapest.farm.farmName}, ${cheapest.farm.town}, ${formatListingPrice(cheapest.priceCents, cheapest.sellingUnit, cheapest.unitSize)} each.`);
+        const seen = new Set<string>();
+        for (const p of [...matches].sort((a, b) => a.priceCents - b.priceCents)) {
+          if (seen.has(p.farm.farmName)) continue;
+          seen.add(p.farm.farmName);
+          const f = perFarm.get(p.farm.farmName) ?? { cents: 0, found: 0 };
+          f.cents += p.priceCents * qty;
+          f.found += 1;
+          perFarm.set(p.farm.farmName, f);
+        }
+      }
+      const one = [...perFarm.entries()].sort((a, b) => b[1].found - a[1].found || a[1].cents - b[1].cents)[0];
+      return [
+        ...lines,
+        `Cheapest split: $${(total / 100).toFixed(2)} from ${stops.size} farm${stops.size === 1 ? '' : 's'} (${[...stops].join(', ')}).`,
+        one ? `Fewest stops: ${one[0]} has ${one[1].found} of ${input.items.length} items for $${(one[1].cents / 100).toFixed(2)}.` : '',
+        'Each extra farm is another pickup trip or delivery to arrange; delivery charges are set by farmers and not listed. Prices are demo listings.',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    },
+  });
+
+  const institutionalBuying = betaZodTool({
+    name: 'institutional_buying',
+    description:
+      'For schools, hospitals, restaurants, colleges and pantries buying larger amounts: farms open to wholesale, how much of a food farms say they have now, and buyers\' shared planned needs. Use for bulk or institutional questions, and when a farmer asks what buyers need.',
+    inputSchema: z.object({ food: z.string().optional(), town: z.string().optional() }),
+    run: async (input) => {
+      const cat = await loadCatalogue();
+      const from = findCommunity(cat, input.town ?? context.town);
+      const q = input.food ? norm(input.food).replace(/(es|s)$/, '') : '';
+      const wholesale = cat.farms.filter((f) => f.openToWholesale).map((f) => `${f.farmName} (${f.location.town})`);
+      const stock = cat.products
+        .filter((p) => p.availability.status === 'available_now' && (!q || norm(`${p.title} ${p.productType.name}`).includes(q)))
+        .slice(0, 8)
+        .map((p) => `- ${p.title}, ${p.farm.farmName} (${p.farm.town})${milesText(cat, from, p.farm.communityId)}: ${quantityLine(p) ?? 'amount not stated'}.`);
+      const needs = cat.institutions
+        .flatMap((i) => i.needs)
+        .filter((n) => !q || norm(n.productType.name).includes(q))
+        .slice(0, 8)
+        .map((n) => `- ${n.buyerLabel} (${n.town}) plans ${n.amount} ${n.productType.comparisonUnit} of ${n.productType.name.toLowerCase()} ${n.cadence === 'weekly' ? 'a week' : n.cadence === 'monthly' ? 'a month' : 'once'}, ${n.startMonth} to ${n.endMonth}.${n.isDemo ? ' (demo)' : ''}`);
+      return [
+        `Farms open to wholesale or institutional supply (farmer-reported): ${wholesale.join(', ') || 'none listed'}.`,
+        stock.length ? `Available now${q ? ` (${input.food})` : ''}:\n${stock.join('\n')}` : '',
+        needs.length ? `Planned needs shared by buyers:\n${needs.join('\n')}` : '',
+        `Musoko splits one larger order across several farms; each farm replies directly and there is no checkout. Source an order: ${SITE}/institutions/order`,
+      ]
+        .filter(Boolean)
+        .join('\n');
+    },
+  });
+
+  return [findListings, findFarms, farmDetails, farmersMarkets, directions, towns, farmDirectory, planBasket, compareCosts, institutionalBuying];
 }

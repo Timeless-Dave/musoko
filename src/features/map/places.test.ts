@@ -24,7 +24,7 @@ describe('map places', () => {
     expect(places.filter((p) => p.kind === 'farm')).toHaveLength(catalogue.farms.length);
     expect(places.filter((p) => p.kind === 'market')).toHaveLength(catalogue.markets.length);
     expect(places.filter((p) => p.kind === 'pickup')).toHaveLength(catalogue.pickupLocations.length);
-    expect(places.every((p) => p.isDemo)).toBe(true);
+    expect(places.filter((p) => p.kind !== 'market').every((p) => p.isDemo)).toBe(true);
   });
 
   it('PRIV-1: a farm sits at the town centre unless the farmer opted in to the exact place', async () => {

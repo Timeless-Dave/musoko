@@ -3,14 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
-import {
-  CalendarBlank,
-  ChatsCircle,
-  ChartBar,
-  ListBullets,
-  Shield,
-  UserCircle,
-} from '@phosphor-icons/react';
+import { CalendarBlank, ChartBar, ChatsCircle, ListBullets, Plant, Shield, UserCircle } from '@phosphor-icons/react';
 import { copy } from '@/content/copy';
 import { isNavActive, NavIcon, SIDEBAR } from '@/features/shell';
 import { useOwnInquiries } from './hooks';
@@ -21,6 +14,7 @@ const WORK = [
   { href: '/dashboard/inquiries', label: copy.dashboard.nav.inquiries, icon: ChatsCircle },
   { href: '/dashboard/profile', label: copy.dashboard.nav.profile, icon: UserCircle },
   { href: '/dashboard/privacy', label: copy.dashboard.nav.privacy, icon: Shield },
+  { href: '/dashboard/planning', label: copy.planning.nav, icon: Plant },
   { href: '/dashboard/numbers', label: copy.dashboard.nav.numbers, icon: ChartBar },
 ] as const;
 

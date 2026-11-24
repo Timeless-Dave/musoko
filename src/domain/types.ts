@@ -16,6 +16,9 @@ export type InquiryId = Brand<string, 'InquiryId'>;
 export type InquiryReplyId = Brand<string, 'InquiryReplyId'>;
 export type ClaimId = Brand<string, 'ClaimId'>;
 export type EventId = Brand<string, 'EventId'>;
+export type DirectoryFarmId = Brand<string, 'DirectoryFarmId'>;
+export type InstitutionId = Brand<string, 'InstitutionId'>;
+export type InstitutionNeedId = Brand<string, 'InstitutionNeedId'>;
 
 export type IsoDateTime = string; // 2026-11-15T14:03:00.000Z
 export type IsoDate = string;     // 2026-11-15
@@ -151,6 +154,8 @@ export interface FarmersMarket {
   point: Coordinates; venue: string; schedule: OpeningHours[]; seasonNote: string;
   contactPhone: string | null; contactEmail: string | null; directionsUrl: string;
   moderationStatus: ModerationStatus; isDemo: boolean;
+  /** For a real market: its own page, and where its days and venue come from. */
+  website?: string | null; sources?: string[];
 }
 export interface FarmerMarketLink { farmerProfileId: FarmerProfileId; marketId: FarmersMarketId }
 export interface PickupLocation {
@@ -189,10 +194,19 @@ export interface Inquiry {
   reminderSentAt: IsoDateTime | null;
   closedAt: IsoDateTime | null;
   closedReason: InquiryClosedReason | null;
+  /** Who is asking. Absent on older rows, which are households. */
+  buyerKind?: BuyerKind;
+  /** Set when an institution sent the inquiry as part of one larger order. */
+  institutionId?: InstitutionId | null;
+  /** Shared by the inquiries of one order split across several farms. */
+  requestGroup?: string | null;
 }
+export type BuyerKind = 'household' | 'institution';
 /** PRIVATE. Deleted on schedule; the inquiry row stays. The free-text message lives here too. */
 export interface InquiryBuyerContact {
   inquiryId: InquiryId; name: string; phone: string | null; email: string | null; message: string;
+  /** The organisation an institutional buyer wrote for. */
+  organisation?: string | null;
 }
 export type ReplyKind = 'available' | 'sold_out' | 'contact_me';
 export interface InquiryReply {
@@ -218,6 +232,56 @@ interface ClaimBase {
 export type Claim =
   | (ClaimBase & { status: 'farmer_reported'; verification: null })
   | (ClaimBase & { status: 'verified'; verification: ClaimVerification });
+
+// ---------- public farm directory ----------
+/**
+ * A real farm Musoko lists from what the farm itself publishes (its website,
+ * its social pages, public directories). Wholly public: there is no private
+ * field. It carries no prices and no listings, because the farm has not joined
+ * Musoko; the farm can claim it or ask for it to be removed.
+ */
+export type DirectoryChannel =
+  | 'farm_stand' | 'u_pick' | 'csa' | 'farmers_market' | 'online_store' | 'delivery' | 'wholesale' | 'visits';
+export interface DirectoryFarm {
+  id: DirectoryFarmId; slug: string; farmName: string;
+  communityId: CommunityId; town: string; county: string;
+  summary: string; offers: string[]; categories: ProductCategory[];
+  howToBuy: { kind: DirectoryChannel; detail: string; url: string | null }[];
+  deliveryTowns: string[]; season: string | null;
+  website: string | null; social: { label: string; url: string }[];
+  /** True only when a source says so. Still farmer-stated, not checked by Musoko. */
+  acceptsSnap: boolean | null;
+  /** Where every fact came from, and when it was last checked. */
+  sources: string[]; checkedOn: IsoDate;
+  status: 'unclaimed' | 'claim_requested' | 'removed';
+}
+
+// ---------- institutional buyers ----------
+export type InstitutionKind = 'school' | 'hospital' | 'restaurant' | 'university' | 'food_pantry' | 'other';
+export type NeedCadence = 'weekly' | 'monthly' | 'one_time';
+export interface Institution {
+  id: InstitutionId; slug: string; name: string; kind: InstitutionKind;
+  communityId: CommunityId; about: string;
+  /** Receiving notes in the buyer's words, e.g. "Kitchen door, weekdays before 10". */
+  receivingNote: string;
+  /** When false the public sees "A school in Marianna" instead of the name. */
+  showName: boolean;
+  /** Held by the device that made the profile; the only key to edit it in the demo. */
+  editToken: string;
+  isDemo: boolean; createdAt: IsoDateTime; updatedAt: IsoDateTime;
+}
+/** PRIVATE. Never returned by a public method. */
+export interface InstitutionContact {
+  institutionId: InstitutionId; contactName: string; phone: string | null; email: string | null;
+}
+/** A planned purchase, shared so farmers can plan what to grow. */
+export interface InstitutionNeed {
+  id: InstitutionNeedId; institutionId: InstitutionId; productTypeId: ProductTypeId;
+  /** In the product type's comparison unit, per cadence period. */
+  amount: number; cadence: NeedCadence;
+  startMonth: YearMonth; endMonth: YearMonth; note: string;
+  createdAt: IsoDateTime;
+}
 
 // ---------- anonymous events ----------
 export interface SearchFilters {
@@ -288,6 +352,10 @@ export interface Database {
   inquiry_outcomes: InquiryOutcome[];
   inquiry_folders: InquiryFolderEntry[];
   claims: Claim[];
+  directory_farms: DirectoryFarm[];
+  institutions: Institution[];
+  institution_contacts: InstitutionContact[];
+  institution_needs: InstitutionNeed[];
   search_events: SearchEvent[];
   preview_events: PreviewEvent[];
   aggregate_counts: AggregateCount[];
@@ -343,10 +411,23 @@ export interface PublicMarket {
   point: Coordinates; venue: string; schedule: OpeningHours[]; seasonNote: string;
   contactPhone: string | null; contactEmail: string | null; directionsUrl: string;
   farms: PublicFarmSummary[]; isDemo: boolean;
+  website: string | null; sources: string[];
 }
 export interface PublicPickupLocation {
   id: PickupLocationId; slug: string; name: string; communityId: CommunityId; town: string;
   point: Coordinates; description: string; isDemo: boolean;
+}
+export interface PublicInstitutionNeed {
+  id: InstitutionNeedId; institutionId: InstitutionId;
+  /** The name, or "A school in Marianna" when the buyer keeps the name private. */
+  buyerLabel: string; kind: InstitutionKind; communityId: CommunityId; town: string;
+  productType: ProductType; amount: number; cadence: NeedCadence;
+  startMonth: YearMonth; endMonth: YearMonth; note: string; isDemo: boolean;
+}
+export interface PublicInstitution {
+  id: InstitutionId; slug: string; buyerLabel: string; kind: InstitutionKind;
+  communityId: CommunityId; town: string; about: string; receivingNote: string;
+  needs: PublicInstitutionNeed[]; isDemo: boolean;
 }
 export interface PublicCatalogue {
   farms: PublicFarm[]; products: PublicProduct[];

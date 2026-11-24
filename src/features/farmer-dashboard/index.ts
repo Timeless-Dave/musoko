@@ -7,3 +7,4 @@ export { InquiriesPage } from './Inquiries';
 export { ProfilePage } from './Profile';
 export { PrivacyPage } from './Privacy';
 export { NumbersPage } from './Numbers';
+export { PlanningPage } from './Planning';

@@ -35,7 +35,7 @@ export function MarketCard({ market, index, miles }: { market: PublicMarket; ind
         <span className="pill-note">{scheduleLines(market.schedule).join(', ')}</span>
         <MetaLine>
           <span>{copy.markets.farmerCount(market.farms.length)}</span>
-          {market.isDemo ? <DemoMark /> : null}
+          {market.isDemo ? <DemoMark /> : <span className="public-mark" title={copy.pickupPage.source}>{copy.pickupPage.publicMarket}</span>}
         </MetaLine>
       </div>
     </article>

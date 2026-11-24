@@ -128,7 +128,7 @@ describe('seed integrity', () => {
       expect(c.email).toMatch(/\.example$/);
     }
     for (const l of db.farm_private_locations) expect(l.streetAddress).toContain('Demo');
-    for (const m of db.farmers_markets) {
+    for (const m of db.farmers_markets.filter((x) => x.isDemo)) {
       expect(farmerPhones.has(m.contactPhone)).toBe(false);
       expect(m.contactEmail).toMatch(/\.example$/);
     }
@@ -136,7 +136,8 @@ describe('seed integrity', () => {
       if (c.phone) expect(c.phone).toMatch(/^870-555-01\d\d$/);
       if (c.email) expect(c.email).toMatch(/\.example$/);
     }
-    for (const r of [...db.farmer_profiles, ...db.products, ...db.farmers_markets, ...db.pickup_locations]) expect(r.isDemo).toBe(true);
+    for (const r of [...db.farmer_profiles, ...db.products, ...db.pickup_locations, ...db.institutions]) expect(r.isDemo).toBe(true);
+    for (const c of db.institution_contacts) expect(c.email).toMatch(/\.example$/);
     expect(JSON.stringify(db)).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgb\(/);
   });
 });
@@ -290,8 +291,9 @@ describe('SEED-8 thin communities', () => {
 
 describe('SEED-9 markets and pickups', () => {
   it('has 5 markets in 5 communities, 3 pickups, options for every published farm, 3 or more delivering', () => {
-    expect(db.farmers_markets).toHaveLength(5);
-    expect(new Set(db.farmers_markets.map((m) => m.communityId)).size).toBe(5);
+    const demo = db.farmers_markets.filter((m) => m.isDemo);
+    expect(demo).toHaveLength(5);
+    expect(new Set(demo.map((m) => m.communityId)).size).toBe(5);
     expect(db.pickup_locations).toHaveLength(3);
     for (const f of db.farmer_profiles.filter((p) => p.publicationStatus === 'published')) {
       expect(db.farmer_pickup_options.some((o) => o.farmerProfileId === f.id), f.farmName).toBe(true);
@@ -354,5 +356,32 @@ describe('SEED-13 accounts', () => {
     expect(slug(farm.communityId)).toBe('helena-west-helena');
     const lapsed = db.products.filter((p) => p.farmerProfileId === farm.id && effective(p.id) === 'unconfirmed' && availOf(p.id).status === 'available_now');
     expect(lapsed.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('SEED-15 real farms and markets', () => {
+  it('lists real markets with sources and no stored contact', () => {
+    const real = db.farmers_markets.filter((m) => !m.isDemo);
+    expect(real.length).toBeGreaterThanOrEqual(8);
+    for (const m of real) {
+      expect(m.sources?.length, m.name).toBeGreaterThan(0);
+      expect(m.contactPhone).toBeNull();
+      expect(m.contactEmail).toBeNull();
+      expect(db.farmer_market_links.some((l) => l.marketId === m.id), m.name).toBe(false);
+    }
+  });
+
+  it('keeps directory farms to public business facts: sources, a check date, no prices, no street address', () => {
+    expect(db.directory_farms.some((f) => f.slug === 'sunlight-farm')).toBe(true);
+    for (const f of db.directory_farms) {
+      expect(f.sources.length, f.farmName).toBeGreaterThan(0);
+      expect(f.checkedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(db.communities.some((c) => c.id === f.communityId)).toBe(true);
+      const text = JSON.stringify(f);
+      expect(text, f.farmName).not.toMatch(/\$\d/);
+      expect(text, f.farmName).not.toMatch(/\b\d{3,6} (Hwy|Highway|Road|Rd|Street|St)\b/i);
+      expect(text, f.farmName).not.toMatch(/\d{3}[-. ]\d{3}[-. ]\d{4}/);
+    }
+    expect(new Set(db.directory_farms.map((f) => f.slug)).size).toBe(db.directory_farms.length);
   });
 });

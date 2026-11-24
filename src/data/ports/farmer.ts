@@ -11,6 +11,7 @@ import type {
   PrivacyInput,
   RegistrationInput,
 } from '@/domain/farmer';
+import type { FarmerPlanning } from '@/domain/planning';
 import type { FarmerProfileId, ProductId, UserId } from '@/domain/types';
 import type { Actor } from './auth';
 
@@ -58,4 +59,6 @@ export interface FarmerGateway {
   farmerSetAvailability(actor: Actor, productId: ProductId, change: AvailabilityChange): Promise<OwnListing>;
 
   getFarmerNumbers(actor: Actor): Promise<FarmerNumbers>;
+  /** Demand near the farm, institutions' planned needs and a price guide, in plain sentences. */
+  getFarmerPlanning(actor: Actor): Promise<FarmerPlanning>;
 }

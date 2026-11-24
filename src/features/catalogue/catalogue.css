@@ -857,3 +857,105 @@ h2.shelf__title:not(.shelf__head *) {
     padding-inline: 0;
   }
 }
+
+/* A real farm or market from its own public pages. Text-labelled, never colour alone. */
+.public-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  border: var(--rule-width) solid var(--rule);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: var(--weight-strong);
+  white-space: nowrap;
+}
+.dir-offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-3);
+}
+.dir-offers li {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--ground-sunk);
+  font-size: var(--text-meta);
+}
+.dir-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* Pickup points: one list of markets and pickup spots. */
+.pickup-list {
+  display: grid;
+  margin-top: var(--space-5);
+  border-top: var(--rule-width) solid var(--rule);
+}
+.pickup-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-5);
+  border-bottom: var(--rule-width) solid var(--rule);
+}
+.pickup-row__icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--ground-sunk);
+}
+.pickup-row__name {
+  font-weight: var(--weight-strong);
+  font-size: 1.125rem;
+}
+.pickup-row__meta,
+.pickup-row__detail,
+.pickup-row__farms {
+  color: var(--ink-muted);
+  font-size: var(--text-meta);
+}
+.pickup-row__when {
+  margin-block: var(--space-1);
+  font-weight: var(--weight-strong);
+}
+.pickup-row__side {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pickup-row__directions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--weight-strong);
+}
+@media (min-width: 48rem) {
+  .pickup-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .pickup-row__side {
+    grid-column: 3;
+    flex-direction: column;
+    align-items: end;
+  }
+}
+.inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.dir-photo {
+  display: grid;
+  gap: var(--space-2);
+}
+.dir-photo figcaption {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}

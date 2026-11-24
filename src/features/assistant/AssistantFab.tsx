@@ -14,8 +14,8 @@ type Line = { role: 'user' | 'guide'; text: string };
 const STARTERS = [
   'What fresh food is available near me now?',
   'Where are the cheapest eggs?',
+  'What can I get for $25 near me?',
   'Which farmers markets are open on Saturday?',
-  'How do I get to Delta Saturday Stalls from Pine Bluff?',
   'Can I pay on Musoko?',
 ];
 
